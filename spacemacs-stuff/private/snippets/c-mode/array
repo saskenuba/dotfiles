@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: array
+# key: array
+# --
+${tipo} ${nome_do_array}[${TAMANHO}];

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: js arrow
+# key: a
+# --
+=> $1
