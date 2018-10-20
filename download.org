@@ -1,0 +1,26 @@
+*** Main
+| yay               | packages manager       |
+| networkManager    | internet related stuff |
+| cups              | printer related        |
+| libreoffice-fresh | ms office dos pobre    |
+| texbin extras     | LaTeX package          |
+| clang             | C Compiler             |
+| iosevka           | Code Font              |
+
+*** Shell
+| zsh                 | Custom shell       |
+| oh my zsh           | Customizations zsh |
+| powerline oh my zsh |                    |
+| st                  | simple terminal    |
+
+*** Audio
+| pulseaudio |
+| alsa-utils |
+
+*** Aur Extras
+| dropbox    | cloud storage     |
+| parcellite | clipboard manager |
+
+*** Cool Packages
+| fd          | user friendly search |
+| ripgrep(rg) | grep substitute      |
