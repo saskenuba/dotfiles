@@ -56,12 +56,16 @@ This function should only modify configuration layer settings."
      ;; web
      html
      csv
+     markdown
 
      ;; utilities
      git
      org
      syntax-checking
      version-control
+     yaml
+     docker
+
      )
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
