@@ -22,5 +22,6 @@
 | parcellite | clipboard manager |
 
 *** Cool Packages
-| fd          | user friendly search |
-| ripgrep(rg) | grep substitute      |
+| fd          | user friendly search      |
+| ripgrep(rg) | grep substitute           |
+| nerd-fonts  | iosevka patched powerline |
