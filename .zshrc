@@ -3,9 +3,10 @@
 
 export TERM="xterm-256color"
 export LANG="en_US.UTF-8"
+fpath+=~/.zfunc
 
 # Path to your oh-my-zsh installation.
-  export ZSH=/home/martin/.oh-my-zsh
+export ZSH=/home/martin/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
@@ -100,11 +101,10 @@ POWERLEVEL9K_SHORTEN_STRATEGY="truncate_middle"
 POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
 
 # Java better fonts
-export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd'
-export _JAVA_OPTIONS='-Dswing.aatext=true'
+export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd -Dswing.aatext=true'
 
 # Auto completion for PipEnv
-eval "$(pipenv --completion)"
+# eval "$(pipenv --completion)"
 
 # Set workon for zsh
 export WORKON_HOME=$HOME/Documentos/PythonEnvironments/
@@ -113,3 +113,15 @@ export WORKON_HOME=$HOME/Documentos/PythonEnvironments/
 # Get ssh-agent to work with gpg-agent
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
 gpgconf --launch gpg-agent
+
+PATH="/home/martin/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/home/martin/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/home/martin/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/home/martin/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/home/martin/perl5"; export PERL_MM_OPT;
+
+# Direnv hook
+eval "$(direnv hook zsh)"
+
+# Yarn correct usage
+export PATH="$PATH:`yarn global bin`"
