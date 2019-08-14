@@ -36,6 +36,9 @@
      :fetcher github
      :repo "naiquevin/sphinx-doc.el")
     evil-multiedit
+    demo-it
+    gif-screencast
+    elisp-format
     )
   "The list of Lisp packages required by the martinmariano layer.
 
@@ -74,17 +77,30 @@ Each entry is either:
 (defun martinmariano/init-sphinx-doc ()
   "docstring"
   (use-package sphinx-doc
+    :defer t
     :init
     (add-hook 'python-mode-hook 'sphinx-doc-mode)
     (spacemacs/set-leader-keys-for-major-mode 'python-mode "id" 'sphinx-doc)
-    :defer t
-  ))
+    ))
 
 (defun martinmariano/init-evil-multiedit ()
   "docstring"
-  (use-package sphinx-doc
+  (use-package evil-multiedit
     :init
     (define-key evil-normal-state-map (kbd "M-d") 'evil-multiedit-match-and-next)
     ))
+
+(defun martinmariano/init-demo-it ()
+  "docstring"
+  (use-package demo-it)
+  )
+
+(defun martinmariano/init-gif-screencast ()
+  "docstring"
+  (use-package gif-screencast)
+  )
+
+
+(defun martinmariano/init-elisp-format ())
 
 ;;; packages.el ends here
