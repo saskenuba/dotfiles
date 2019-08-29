@@ -49,17 +49,32 @@ This function should only modify configuration layer settings."
      neotree
      auto-completion
      shell
+     shell-scripts
+     lsp
+     dap
 
      ;; programming
-     python
+     (python :variables
+             python-backend 'lsp
+             python-fill-column 99
+             lsp-pyls-configuration-sources ["flake8"]
+                                        ;flycheck-python-flake8-executable "flake8"
+             )
      typescript
-     haskell
+     rust
+     (javascript :variables
+                 javascript-repl `skewer
+                 javascript-backend 'lsp)
      (clojure :variables
               clojure-enable-clj-refactor t
               clojure-enable-sayid t
               clojure-enable-fancify-symbols t)
-     rust
-     perl5
+     (c-c++ :variables
+            c-c++-backend 'lsp-ccls)
+     (typescript :variables
+                 tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")
+     ; haskell
+     ; perl5
 
      ;; web
      html
@@ -74,6 +89,9 @@ This function should only modify configuration layer settings."
      yaml
      docker
      asciidoc
+     colors
+     json
+     ; themes-megapack
      (latex :variables
             enable-local-variables t))
 
@@ -213,6 +231,9 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
+                         badwolf
+                         phoenix-dark-mono
+                         gruvbox
                          spacemacs-light)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
@@ -477,10 +498,7 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
-  (setq-default dotspacemacs-configuration-layers '(
-                                                    (typescript :variables
-                                                                tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")))
-)
+  (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
 (defun dotspacemacs/user-load ()
   "Library to load while dumping.
@@ -504,30 +522,26 @@ before packages are loaded."
                                                                     'company-complete))
                                                                  try-expand-dabbrev-visible
                                                                  try-expand-dabbrev-all-buffers))
+
   (global-set-key (kbd "<tab>")  'hippie-expand)
   (global-set-key (kbd "TAB")  'hippie-expand)
+
+
+  ; Python manim
+  (spacemacs/declare-prefix-for-mode 'python-mode "mm" "manim")
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "ml" 'manim-render-low)
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "mm" 'manim-render-medium)
+  (spacemacs/set-leader-keys-for-major-mode 'python-mode "mh" 'manim-render-high)
 
   (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "id" 'tide-jsdoc-template)
   (customize-set-variable 'helm-ff-lynx-style-map t)
 
-  (defun auto-type-to-buffer (filepath)
-    "Simulates typing in current buffer using text in other file
-     This function is supposedly to ran within a demo-it presentation. "
-    (interactive)
-    (demo-it-disable-mode)
-    (setq-local python-indent-offset 0)
-    (with-current-buffer (current-buffer)
-      (smartparens-mode -1))
-    (let ((proc (start-process "auto-write-process" "main.py" "python"
-                               "/home/martin/Documentos/Programming/Python/Projetos/Text-To-Keyboard/main.py"
-                               filepath))))
-    (set-process-sentinel (get-process "auto-write-process")
-                          (lambda (p e)
-                            (when (= 0 (process-exit-status p))
-                              (message "OK")
-                              (smartparens-mode)
-                              (demo-it-mode)
-                              (demo-it-mode-adv))))))
+  (setq org-src-fontify-natively t
+        org-src-preserve-indentation t)
+
+  ; Set javascript src to open with js2-mode
+  ; (add-to-list 'org-src-lang-modes '("js" . js2))
+)
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -551,12 +565,45 @@ This function is called at the very end of Spacemacs initialization."
      (output-pdf "Zathura")
      (output-html "xdg-open"))))
  '(company-plsense-executable "/home/martin/perl5/bin/plsense")
+ '(evil-want-Y-yank-to-eol nil)
+ '(helm-ff-lynx-style-map t)
+ '(org-src-lang-modes
+   (quote
+    (("arduino" . arduino)
+     ("redis" . redis)
+     ("php" . php)
+     ("C" . c)
+     ("C++" . c++)
+     ("asymptote" . asy)
+     ("bash" . sh)
+     ("beamer" . latex)
+     ("calc" . fundamental)
+     ("cpp" . c++)
+     ("ditaa" . artist)
+     ("dot" . fundamental)
+     ("elisp" . emacs-lisp)
+     ("ocaml" . tuareg)
+     ("screen" . shell-script)
+     ("shell" . sh)
+     ("sqlite" . sql)
+     ("javascript" . js2))))
  '(package-selected-packages
    (quote
-    (gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))))
+    (lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- ))
+ '(font-lock-constant-face ((t (:foreground "#C792EA"))))
+ '(font-lock-keyword-face ((t (:foreground "#2BA3FF" :slant italic))))
+ '(font-lock-preprocessor-face ((t (:inherit bold :foreground "#2BA3FF" :slant italic :weight normal))))
+ '(font-lock-string-face ((t (:foreground "#00baa5"))))
+ '(font-lock-type-face ((t (:foreground "#FFCB6B"))))
+ '(font-lock-variable-name-face ((t (:foreground "#FF5370"))))
+ '(helm-rg-active-arg-face ((t (:foreground "LightGreen"))))
+ '(helm-rg-file-match-face ((t (:foreground "LightGreen" :underline t))))
+ '(helm-rg-preview-line-highlight ((t (:background "LightGreen" :foreground "black"))))
+ '(js2-object-property ((t (:foreground "#fe743f"))))
+ '(mode-line ((t (:background "#191919" :box nil))))
+ '(mode-line-inactive ((t (:background "#282828" :foreground "#21242b" :box nil))))))
