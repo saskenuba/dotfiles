@@ -39,6 +39,10 @@
     demo-it
     gif-screencast
     elisp-format
+    doom-themes
+    poet-theme
+    (poetry
+     :requires transient)
     )
   "The list of Lisp packages required by the martinmariano layer.
 
@@ -95,6 +99,36 @@ Each entry is either:
   (use-package demo-it)
   )
 
+
+(defun martinmariano/init-poet-theme ())
+
+;; Theme
+(defun martinmariano/init-doom-themes ()
+  :init
+  (load-theme 'doom-one t)
+  :config
+  (custom-set-faces
+ '(font-lock-constant-face ((t (:foreground "#C792EA"))))
+ '(font-lock-keyword-face ((t (:foreground "#2BA3FF"))))
+ '(font-lock-preprocessor-face ((t (:inherit bold :foreground "#2BA3FF" :slant italic :weight normal))))
+ '(font-lock-string-face ((t (:foreground "#00baa5"))))
+ '(font-lock-type-face ((t (:foreground "#FFCB6B"))))
+ '(font-lock-doc-face ((t (:foreground "#85b2ae"))))
+ '(font-lock-variable-name-face ((t (:foreground "#FF5370"))))
+ '(helm-rg-active-arg-face ((t (:foreground "LightGreen"))))
+ '(helm-rg-file-match-face ((t (:foreground "LightGreen" :underline t))))
+ '(helm-rg-preview-line-highlight ((t (:background "LightGreen" :foreground "black"))))
+ '(mode-line ((t (:background "#191919" :box nil))))
+ '(mode-line-inactive ((t (:background "#282828" :foreground "#21242b" :box nil))))
+
+ ; js2-mode
+ '(js2-object-property ((t (:foreground "#fe743f"))))
+
+; org-mode
+ '(org-block-begin-line ((t (:foreground "#827591" :background "#373040"))))
+ )
+  )
+
 (defun martinmariano/init-gif-screencast ()
   "docstring"
   (use-package gif-screencast)
@@ -102,5 +136,10 @@ Each entry is either:
 
 
 (defun martinmariano/init-elisp-format ())
+
+
+(defun martinmariano/init-poetry ()
+  :defer t
+  )
 
 ;;; packages.el ends here

@@ -3,7 +3,6 @@
 
 export TERM="xterm-256color"
 export LANG="en_US.UTF-8"
-fpath+=~/.zfunc
 
 # Path to your oh-my-zsh installation.
 export ZSH=/home/martin/.oh-my-zsh
@@ -57,7 +56,7 @@ ENABLE_CORRECTION="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git gitfast sudo docker
+  git gitfast sudo docker yarn
 )
 
 source $ZSH/oh-my-zsh.sh
@@ -125,3 +124,6 @@ eval "$(direnv hook zsh)"
 
 # Yarn correct usage
 export PATH="$PATH:`yarn global bin`"
+
+
+fpath+=~/.zfunc ; compinit
