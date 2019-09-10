@@ -525,6 +525,7 @@ before packages are loaded."
 
   (global-set-key (kbd "<tab>")  'hippie-expand)
   (global-set-key (kbd "TAB")  'hippie-expand)
+  (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
 
   ; Python manim

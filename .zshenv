@@ -1,5 +1,16 @@
-alias poetry='~/.poetry/bin/poetry'
+#alias poetry='~/.poetry/bin/poetry'
 alias paste-clipboard='xclip -out -selection clipboard'
+alias spotify='flatpak run com.discordapp.Spotify'
+alias xampp='/opt/lampp/manager-linux-x64.run'
+alias gobuster='~/Documents/src/gobuster-linux-amd64/gobuster'
+alias dirsearch='python ~/Documents/src/dirsearch/dirsearch.py'
+alias dnsrecon='pipenv run python ~/Documents/src/dnsrecon/dnsrecon.py'
+alias john='~/Documents/src/JohnTheRipper/run/john'
+alias rr9='~/Documents/Programming/Shell/uni.sh'
+
+VISUAL=emacs
+EDITOR=emacs
+RANGER_LOAD_DEFAULT_RC=false
 
 transliterate () {
 
@@ -40,4 +51,7 @@ paste-carbon () {
 	echo 'Concluído. Arquivo com padding salvo em `realpath .`'$paddedName.
 }
 
+ocr-selection() {
 
+	convert x: -modulate 100 -density 300 -resize 400% png:- | tesseract stdin stdout
+}
