@@ -1,0 +1,35 @@
+set ignorecase
+set smartcase
+set ideajoin
+set surround
+
+let mapleader = " "
+
+
+" ============================================================================
+" key bindings for quickly moving between windows
+" h left, l right, k up, j down
+" ============================================================================
+nmap <leader>wh <c-w>h
+nmap <leader>wl <c-w>l
+nmap <leader>wk <c-w>k
+nmap <leader>wj <c-w>j
+nmap <leader>wv <c-w>v
+nmap <leader>ws <c-w>s
+nmap <leader>wc <c-w>c
+nmap <leader>wm :action HideAllWindows<CR>
+nmap <leader>wz :action ToggleDistractionFreeMode<CR>
+
+vmap <leader>wh <c-w>h
+vmap <leader>wl <c-w>l
+vmap <leader>wk <c-w>k
+vmap <leader>wj <c-w>j
+vmap <leader>wv <c-w>v
+vmap <leader>ws <c-w>s
+vmap <leader>wc <c-w>c
+vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
+vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
+
+" Reload .ideavimrc
+nmap <leader>R :source ~/.ideavimrc<CR>
+vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/.ideavimrc<CR>
