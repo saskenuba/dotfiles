@@ -2,9 +2,9 @@ set ignorecase
 set smartcase
 set ideajoin
 set surround
+set wrapsearch
 
 let mapleader = " "
-
 
 " ============================================================================
 " key bindings for quickly moving between windows
@@ -30,6 +30,51 @@ vmap <leader>wc <c-w>c
 vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
 
+
+" ============================================================================
+" IDE actions
+" ============================================================================
+nmap gd              :action GotoDeclaration<CR>
+nmap gh              :action QuickJavaDoc<CR>
+nmap gr              :action FindUsages<CR>
+nmap gs              :action GotoSymbol<CR>
+nmap <leader>bb      :action Build<CR>
+nmap <leader>br      :action Run<CR>
+nmap <leader>bs      :action Stop<CR>
+nmap <leader>fs      :action SaveAll<CR>
+
 " Reload .ideavimrc
 nmap <leader>R :source ~/.ideavimrc<CR>
 vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/.ideavimrc<CR>
+
+" Cursive Related =================
+
+" Sexp editing mappings straight from paredit.vim
+map <leader>J :action :cursive.actions.paredit/join<CR>
+map <leader>O :action :cursive.actions.paredit/split<CR>
+map <leader>S :action :cursive.actions.paredit/splice<CR>
+map <leader>I :action :cursive.actions.paredit/raise<CR>
+
+" Slurp and barf
+map <leader>l :action :cursive.actions.paredit/barf-forwards<CR>
+map <leader>h :action :cursive.actions.paredit/slurp-forwards<CR>
+map <leader>L :action :cursive.actions.paredit/slurp-backwards<CR>
+map <leader>H :action :cursive.actions.paredit/barf-backwards<CR>
+
+" Splice backwards and forwards
+map <leader>k :action :cursive.actions.paredit/splice-killing-backwards<CR>
+map <leader>j :action :cursive.actions.paredit/splice-killing-forwards<CR>
+
+" leader + wrapping symbol for wrapping
+map <leader>( :action :cursive.actions.paredit/wrap-paren<CR>
+map <leader>[ :action :cursive.actions.paredit/wrap-square<CR>
+map <leader>{ :action :cursive.actions.paredit/wrap-curly<CR>
+map <leader>" :action :cursive.actions.paredit/wrap-quotes<CR>
+
+" vim delete and change, with sexps!
+map <leader>x :action :cursive.actions.paredit/kill-sexp<CR>
+map <leader>d :action :cursive.actions.paredit/kill<CR>
+map <leader>c :action :cursive.actions.paredit/kill-sexp<CR>i
+
+" Cycle collection
+map <leader>C :action :cursive.actions.paredit/cycle-collection-type<CR>
