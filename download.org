@@ -11,7 +11,7 @@
 | zsh                 | Custom shell       |
 | oh my zsh           | Customizations zsh |
 | powerline oh my zsh |                    |
-| st                  | simple terminal    |
+| alacritty           | simple terminal    |
 
 *** Audio
 | pulseaudio |
@@ -24,4 +24,5 @@
 *** Cool Packages
 | fd          | user friendly search      |
 | ripgrep(rg) | grep substitute           |
+| bat         | cat substitute            |
 | nerd-fonts  | iosevka patched powerline |
