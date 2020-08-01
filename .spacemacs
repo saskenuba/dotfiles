@@ -58,7 +58,6 @@ This function should only modify configuration layer settings."
              python-backend 'lsp
              python-fill-column 99
              lsp-pyls-configuration-sources ["flake8"]
-                                        ;flycheck-python-flake8-executable "flake8"
              )
      typescript
      rust
@@ -69,12 +68,9 @@ This function should only modify configuration layer settings."
               clojure-enable-clj-refactor t
               clojure-enable-sayid t
               clojure-enable-fancify-symbols t)
-     (c-c++ :variables
-            c-c++-backend 'lsp-ccls)
-     (typescript :variables
-                 tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")
-     ; haskell
-     ; perl5
+     (c-c++ :variables c-c++-backend 'lsp-ccls)
+     (typescript :variables tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")
+
 
      ;; web
      html
@@ -102,7 +98,7 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '()
+   dotspacemacs-additional-packages '((dbml-mode :location local))
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -498,6 +494,7 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
 
+
   (setq gnutls-algorithm-priority "NORMAL:-VERS-TLS1.3"))
 
 (defun dotspacemacs/user-load ()
@@ -513,6 +510,8 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
+  (require 'dbml-mode)
+
   (defun check-expansion ()
     (save-excursion (if (looking-at "\\_>") t (backward-char 1)
                         (if (looking-at "\\.") t (backward-char 1)
@@ -526,6 +525,12 @@ before packages are loaded."
   (global-set-key (kbd "<tab>")  'hippie-expand)
   (global-set-key (kbd "TAB")  'hippie-expand)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
+
+  ;; Magit exception
+  (add-hook 'magit-mode-hook
+            (lambda ()
+              (local-set-key (kbd "TAB") 'magit-section-toggle)
+              (local-set-key (kbd "<tab>") 'magit-section-toggle)))
 
 
   ; Python manim
@@ -590,7 +595,7 @@ This function is called at the very end of Spacemacs initialization."
      ("javascript" . js2))))
  '(package-selected-packages
    (quote
-    (lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))))
+    (eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -607,4 +612,6 @@ This function is called at the very end of Spacemacs initialization."
  '(helm-rg-preview-line-highlight ((t (:background "LightGreen" :foreground "black"))))
  '(js2-object-property ((t (:foreground "#fe743f"))))
  '(mode-line ((t (:background "#191919" :box nil))))
- '(mode-line-inactive ((t (:background "#282828" :foreground "#21242b" :box nil))))))
+ '(mode-line-inactive ((t (:background "#282828" :foreground "#21242b" :box nil))))
+ '(org-block-begin-line ((t (:foreground "#827591" :background "#373040")))))
+)
