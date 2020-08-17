@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: anon function
-# key: af
-# --
-function($1) {
-    $2
-}

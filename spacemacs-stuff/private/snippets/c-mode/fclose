@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: fclose(FILE *stream)
-# key: fclose
-# --
-fclose($0)

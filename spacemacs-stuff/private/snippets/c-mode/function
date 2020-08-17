@@ -1,8 +1,0 @@
-# -*- mode: snippet -*-
-# name: function prototype
-# key: func
-# --
-${type} ${functionName}(${type arg1}, ${type arg2})
-{
-    ${}
-}

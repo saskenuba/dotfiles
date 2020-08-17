@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: triple slash directive
-# key: ///
-# --
-/// <reference path="$1" />
