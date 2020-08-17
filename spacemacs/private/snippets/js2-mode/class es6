@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: es6 class
+# key: c
+# --
+class ${1:ClassName} {
+    constructor(${2:param}) {
+        $3
+    }
+}

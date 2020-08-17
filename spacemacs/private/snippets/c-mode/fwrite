@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: fwrite(..., ...)
+# key: fwrite
+# --
+fwrite(&${input *ptr},${sizeof size}, ${size_t nmemb}, ${FILE *stream})

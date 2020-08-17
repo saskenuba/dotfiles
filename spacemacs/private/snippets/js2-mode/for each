@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: for each
+# key: fore
+# --
+for (let ${1:var} in ${2:collection}) {
+    $3
+}

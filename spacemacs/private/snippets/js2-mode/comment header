@@ -1,0 +1,12 @@
+# -*- mode: snippet -*-
+# name: comment header
+# key: coh
+# --
+/***********************************************
+*
+* Author: ${1:Your name}, ${2:Year}
+*
+* Description: ${3: Description}
+*
+*
+************************************************/
