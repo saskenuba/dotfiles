@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: genexp
+# key: genexp
+# --
+(${1:x} for ${2:x} in ${3:collection})

@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Regex Constructor
+# key: regex
+# --
+const regex = new RegExp(${1:pattern}, ${2:flag});
