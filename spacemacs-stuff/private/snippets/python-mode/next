@@ -1,7 +1,0 @@
-## -*- mode: snippet -*-
-# name: __next__
-# key: next
-# group: dunder methods
-# --
-def __next__(self):
-    $0

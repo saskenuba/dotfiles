@@ -1,7 +1,0 @@
-# -*- mode: snippet -*-
-# name: self invoke function
-# key: sf
-# --
-(function() {
-    $0
-})();
