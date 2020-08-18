@@ -48,41 +48,32 @@
     traad
     tree-sitter
     tree-sitter-langs)
-  "The list of Lisp packages required by the martinmariano layer.
-
-Each entry is either:
-
-1. A symbol, which is interpreted as a package to be installed, or
-
-2. A list of the form (PACKAGE KEYS...), where PACKAGE is the
-    name of the package to be installed or loaded, and KEYS are
-    any number of keyword-value-pairs.
-
-    The following keys are accepted:
-
-    - :excluded (t or nil): Prevent the package from being loaded
-      if value is non-nil
-
-    - :location: Specify a custom installation location.
-      The following values are legal:
-
-      - The symbol `elpa' (default) means PACKAGE will be
-        installed using the Emacs package manager.
-
-      - The symbol `local' directs Spacemacs to load the file at
-        `./local/PACKAGE/PACKAGE.el'
-
-      - A list beginning with the symbol `recipe' is a melpa
-        recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
+  "Org Roam needs the graphviz package, along with the protocol
+   .desktop handler to allow linking from the browser.")
 
 
 (defconst my-org-roam-templates
-  '(
-    ("d" "default" plain (function org-roam--capture-get-point)
-   "%?"
-   :file-name "%<%d-%m-%Y>-${slug}"
-   :head "#+TITLE: ${title}\n#+ROAM_ALIAS: \n#+ROAM_TAGS: \n#+CREATED: %u"
-   :unnarrowed t)))
+  '(("d" "default" plain (function org-roam--capture-get-point) "%?"
+     :file-name "%<%d-%m-%Y>-${slug}"
+     :head
+     "#+TITLE: ${title}
+#+ROAM_ALIAS:
+#+ROAM_TAGS:
+#+CREATED: %u"
+     :unnarrowed t)
+    ))
+
+(defconst my-org-roam-ref-templates
+  '(("r" "ref" plain (function org-roam--capture-get-point)
+     "%?"
+     :file-name "web/${slug}"
+     :head
+     "#+TITLE: ${title}
+#+ROAM_KEY: ${ref}
+#+ROAM_ALIAS:
+#+ROAM_TAGS:
+#+CREATED: %u"
+     :unnarrowed t)))
 
 (defun martinmariano/init-org-roam()
   (use-package
@@ -93,9 +84,17 @@ Each entry is either:
 
 (defun martinmariano/post-init-org-roam()
   (setq org-roam-capture-templates my-org-roam-templates)
+  (setq org-roam-capture-ref-templates my-org-roam-ref-templates)
+
+  (require 'org-roam-protocol)
+  (add-to-list 'org-modules 'org-roam-protocol)
+  (add-hook 'org-mode-hook 'smartparens-mode)
 
   (spacemacs/declare-prefix-for-mode 'org-mode "mr" "org-roam")
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "rb" 'org-roam)
   (spacemacs/set-leader-keys-for-major-mode 'org-mode "rc" 'org-roam-db-build-cache)
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "rf" 'org-roam-find-file)
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "ri" 'org-roam-insert)
   (spacemacs/set-leader-keys-for-major-mode 'org-mode "rg" 'org-roam-graph))
 
 (defun martinmariano/post-init-org-roam-server()
@@ -122,7 +121,7 @@ Each entry is either:
 
 (defun martinmariano/init-company-org-roam()
   :ensure t
-  :init (spacemacs|add-company-backends :backends company-org-roam company-capf :modes org-mode))
+  :init (spacemacs|add-company-backends :backends company-org-roam :modes org-mode))
 
 (defun martinmariano/init-tree-sitter-langs ()
   (use-package tree-sitter-langs))
