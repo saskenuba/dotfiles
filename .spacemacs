@@ -543,6 +543,7 @@ Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
   (setq history-delete-duplicates t)
+
   (require 'dbml-mode)
 
   (defun check-expansion ()
@@ -581,6 +582,10 @@ before packages are loaded."
 
   ; Set javascript src to open with js2-mode
   ; (add-to-list 'org-src-lang-modes '("js" . js2))
+
+  ; Allow calls to this emacs process, without opening another process
+  (server-start)
+
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
