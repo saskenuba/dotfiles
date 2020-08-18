@@ -47,8 +47,7 @@
     (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
     traad
     tree-sitter
-    tree-sitter-langs
-    )
+    tree-sitter-langs)
   "The list of Lisp packages required by the martinmariano layer.
 
 Each entry is either:
@@ -77,12 +76,27 @@ Each entry is either:
         recipe.  See: https://github.com/milkypostman/melpa#recipe-format")
 
 
+(defconst my-org-roam-templates
+  '(
+    ("d" "default" plain (function org-roam--capture-get-point)
+   "%?"
+   :file-name "%<%d-%m-%Y>-${slug}"
+   :head "#+TITLE: ${title}\n#+ROAM_ALIAS: \n#+ROAM_TAGS: \n#+CREATED: %u"
+   :unnarrowed t)))
+
 (defun martinmariano/init-org-roam()
-  (use-package org-roam
+  (use-package
+    org-roam
     :after org
     :hook (org-mode . org-roam-mode)
-    :custom
-    (org-roam-directory "~/Dropbox/Pessoal/Notes")))
+    :custom (org-roam-directory "~/Dropbox/Pessoal/Notes")))
+
+(defun martinmariano/post-init-org-roam()
+  (setq org-roam-capture-templates my-org-roam-templates)
+
+  (spacemacs/declare-prefix-for-mode 'org-mode "mr" "org-roam")
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "rc" 'org-roam-db-build-cache)
+  (spacemacs/set-leader-keys-for-major-mode 'org-mode "rg" 'org-roam-graph))
 
 (defun martinmariano/post-init-org-roam-server()
   (add-hook 'org-mode-hook (lambda ()
