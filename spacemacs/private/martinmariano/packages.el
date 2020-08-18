@@ -40,6 +40,8 @@
     (org-roam :location (recipe
                          :fetcher github
                          :repo "jethrokuan/org-roam"))
+    org-roam-server
+    company-org-roam
     poet-theme
     (poetry :requires transient)
     (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
@@ -80,8 +82,33 @@ Each entry is either:
     :after org
     :hook (org-mode . org-roam-mode)
     :custom
-    (org-roam-directory "~/Dropbox/Pessoal/Notes")
-    (org-roam-graph--open 'eww-open-file)))
+    (org-roam-directory "~/Dropbox/Pessoal/Notes")))
+
+(defun martinmariano/post-init-org-roam-server()
+  (add-hook 'org-mode-hook (lambda ()
+                             (org-roam-buffer-activate)
+                             (org-roam-server-mode))))
+
+(defun martinmariano/init-org-roam-server()
+  (use-package org-roam-server
+    :ensure t
+    :config
+    (setq org-roam-server-host "127.0.0.1"
+          org-roam-server-port 9345
+          org-roam-server-authenticate nil
+          org-roam-server-export-inline-images t
+          org-roam-server-serve-files nil
+          org-roam-server-served-file-extensions '("pdf" "mp4" "ogv")
+          org-roam-server-network-poll t
+          org-roam-server-network-arrows nil
+          org-roam-server-network-label-truncate t
+          org-roam-server-network-label-truncate-length 60
+          org-roam-server-network-label-wrap-length 20)))
+
+
+(defun martinmariano/init-company-org-roam()
+  :ensure t
+  :init (spacemacs|add-company-backends :backends company-org-roam company-capf :modes org-mode))
 
 (defun martinmariano/init-tree-sitter-langs ()
   (use-package tree-sitter-langs))
