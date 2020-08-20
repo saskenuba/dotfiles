@@ -88,7 +88,10 @@
 
   (require 'org-roam-protocol)
   (add-to-list 'org-modules 'org-roam-protocol)
-  (add-hook 'org-mode-hook 'smartparens-mode)
+
+  (add-hook 'org-mode-hook (lambda ()
+                             (smartparens-mode)
+                             (imenu-list-minor-mode)))
 
   (spacemacs/declare-prefix-for-mode 'org-mode "mr" "org-roam")
   (spacemacs/set-leader-keys-for-major-mode 'org-mode "rb" 'org-roam)
