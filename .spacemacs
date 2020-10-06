@@ -49,7 +49,7 @@ This function should only modify configuration layer settings."
      dap
      emacs-lisp
      helm
-     lsp
+     (lsp :variables lsp-rust-server 'rust-analyzer)
      multiple-cursors
      shell
      shell-scripts
@@ -72,6 +72,7 @@ This function should only modify configuration layer settings."
               clojure-enable-fancify-symbols t)
      (c-c++ :variables c-c++-backend 'lsp-ccls)
      (typescript :variables tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")
+     sql
 
 
      ;; web
@@ -100,7 +101,11 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '((dbml-mode :location local))
+   dotspacemacs-additional-packages '(
+                                      (dbml-mode :location local)
+                                      modus-operandi-theme
+                                      modus-vivendi-theme
+                                      )
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -238,10 +243,9 @@ It should only modify the values of Spacemacs settings."
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
    dotspacemacs-themes '(spacemacs-dark
-                         badwolf
-                         phoenix-dark-mono
-                         gruvbox
-                         spacemacs-light)
+                         spacemacs-light
+                         modus-operandi
+                         modus-vivendi)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -259,7 +263,7 @@ It should only modify the values of Spacemacs settings."
    ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
    ;; quickly tweak the mode-line size to make separators look not too crappy.
    dotspacemacs-default-font '("Iosevka"
-                               :size 16
+                               :size 14
                                :weight light
                                :width normal
                                :powerline-scale 1.1)
@@ -561,11 +565,24 @@ before packages are loaded."
   (global-set-key (kbd "C-SPC")  'hippie-expand)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
+
+  (setq cider-font-lock-dynamically '(macro core function var))
+  (setq cljr-warn-on-eval nil)
+
   ;; Magit exception
-  (add-hook 'magit-mode-hook
-            (lambda ()
+  (add-hook 'magit-mode-hook (lambda ()
               (local-set-key (kbd "TAB") 'magit-section-toggle)
               (local-set-key (kbd "<tab>") 'magit-section-toggle)))
+
+  ;; Clojurescript hooks
+  (add-hook 'clojurescript-mode-hook (lambda ()
+                                       (evil-cleverparens-mode)
+                                       (smartparens-mode)
+                                       (smartparens-strict-mode)))
+  (add-hook 'clojure-mode-hook (lambda ()
+                                       (evil-cleverparens-mode)
+                                       (smartparens-mode)
+                                       (smartparens-strict-mode)))
 
 
   ; Python manim
@@ -580,11 +597,11 @@ before packages are loaded."
   (setq org-src-fontify-natively t
         org-src-preserve-indentation t)
 
-  ; Set javascript src to open with js2-mode
-  ; (add-to-list 'org-src-lang-modes '("js" . js2))
-
   ; Allow calls to this emacs process, without opening another process
   (server-start)
+
+  ; Load my custom theme, check martinmariano.funcs
+  (modus-vivendi-theme-load)
 
 )
 
@@ -609,6 +626,8 @@ This function is called at the very end of Spacemacs initialization."
      (output-pdf "Zathura")
      (output-html "xdg-open")))
  '(company-plsense-executable "/home/martin/perl5/bin/plsense")
+ '(custom-safe-themes
+   '("1d904ba8343822dff21ffae28a348975eafeb0734034ed5fa33d78bf2519e7cb" "39b0c917e910f32f43f7849d07b36a2578370a2d101988ea91292f9087f28470" default))
  '(evil-want-Y-yank-to-eol nil)
  '(helm-ff-lynx-style-map t)
  '(org-src-lang-modes
@@ -637,17 +656,6 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- '(font-lock-constant-face ((t (:foreground "#C792EA"))))
- '(font-lock-keyword-face ((t (:foreground "#2BA3FF" :slant italic))))
- '(font-lock-preprocessor-face ((t (:inherit bold :foreground "#2BA3FF" :slant italic :weight normal))))
- '(font-lock-string-face ((t (:foreground "#00baa5"))))
- '(font-lock-type-face ((t (:foreground "#FFCB6B"))))
- '(font-lock-variable-name-face ((t (:foreground "#FF5370"))))
- '(helm-rg-active-arg-face ((t (:foreground "LightGreen"))))
- '(helm-rg-file-match-face ((t (:foreground "LightGreen" :underline t))))
- '(helm-rg-preview-line-highlight ((t (:background "LightGreen" :foreground "black"))))
  '(js2-object-property ((t (:foreground "#fe743f"))))
- '(mode-line ((t (:background "#191919" :box nil))))
- '(mode-line-inactive ((t (:background "#282828" :foreground "#21242b" :box nil))))
  '(org-block-begin-line ((t (:foreground "#827591" :background "#373040")))))
 )

@@ -32,16 +32,17 @@
 (defconst martinmariano-packages
   '(
     demo-it
-    doom-themes
+    ;; doom-themes
     eglot
     elisp-format
-    evil-multiedit
     gif-screencast
     (org-roam :location (recipe
                          :fetcher github
                          :repo "jethrokuan/org-roam"))
+    org-sidebar
     org-roam-server
     company-org-roam
+    kibit-helper
     poet-theme
     (poetry :requires transient)
     (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
@@ -82,6 +83,9 @@
     :hook (org-mode . org-roam-mode)
     :custom (org-roam-directory "~/Dropbox/Pessoal/Notes")))
 
+(defun martinmariano/init-org-sidebar()
+  (use-package org-sidebar))
+
 (defun martinmariano/post-init-org-roam()
   (setq org-roam-capture-templates my-org-roam-templates)
   (setq org-roam-capture-ref-templates my-org-roam-ref-templates)
@@ -91,7 +95,9 @@
 
   (add-hook 'org-mode-hook (lambda ()
                              (smartparens-mode)
-                             (imenu-list-minor-mode)))
+                             (imenu-list-minor-mode)
+                             ;; (org-sidebar '(my/org-sidebar))
+                             ))
 
   (spacemacs/declare-prefix-for-mode 'org-mode "mr" "org-roam")
   (spacemacs/set-leader-keys-for-major-mode 'org-mode "rb" 'org-roam)
@@ -126,6 +132,9 @@
   :ensure t
   :init (spacemacs|add-company-backends :backends company-org-roam :modes org-mode))
 
+(defun martinmariano/init-kibit-helper()
+  (use-package kibit-helper))
+
 (defun martinmariano/init-tree-sitter-langs ()
   (use-package tree-sitter-langs))
 
@@ -151,16 +160,9 @@
     (add-hook 'python-mode-hook 'sphinx-doc-mode)
     (spacemacs/set-leader-keys-for-major-mode 'python-mode "id" 'sphinx-doc)))
 
-(defun martinmariano/init-evil-multiedit ()
-  "docstring"
-  (use-package evil-multiedit
-    :init
-    (define-key evil-normal-state-map (kbd "M-d") 'evil-multiedit-match-and-next)))
-
 (defun martinmariano/init-demo-it ()
   "docstring"
   (use-package demo-it))
-
 
 (defun martinmariano/init-poet-theme ())
 
@@ -188,4 +190,38 @@
 (defun martinmariano/init-poetry ()
   :defer t)
 
-;;; packages.el ends here
+(defmacro modus-themes-format-sexp (sexp &rest objects)
+  `(eval (read (format ,(format "%S" sexp) ,@objects))))
+
+(dolist (theme '("operandi" "vivendi"))
+  (modus-themes-format-sexp
+   (defun modus-%1$s-theme-load ()
+
+     ;; Disable first enabled theme to avoid theme stacking
+     (disable-theme (car custom-enabled-themes))
+
+     (setq modus-%1$s-theme-slanted-constructs nil
+           modus-%1$s-theme-bold-constructs nil
+           modus-%1$s-theme-fringes 'intense ; {nil,'subtle,'intense}
+           modus-%1$s-theme-mode-line '3d ; {nil,'3d,'moody}
+           modus-%1$s-theme-faint-syntax nil
+           modus-%1$s-theme-intense-hl-line nil
+           modus-%1$s-theme-intense-paren-match nil
+           modus-%1$s-theme-no-link-underline nil
+           modus-%1$s-theme-no-mixed-fonts nil
+           modus-%1$s-theme-prompts nil ; {nil,'subtle,'intense}
+           modus-%1$s-theme-completions 'opinionated ; {nil,'moderate,'opinionated}
+           modus-%1$s-theme-diffs nil ; {nil,'desaturated,'fg-only}
+           modus-%1$s-theme-org-blocks 'greyscale ; {nil,'greyscale,'rainbow}
+           modus-%1$s-theme-headings  ; Read further below in the manual for this one
+           '((1 . line)
+             (t . rainbow-line-no-bold))
+           modus-%1$s-theme-variable-pitch-headings t
+           modus-%1$s-theme-scale-headings t
+           modus-%1$s-theme-scale-1 1.1
+           modus-%1$s-theme-scale-2 1.15
+           modus-%1$s-theme-scale-3 1.21
+           modus-%1$s-theme-scale-4 1.27
+           modus-%1$s-theme-scale-5 1.33)
+     (load-theme 'modus-%1$s t))
+   theme))
