@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: require timbre cljs
+# key: req-timbre
+# --
+
+[taoensso.timbre :as timbre
+:refer [log  trace  debug  info  warn  error  fatal  report
+logf tracef debugf infof warnf errorf fatalf reportf
+spy get-env]]
