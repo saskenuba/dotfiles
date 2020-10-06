@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: oops dep
+# key: req-oops
+# --
+
+[oops.core :refer [oget oset! ocall oapply ocall! oapply!
+oget+ oset!+ ocall+ oapply+ ocall!+ oapply!+]]
