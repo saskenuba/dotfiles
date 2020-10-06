@@ -124,3 +124,29 @@
   "Render last frame of current scene."
   (interactive)
   (manim-render-current-scene "s"))
+
+(defun my/org-sidebar (source-buffer)
+  "Return an Org QL View buffer showing upcoming items in SOURCE-BUFFER."
+  (let ((display-buffer (generate-new-buffer (format "org-sidebar<%s>" (buffer-name
+                                                                        source-buffer))))
+        (title (concat "Headers and subcategories: " (buffer-name source-buffer))))
+    (with-current-buffer display-buffer (setf org-sidebar-source-buffer source-buffer))
+    (save-window-excursion
+      ;; `org-ql-search' displays the buffer, but we don't want to do that here.
+      (org-ql-search source-buffer '(heading ".*")
+        :narrow t
+        :sort 'date
+        :super-groups '((:auto-planning))
+        :buffer display-buffer
+        :title title)) display-buffer))
+
+
+(defun modus-themes-toggle ()
+  "Toggle between `modus-operandi' and `modus-vivendi' themes."
+  (interactive)
+  (if (eq (car custom-enabled-themes) 'modus-operandi)
+      (progn
+        (disable-theme 'modus-operandi)
+        (modus-vivendi-theme-load))
+    (disable-theme 'modus-vivendi)
+    (modus-operandi-theme-load)))
