@@ -6,15 +6,19 @@
 
 ### Variables
 #
+#
 # Logo key. Use Mod1 for Alt.
 set $mod Mod4
+
 # Home row direction keys, like vim
 set $left h
 set $down j
 set $up k
 set $right l
+
 # Your preferred terminal emulator
 set $term alacritty
+
 # Your preferred application launcher
 # Note: pass the final command to swaymsg so that the resulting window can be opened
 # on the original workspace that the command was run on.
@@ -22,10 +26,6 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 
 # Custom keybindings
 set $offline_docs zeal
-
-
-
-
 
 ### Output configuration
 #
@@ -235,14 +235,24 @@ bindsym $mod+r mode "resize"
 #}
 
 include /etc/sway/config.d/*
+exec_always ~/.config/sway/startup.sh
 
+# Other configs
+gaps inner 0
+gaps outer 0
+# hide_edge_borders smart
 
-# Custom assignments
+# bindsym XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5%
+# bindsym XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5%
+# bindsym XF86AudioMute exec pactl set-sink-mute $(pacmd list-sinks |awk '/* index:/{print $3}') toggle
 
+# Font settings
+font pango: IosevkaSS04:style=Regular 8
 
-# Browser workspace
+# Workspaces
+
+## Browser workspace
 assign [class="firefox"] workspace 9
 
-# Dev workspace
+## Dev workspace
 assign [class="Emacs"] workspace 2
-
