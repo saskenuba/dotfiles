@@ -26,6 +26,7 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 
 # Custom keybindings
 set $offline_docs zeal
+set $filemanager ranger
 
 ### Output configuration
 #
@@ -87,8 +88,8 @@ input 1267:12424:DELL083F:00_04F3:3088_Touchpad {
     # Start your launcher
     bindsym $mod+p exec $menu
 
-    # Start your launcher
     bindsym $mod+z exec $offline_docs
+    bindsym $mod+Shift+e exec $filemanager
 
 
     # Drag floating windows by holding down $mod and left mouse button.
