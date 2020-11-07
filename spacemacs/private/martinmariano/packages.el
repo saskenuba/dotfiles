@@ -45,7 +45,7 @@
     kibit-helper
     poet-theme
     (poetry :requires transient)
-    (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
+    ;; (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
     traad
     tree-sitter
     tree-sitter-langs)
@@ -152,13 +152,13 @@
     :init (spacemacs/set-leader-keys-for-major-mode 'python-mode "rr" 'traad-rename)
     :defer t))
 
-(defun martinmariano/init-sphinx-doc ()
-  "docstring"
-  (use-package sphinx-doc
-    :defer t
-    :init
-    (add-hook 'python-mode-hook 'sphinx-doc-mode)
-    (spacemacs/set-leader-keys-for-major-mode 'python-mode "id" 'sphinx-doc)))
+;; (defun martinmariano/init-sphinx-doc ()
+;;   "docstring"
+;;   (use-package sphinx-doc
+;;     :defer t
+;;     :init
+;;     (add-hook 'python-mode-hook 'sphinx-doc-mode)
+;;     (spacemacs/set-leader-keys-for-major-mode 'python-mode "id" 'sphinx-doc)))
 
 (defun martinmariano/init-demo-it ()
   "docstring"
