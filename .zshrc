@@ -33,7 +33,7 @@ ZSH_THEME="powerlevel9k/powerlevel9k"
 # DISABLE_AUTO_TITLE="true"
 
 # Uncomment the following line to enable command auto-correction.
-ENABLE_CORRECTION="true"
+# ENABLE_CORRECTION="true"
 
 # Uncomment the following line to display red dots whilst waiting for completion.
 # COMPLETION_WAITING_DOTS="true"
@@ -56,8 +56,11 @@ ENABLE_CORRECTION="true"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git gitfast sudo docker yarn
+  git gitfast sudo docker yarn aws zsh-completions
 )
+
+# url pasting
+# DISABLE_MAGIC_FUNCTIONS=true
 
 source $ZSH/oh-my-zsh.sh
 
@@ -100,10 +103,10 @@ POWERLEVEL9K_SHORTEN_STRATEGY="truncate_middle"
 POWERLEVEL9K_SHORTEN_DIR_LENGTH=3
 
 # Java better fonts
-export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd -Dswing.aatext=true'
+# export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd -Dswing.aatext=true'
 
-# Auto completion for PipEnv
-# eval "$(pipenv --completion)"
+# Use bat as colorizer for man
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 # Set workon for zsh
 export WORKON_HOME=$HOME/Documentos/PythonEnvironments/
@@ -125,5 +128,6 @@ eval "$(direnv hook zsh)"
 # Yarn correct usage
 export PATH="$PATH:`yarn global bin`"
 
-
+path+=('/home/martin/.cargo/bin')
+path+=('/home/martin/.local/bin')
 fpath+=~/.zfunc ; compinit
