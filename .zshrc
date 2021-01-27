@@ -56,13 +56,14 @@ ZSH_THEME="powerlevel9k/powerlevel9k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git gitfast sudo docker yarn aws zsh-completions
+  git gitfast sudo docker yarn aws
 )
 
 # url pasting
 # DISABLE_MAGIC_FUNCTIONS=true
 
 source $ZSH/oh-my-zsh.sh
+# eval "$(starship init zsh)"
 
 # User configuration
 

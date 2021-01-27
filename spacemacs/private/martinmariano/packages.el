@@ -44,7 +44,6 @@
     company-org-roam
     kibit-helper
     poet-theme
-    (poetry :requires transient)
     ;; (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
     traad
     tree-sitter
@@ -185,10 +184,6 @@
 
 
 (defun martinmariano/init-elisp-format ())
-
-
-(defun martinmariano/init-poetry ()
-  :defer t)
 
 (defmacro modus-themes-format-sexp (sexp &rest objects)
   `(eval (read (format ,(format "%S" sexp) ,@objects))))

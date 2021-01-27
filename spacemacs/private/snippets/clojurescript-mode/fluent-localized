@@ -2,4 +2,4 @@
 # name: new Localized
 # key: loc
 # --
-[:> Localized {:id "$1" :vars {$2}} ]
+[:> Localized {:id "$1"} ]
