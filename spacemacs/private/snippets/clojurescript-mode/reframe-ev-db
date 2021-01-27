@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: re-frame ev db
+# key: rdb
+# --
+
+(rf/reg-event-db
+::$1
+(fn [db [_ $2]]
+$3))

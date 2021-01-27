@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: require match lib
+# key: req-match
+# --
+
+[cljs.core.match :refer-macros [match]]

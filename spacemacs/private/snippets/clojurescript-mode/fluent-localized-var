@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: localized with vars
+# key: locv
+# --
+[:> Localized {:id "$1" :vars {$2}}]
