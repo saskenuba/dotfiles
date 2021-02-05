@@ -32,7 +32,7 @@
 (defconst martinmariano-packages
   '(
     demo-it
-    ;; doom-themes
+    ; doom-themes
     eglot
     elisp-format
     gif-screencast
@@ -43,8 +43,8 @@
     org-roam-server
     company-org-roam
     kibit-helper
-    poet-theme
-    ;; (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
+    ; poet-theme
+    ; (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
     traad
     tree-sitter
     tree-sitter-langs)
@@ -163,7 +163,7 @@
   "docstring"
   (use-package demo-it))
 
-(defun martinmariano/init-poet-theme ())
+; (defun martinmariano/init-poet-theme ())
 
 ;; Theme
 (defun martinmariano/init-doom-themes ()
