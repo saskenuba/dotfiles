@@ -567,13 +567,15 @@ before packages are loaded."
 
   (setq history-delete-duplicates t)
 
-  ;; clojure
-  (setq lsp-clojure-custom-server-command '("bash" "-c" "/home/martin/.config/clojure-lsp/clojure-lsp"))
+  ; Clojure-lsp is installed through the clojure-lsp package on AUR
+  (setq lsp-clojure-custom-server-command '("bash" "-c" "/usr/bin/clojure-lsp"))
+
+  ; Clojure hooks
   (add-hook 'clojure-mode-hook 'lsp)
   (add-hook 'clojurescript-mode-hook 'lsp)
   (add-hook 'clojurec-mode-hook 'lsp)
 
-  ;; (require 'dbml-mode)
+  ; (require 'dbml-mode)
 
   (defun check-expansion ()
     (save-excursion (if (looking-at "\\_>") t (backward-char 1)
