@@ -565,10 +565,12 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
+  (setq debug-on-error t)
   (setq history-delete-duplicates t)
 
   ; Clojure-lsp is installed through the clojure-lsp package on AUR
-  (setq lsp-clojure-custom-server-command '("bash" "-c" "/usr/bin/clojure-lsp"))
+  ; (setq lsp-clojure-custom-server-command '("bash" "-c" "/usr/bin/clojure-lsp"))
+  (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
 
   ; Clojure hooks
   (add-hook 'clojure-mode-hook 'lsp)
@@ -595,6 +597,7 @@ before packages are loaded."
 
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cljr-warn-on-eval nil)
+  (setq lsp-modeline-code-actions-enable nil)
 
   ;; Magit exception
   (add-hook 'magit-mode-hook (lambda ()
@@ -626,6 +629,7 @@ before packages are loaded."
 
   ; Load my custom theme, check martinmariano.funcs
   (modus-vivendi-theme-load)
+  (disable-theme 'spacemacs-dark)
 
 )
 
