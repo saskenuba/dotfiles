@@ -441,7 +441,7 @@ It should only modify the values of Spacemacs settings."
 
    ;; If non-nil `smartparens-strict-mode' will be enabled in programming modes.
    ;; (default nil)
-   dotspacemacs-smartparens-strict-mode nil
+   dotspacemacs-smartparens-strict-mode t
 
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc...
@@ -595,24 +595,25 @@ before packages are loaded."
   (global-set-key (kbd "C-SPC")  'hippie-expand)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
+
+
+  ; (global-set-key (kbd "M-[")  'paredit-wrap-square)
+  ; (global-set-key (kbd "M-d")  'paredit-kill)
+
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cljr-warn-on-eval nil)
-  (setq lsp-modeline-code-actions-enable nil)
+  (setq lsp-ui-sideline-enable nil)
+
+
+
+  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
+  (setq lsp-enable-indentation nil)
+
 
   ;; Magit exception
   (add-hook 'magit-mode-hook (lambda ()
               (local-set-key (kbd "TAB") 'magit-section-toggle)
               (local-set-key (kbd "<tab>") 'magit-section-toggle)))
-
-  ;; Clojurescript hooks
-  (add-hook 'clojurescript-mode-hook (lambda ()
-                                       (evil-cleverparens-mode)
-                                       (smartparens-mode)
-                                       (smartparens-strict-mode)))
-  (add-hook 'clojure-mode-hook (lambda ()
-                                       (evil-cleverparens-mode)
-                                       (smartparens-mode)
-                                       (smartparens-strict-mode)))
 
 
   ; Python manim
