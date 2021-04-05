@@ -32,7 +32,6 @@
 (defconst martinmariano-packages
   '(
     demo-it
-    ; doom-themes
     eglot
     elisp-format
     gif-screencast
@@ -41,10 +40,8 @@
                          :repo "jethrokuan/org-roam"))
     org-sidebar
     org-roam-server
-    company-org-roam
+    ; company-org-roam
     kibit-helper
-    ; poet-theme
-    ; (sphinx-doc :fetcher github :repo "naiquevin/sphinx-doc.el")
     traad
     tree-sitter
     tree-sitter-langs)
