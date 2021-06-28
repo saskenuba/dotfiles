@@ -194,7 +194,7 @@
 
      (setq modus-%1$s-theme-slanted-constructs nil
            modus-%1$s-theme-bold-constructs nil
-           modus-%1$s-theme-fringes 'intense ; {nil,'subtle,'intense}
+           modus-%1$s-theme-fringes 'subtle ; {nil,'subtle,'intense}
            modus-%1$s-theme-mode-line '3d ; {nil,'3d,'moody}
            modus-%1$s-theme-faint-syntax nil
            modus-%1$s-theme-intense-hl-line nil
