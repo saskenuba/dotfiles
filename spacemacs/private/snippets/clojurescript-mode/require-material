@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: material ui component
+# key: req-material
+# --
+["@material-ui/core" :refer [$1]]
