@@ -565,7 +565,7 @@ configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
 
-  (setq debug-on-error t)
+  ; (setq debug-on-error t)
   (setq history-delete-duplicates t)
 
   ; Clojure-lsp is installed through the clojure-lsp package on AUR
@@ -608,6 +608,7 @@ before packages are loaded."
 
   (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
   (setq lsp-enable-indentation nil)
+  ; (setq lsp-semantic-tokens-enable t)
 
 
   ;; Magit exception
@@ -658,7 +659,7 @@ This function is called at the very end of Spacemacs initialization."
  '(custom-safe-themes
    '("1d904ba8343822dff21ffae28a348975eafeb0734034ed5fa33d78bf2519e7cb" "39b0c917e910f32f43f7849d07b36a2578370a2d101988ea91292f9087f28470" default))
  '(evil-want-Y-yank-to-eol nil)
- '(helm-ff-lynx-style-map t)
+ '(helm-ff-lynx-style-map t t)
  '(org-src-lang-modes
    '(("arduino" . arduino)
      ("redis" . redis)
@@ -679,7 +680,20 @@ This function is called at the very end of Spacemacs initialization."
      ("sqlite" . sql)
      ("javascript" . js2)))
  '(package-selected-packages
-   '(tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell)))
+   '(tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
+ '(safe-local-variable-values
+   '((cider-shadow-default-options . "app")
+     (cider-default-cljs-repl . shadow)
+     (cider-preferred-build-tool . "shadow-cljs")
+     (cider-preferred-build-tool quote shadow-cljs)
+     (cider-default-cljs-repl quote shadow)
+     (cider-default-cljs-repl quote shadow-cljs)
+     (cider-jack-in-default quote shadow-cljs)
+     (typescript-backend . tide)
+     (typescript-backend . lsp)
+     (javascript-backend . tide)
+     (javascript-backend . tern)
+     (javascript-backend . lsp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
