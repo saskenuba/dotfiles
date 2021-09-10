@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: subscribe
+# key: sub
+# --
+(util/<sub [::$1])
