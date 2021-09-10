@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: hiccup class
+# key: cls
+# --
+{:class "$1"}
