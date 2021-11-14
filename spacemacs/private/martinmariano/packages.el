@@ -42,6 +42,7 @@
     org-roam-server
     ; company-org-roam
     kibit-helper
+    magit-lfs
     traad
     tree-sitter
     tree-sitter-langs)
@@ -107,6 +108,7 @@
                              (org-roam-buffer-activate)
                              (org-roam-server-mode))))
 
+
 (defun martinmariano/init-org-roam-server()
   (use-package org-roam-server
     :ensure t
@@ -127,6 +129,11 @@
 (defun martinmariano/init-company-org-roam()
   :ensure t
   :init (spacemacs|add-company-backends :backends company-org-roam :modes org-mode))
+
+(defun martinmariano/init-magit-lfs()
+  (use-package magit-lfs
+    :ensure t
+    :pin melpa))
 
 (defun martinmariano/init-kibit-helper()
   (use-package kibit-helper))
