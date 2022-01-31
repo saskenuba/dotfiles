@@ -44,21 +44,21 @@ This function should only modify configuration layer settings."
      auto-completion
      better-defaults
      dap
-     emacs-lisp
      helm
-     (lsp :variables lsp-rust-server 'rust-analyzer)
+     emacs-lisp
      major-modes
      multiple-cursors
+     (lsp :variables lsp-rust-server 'rust-analyzer)
      shell
      shell-scripts
      treemacs
+     gtags
 
      ;; programming
      (python :variables
              python-backend 'lsp
              python-fill-column 99
-             lsp-pyls-configuration-sources ["flake8"]
-             )
+             lsp-pyls-configuration-sources ["flake8"])
      typescript
      rust
      (javascript :variables
@@ -81,21 +81,25 @@ This function should only modify configuration layer settings."
      ;; utilities
      asciidoc
      colors
+     emoji
      docker
      git
      json
-     org
+     (org :variables
+          org-enable-roam-support t
+          org-enable-roam-server t
+          org-enable-roam-protocol t)
      syntax-checking
      version-control
      yaml
      ; themes-megapack
      (latex :variables
             enable-local-variables t)
+     vimscript
 
      ;; my configuration layer
      martinmariano
-
-     )
+)
 
    ;; List of additional packages that will be installed without being
    ;; wrapped in a layer. If you need some configuration for these
@@ -107,8 +111,7 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(
                                       (dbml-mode :location local)
                                       modus-operandi-theme
-                                      modus-vivendi-theme
-                                      )
+                                      modus-vivendi-theme)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -528,7 +531,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-use-clean-aindent-mode t
 
-   ;; Accept SPC as y for prompts if non nil. (default nil)
+   ;; Accept SPC as y for prompts if non-nil. (default nil)
    dotspacemacs-use-SPC-as-y nil
 
    ;; If non-nil shift your number row to match the entered keyboard layout
@@ -548,7 +551,7 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-pretty-docs nil
 
    ;; If nil the home buffer shows the full path of agenda items
-   ;; and todos. If non nil only the file name is shown.
+   ;; and todos. If non-nil only the file name is shown.
    dotspacemacs-home-shorten-agenda-source nil
 
    ;; If non-nil then byte-compile some of Spacemacs files.
@@ -599,8 +602,10 @@ before packages are loaded."
   (setq history-delete-duplicates t)
 
   ; Clojure-lsp is installed through the clojure-lsp package on AUR
-  ; (setq lsp-clojure-custom-server-command '("bash" "-c" "/usr/bin/clojure-lsp"))
   (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
+
+  (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
+  (setq org-roam-v2-ack t)
 
   ; Clojure hooks
   (add-hook 'clojure-mode-hook 'lsp)
@@ -625,8 +630,6 @@ before packages are loaded."
   (global-set-key (kbd "C-SPC")  'hippie-expand)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
-
-
   ; (global-set-key (kbd "M-[")  'paredit-wrap-square)
   ; (global-set-key (kbd "M-d")  'paredit-kill)
 
@@ -634,12 +637,17 @@ before packages are loaded."
   (setq cljr-warn-on-eval nil)
   (setq lsp-ui-sideline-enable nil)
 
-
-
   (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
   (setq lsp-enable-indentation nil)
   ; (setq lsp-semantic-tokens-enable t)
 
+  ;; Org roam variables
+  (setq org-roam-capture-templates my-org-roam-templates)
+  (setq org-roam-capture-ref-templates my-org-roam-ref-templates)
+  (add-hook 'org-mode-hook (lambda ()
+                             (org-roam-buffer-display-dedicated)
+                             (imenu-list-minor-mode)
+                             (org-roam-ui-mode)))
 
   ;; Magit exception
   (add-hook 'magit-mode-hook (lambda ()
@@ -662,7 +670,6 @@ before packages are loaded."
   ; Load my custom theme, check martinmariano.funcs
   (modus-vivendi-theme-load)
   (disable-theme 'spacemacs-dark)
-
 )
 
 ;; Do not write anything past this comment. This is where Emacs will
@@ -689,7 +696,7 @@ This function is called at the very end of Spacemacs initialization."
  '(custom-safe-themes
    '("1d904ba8343822dff21ffae28a348975eafeb0734034ed5fa33d78bf2519e7cb" "39b0c917e910f32f43f7849d07b36a2578370a2d101988ea91292f9087f28470" default))
  '(evil-want-Y-yank-to-eol nil)
- '(helm-ff-lynx-style-map t t)
+ '(helm-ff-lynx-style-map t)
  '(org-src-lang-modes
    '(("arduino" . arduino)
      ("redis" . redis)
@@ -710,7 +717,7 @@ This function is called at the very end of Spacemacs initialization."
      ("sqlite" . sql)
      ("javascript" . js2)))
  '(package-selected-packages
-   '(tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
+   '(vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags helm-tramp tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
  '(safe-local-variable-values
    '((cider-shadow-default-options . "app")
      (cider-default-cljs-repl . shadow)
@@ -730,5 +737,4 @@ This function is called at the very end of Spacemacs initialization."
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(js2-object-property ((t (:foreground "#fe743f"))))
- '(org-block-begin-line ((t (:foreground "#827591" :background "#373040")))))
-)
+ '(org-block-begin-line ((t (:foreground "#827591" :background "#373040"))))))
