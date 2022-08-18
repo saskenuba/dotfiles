@@ -136,8 +136,8 @@ It should only modify the values of Spacemacs settings."
   ;; This setq-default sexp is an exhaustive list of all the supported
   ;; spacemacs settings.
   (setq-default
-   ;; If non-nil then enable support for the portable dumper. You'll need
-   ;; to compile Emacs 27 from source following the instructions in file
+   ;; If non-nil then enable support for the portable dumper. You'll need to
+   ;; compile Emacs 27 from source following the instructions in file
    ;; EXPERIMENTAL.org at to root of the git repository.
    ;; (default nil)
    dotspacemacs-enable-emacs-pdumper nil
@@ -223,6 +223,13 @@ It should only modify the values of Spacemacs settings."
    ;; If the value is nil then no banner is displayed. (default 'official)
    dotspacemacs-startup-banner 'official
 
+   ;; Scale factor controls the scaling (size) of the startup banner. Default
+   ;; value is `auto' for scaling the logo automatically to fit all buffer
+   ;; contents, to a maximum of the full image height and a minimum of 3 line
+   ;; heights. If set to a number (int or float) it is used as a constant
+   ;; scaling factor for the default logo size.
+   dotspacemacs-startup-banner-scale 'auto
+
    ;; List of items to show in startup buffer or an association list of
    ;; the form `(list-type . list-size)`. If nil then it is disabled.
    ;; Possible values for list-type are:
@@ -244,6 +251,11 @@ It should only modify the values of Spacemacs settings."
 
    ;; The minimum delay in seconds between number key presses. (default 0.4)
    dotspacemacs-startup-buffer-multi-digit-delay 0.4
+
+   ;; If non-nil, show file icons for entries and headings on Spacemacs home buffer.
+   ;; This has no effect in terminal or if "all-the-icons" package or the font
+   ;; is not installed. (default nil)
+   dotspacemacs-startup-buffer-show-icons nil
 
    ;; Default major mode for a new empty buffer. Possible values are mode
    ;; names such as `text-mode'; and `nil' to use Fundamental mode.
@@ -433,8 +445,8 @@ It should only modify the values of Spacemacs settings."
    ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
    ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
    ;; numbers are relative. If set to `visual', line numbers are also relative,
-   ;; but lines are only visual lines are counted. For example, folded lines
-   ;; will not be counted and wrapped lines are counted as multiple lines.
+   ;; but only visual lines are counted. For example, folded lines will not be
+   ;; counted and wrapped lines are counted as multiple lines.
    ;; This variable can also be set to a property list for finer control:
    ;; '(:relative nil
    ;;   :visual nil
@@ -514,7 +526,9 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil - same as frame-title-format)
    dotspacemacs-icon-title-format nil
 
-   ;; Show trailing whitespace (default t)
+   ;; Color highlight trailing whitespace in all prog-mode and text-mode derived
+   ;; modes such as c++-mode, python-mode, emacs-lisp, html-mode, rst-mode etc.
+   ;; (default t)
    dotspacemacs-show-trailing-whitespace t
 
    ;; Delete whitespace while saving buffer. Possible values are `all'
@@ -524,8 +538,8 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup 'trailing
 
-   ;; If non nil activate `clean-aindent-mode' which tries to correct
-   ;; virtual indentation of simple modes. This can interfer with mode specific
+   ;; If non-nil activate `clean-aindent-mode' which tries to correct
+   ;; virtual indentation of simple modes. This can interfere with mode specific
    ;; indent handling like has been reported for `go-mode'.
    ;; If it does deactivate it here.
    ;; (default t)
@@ -630,16 +644,15 @@ before packages are loaded."
   (global-set-key (kbd "C-SPC")  'hippie-expand)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
-  ; (global-set-key (kbd "M-[")  'paredit-wrap-square)
-  ; (global-set-key (kbd "M-d")  'paredit-kill)
-
+  ; Clojure related
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cljr-warn-on-eval nil)
   (setq lsp-ui-sideline-enable nil)
-
-  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
   (setq lsp-enable-indentation nil)
-  ; (setq lsp-semantic-tokens-enable t)
+  (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
+
+  (define-key smartparens-mode-map (kbd "U") 'sp-backward-up-sexp)
+  (lsp-treemacs-sync-mode 1)
 
   ;; Org roam variables
   (setq org-roam-capture-templates my-org-roam-templates)
@@ -660,6 +673,7 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "ml" 'manim-render-low)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "mm" 'manim-render-medium)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "mh" 'manim-render-high)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "GG" 'xref-find-definitions-other-window)
 
   (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "id" 'tide-jsdoc-template)
   (customize-set-variable 'helm-ff-lynx-style-map t)
@@ -719,7 +733,8 @@ This function is called at the very end of Spacemacs initialization."
  '(package-selected-packages
    '(vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags helm-tramp tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
  '(safe-local-variable-values
-   '((cider-shadow-default-options . "app")
+   '((TeX-encoding . UTF-8)
+     (cider-shadow-default-options . "app")
      (cider-default-cljs-repl . shadow)
      (cider-preferred-build-tool . "shadow-cljs")
      (cider-preferred-build-tool quote shadow-cljs)
@@ -736,5 +751,7 @@ This function is called at the very end of Spacemacs initialization."
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t)
  '(js2-object-property ((t (:foreground "#fe743f"))))
- '(org-block-begin-line ((t (:foreground "#827591" :background "#373040"))))))
+ '(org-block-begin-line ((t (:foreground "#827591" :background "#373040")))))
+)

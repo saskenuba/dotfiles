@@ -32,13 +32,14 @@
 (defconst martinmariano-packages
   '(
     demo-it
+    direnv
     eglot
     elisp-format
     gif-screencast
-    org-sidebar
-    org-roam-ui
     kibit-helper
     magit-lfs
+    org-roam-ui
+    org-sidebar
     traad
     tree-sitter
     tree-sitter-langs)
@@ -67,6 +68,10 @@
 #+ROAM_TAGS:
 #+CREATED: %u"
      :unnarrowed t)))
+
+(defun martinmariano/init-direnv()
+  (use-package direnv
+    :config (direnv-mode)))
 
 (defun martinmariano/init-org-sidebar()
   (use-package org-sidebar))
