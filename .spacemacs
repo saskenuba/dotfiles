@@ -647,6 +647,7 @@ before packages are loaded."
   ; Clojure related
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cljr-warn-on-eval nil)
+
   (setq lsp-ui-sideline-enable nil)
   (setq lsp-enable-indentation nil)
   (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
@@ -668,12 +669,16 @@ before packages are loaded."
               (local-set-key (kbd "<tab>") 'magit-section-toggle)))
 
 
-  ; Python manim
+  ; Python shortcuts
   (spacemacs/declare-prefix-for-mode 'python-mode "mm" "manim")
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "ml" 'manim-render-low)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "mm" 'manim-render-medium)
   (spacemacs/set-leader-keys-for-major-mode 'python-mode "mh" 'manim-render-high)
+
+  ; Clojure shortcuts
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "GG" 'xref-find-definitions-other-window)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mr" 'cider-send-restart)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mR" 'cider-send-reset)
 
   (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "id" 'tide-jsdoc-template)
   (customize-set-variable 'helm-ff-lynx-style-map t)
