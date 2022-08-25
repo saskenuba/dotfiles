@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: require flowstorm api
+# key: req-flow
+# --
+[flow-storm.api :as fs-api]

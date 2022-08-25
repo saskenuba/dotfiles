@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: require core.match
+# key: req-match
+# --
+
+[clojure.core.match :refer [match]]
