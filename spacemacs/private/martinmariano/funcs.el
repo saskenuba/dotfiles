@@ -166,3 +166,15 @@ current buffer's, reload dir-locals."
         (modus-vivendi-theme-load))
     (disable-theme 'modus-vivendi)
     (modus-operandi-theme-load)))
+
+(defun cider-send-reset ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (reset))"))
+
+(defun cider-send-restart ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (restart))"))
