@@ -83,7 +83,11 @@ This function should only modify configuration layer settings."
      colors
      emoji
      docker
-     git
+
+     ;; install `'delta`' from aur first!
+     (git :variables
+          git-enable-magit-delta-plugin t)
+
      json
      (org :variables
           org-enable-roam-support t
