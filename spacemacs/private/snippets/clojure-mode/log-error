@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: log-error
+# key: le
+# --
+(log/error "$1")
