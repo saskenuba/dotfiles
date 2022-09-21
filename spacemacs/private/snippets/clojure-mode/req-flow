@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: require flow
+# key: req-flow
+# --
+[fmnoise.flow :refer [?ok ?err call flet then else else-if then-call fail-with]]

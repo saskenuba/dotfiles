@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: datomic pull query
+# key: dpq
+# --
+
+(d/q '{:find  [(pull ${1:bind-variable} [${2:*}])]
+       :where [[$1 ${3::something} ${4:_}]]}
+       $5)

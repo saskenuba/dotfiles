@@ -143,6 +143,10 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil then enable support for the portable dumper. You'll need to
    ;; compile Emacs 27 from source following the instructions in file
    ;; EXPERIMENTAL.org at to root of the git repository.
+   ;;
+   ;; WARNING: pdumper does not work with Native Compilation, so it's disabled
+   ;; regardless of the following setting when native compilation is in effect.
+   ;;
    ;; (default nil)
    dotspacemacs-enable-emacs-pdumper nil
 
@@ -474,6 +478,10 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-smartparens-strict-mode t
 
+   ;; If non-nil smartparens-mode will be enabled in programming modes.
+   ;; (default t)
+   dotspacemacs-activate-smartparens-mode t
+
    ;; If non-nil pressing the closing parenthesis `)' key in insert mode passes
    ;; over any automatically added closing parenthesis, bracket, quote, etc...
    ;; This can be temporary disabled by pressing `C-q' before `)'. (default nil)
@@ -683,6 +691,18 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "GG" 'xref-find-definitions-other-window)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mr" 'cider-send-restart)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mR" 'cider-send-reset)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mG" 'cider-send-go)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mh" 'cider-send-halt)
+
+  ;; Difftastic shortcuts
+  (transient-define-prefix th/magit-aux-commands ()
+    "My personal auxiliary magit commands."
+    ["Auxiliary commands"
+     ("d" "Difftastic Diff (dwim)" th/magit-diff-with-difftastic)
+     ("s" "Difftastic Show" th/magit-show-with-difftastic)])
+
+  (transient-append-suffix 'magit-dispatch "!"
+    '("#" "My Magit Cmds" th/magit-aux-commands))
 
   (spacemacs/set-leader-keys-for-major-mode 'typescript-mode "id" 'tide-jsdoc-template)
   (customize-set-variable 'helm-ff-lynx-style-map t)

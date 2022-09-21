@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: datomic query
+# key: dq
+# --
+
+(d/q '{:find  [${1:variable-name}]
+       :where [[$1 ${2::something} _]]}
+       $3)
