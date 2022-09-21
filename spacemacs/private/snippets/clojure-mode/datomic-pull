@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: datomic pull
+# key: dp
+# --
+(d/pull ${1:(db/current-db)} '${2:[*]} ${3:eid})

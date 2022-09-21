@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: datomic transact
+# key: dt
+# --
+(d/transact ${1:(db/conn)} {:tx-data [$2]})
