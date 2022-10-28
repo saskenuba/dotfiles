@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: reframe cofx declaration
+# key: rcofx
+# --
+(rf/reg-cofx
+  ::${1:name}
+  (fn [cofx _]
+    (assoc cofx :$1 $2)))
