@@ -173,6 +173,12 @@ current buffer's, reload dir-locals."
    "(do (ns user)
         (reset))"))
 
+(defun cider-send-reset-tests ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (reset-tests))"))
+
 (defun cider-send-restart ()
   (interactive)
   (cider-interactive-eval
