@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: require tapestry
+# key: req-fiber
+# --
+[tapestry.core :refer [fiber fiber-loop parallelly asyncly pfor]]

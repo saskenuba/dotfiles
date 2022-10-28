@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: selmer expression
+# key: selexp
+# --
+{% $0 %}
