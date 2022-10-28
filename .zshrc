@@ -132,3 +132,10 @@ export PATH="$PATH:`yarn global bin`"
 path+=('/home/martin/.cargo/bin')
 path+=('/home/martin/.local/bin')
 fpath+=~/.zfunc ; compinit
+
+
+#THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!
+export SDKMAN_DIR="$HOME/.sdkman"
+[[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]] && source "$HOME/.sdkman/bin/sdkman-init.sh"
+
+source /home/martin/.config/broot/launcher/bash/br

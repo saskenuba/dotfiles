@@ -66,6 +66,8 @@ This function should only modify configuration layer settings."
                  javascript-backend 'lsp)
      (clojure :variables
               clojure-enable-clj-refactor t
+              clojure-enable-linters 'joker
+              clojure-enable-kaocha-runner t
               clojure-enable-sayid t
               clojure-enable-fancify-symbols t)
      (c-c++ :variables c-c++-backend 'lsp-ccls)
@@ -658,8 +660,14 @@ before packages are loaded."
 
   ; Clojure related
   (setq cider-font-lock-dynamically '(macro core function var))
+  (setq cider-redirect-server-output-to-repl nil)
   (setq cljr-warn-on-eval nil)
 
+  (setq cider-eldoc-display-for-symbol-at-point nil)
+  (setq cider-eldoc-display-context-dependent-info nil)
+  (setq lsp-eldoc-enable-hover t)
+
+  (setq lsp-ui-doc-include-signature t)
   (setq lsp-ui-sideline-enable nil)
   (setq lsp-enable-indentation nil)
   (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
@@ -689,8 +697,10 @@ before packages are loaded."
 
   ; Clojure shortcuts
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "GG" 'xref-find-definitions-other-window)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "GG" 'xref-find-definitions-other-window)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mr" 'cider-send-restart)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mR" 'cider-send-reset)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mt" 'cider-send-reset-tests)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mG" 'cider-send-go)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mh" 'cider-send-halt)
 
@@ -762,7 +772,13 @@ This function is called at the very end of Spacemacs initialization."
  '(package-selected-packages
    '(vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags helm-tramp tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
  '(safe-local-variable-values
-   '((TeX-encoding . UTF-8)
+   '((cider-lein-parameters . "with-profile -user,+pretty,+dev-local,+dev,+test repl :headless :host localhost")
+     (cider-ns-refresh-after-fn . "user/reset")
+     (cider-ns-reload-after-fn . "user/restart")
+     (cider-ns-reload-after-fn . "integrant.repl/start")
+     (cider-ns-reload-before-fn . "integrant.repl/halt")
+     (cider-lein-parameters . "with-profile +dev-local repl")
+     (TeX-encoding . UTF-8)
      (cider-shadow-default-options . "app")
      (cider-default-cljs-repl . shadow)
      (cider-preferred-build-tool . "shadow-cljs")
