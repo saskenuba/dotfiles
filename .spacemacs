@@ -71,7 +71,7 @@ This function should only modify configuration layer settings."
               clojure-enable-sayid t
               clojure-enable-fancify-symbols t)
      (c-c++ :variables c-c++-backend 'lsp-ccls)
-     (typescript :variables tide-tsserver-executable "/usr/lib/node_modules/typescript/bin/tsserver")
+     typescript
      sql
 
 
@@ -114,10 +114,7 @@ This function should only modify configuration layer settings."
    ;; To use a local version of a package, use the `:location' property:
    ;; '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(
-                                      (dbml-mode :location local)
-                                      modus-operandi-theme
-                                      modus-vivendi-theme)
+   dotspacemacs-additional-packages '((dbml-mode :location local))
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -630,7 +627,8 @@ before packages are loaded."
   (setq history-delete-duplicates t)
 
   ; Clojure-lsp is installed through the clojure-lsp package on AUR
-  (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
+  (setq lsp-log-io t)
+  ; (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
 
   (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
   (setq org-roam-v2-ack t)
@@ -662,6 +660,7 @@ before packages are loaded."
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cider-redirect-server-output-to-repl nil)
   (setq cljr-warn-on-eval nil)
+  (setq cider-merge-sessions 'host)
 
   (setq cider-eldoc-display-for-symbol-at-point nil)
   (setq cider-eldoc-display-context-dependent-info nil)
@@ -720,9 +719,16 @@ before packages are loaded."
   (setq org-src-fontify-natively t
         org-src-preserve-indentation t)
 
-  ; Load my custom theme, check martinmariano.funcs
-  (modus-vivendi-theme-load)
-  (disable-theme 'spacemacs-dark)
+  ;; If you like two specific themes and want to switch between them, you
+  ;; can specify them in `ef-themes-to-toggle' and then invoke the command
+  ;; `ef-themes-toggle'.  All the themes are included in the variable
+  ;; `ef-themes-collection'.
+  (setq ef-themes-to-toggle '(ef-light ef-bio))
+  (disable-theme (car custom-enabled-themes))
+  (ef-themes-toggle)
+  ; (modus-vivendi-theme-load)
+  ; (disable-theme 'spacemacs-dark)
+
 )
 
 ;; Do not write anything past this comment. This is where Emacs will

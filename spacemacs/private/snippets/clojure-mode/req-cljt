@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: require clojure test
+# key: req-cljt
+# --
+[clojure.test :refer [are deftest is testing use-fixtures]]

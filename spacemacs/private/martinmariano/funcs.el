@@ -156,7 +156,6 @@ current buffer's, reload dir-locals."
         :buffer display-buffer
         :title title)) display-buffer))
 
-
 (defun modus-themes-toggle ()
   "Toggle between `modus-operandi' and `modus-vivendi' themes."
   (interactive)
