@@ -111,7 +111,8 @@ export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 
 # Set workon for zsh
 export WORKON_HOME=$HOME/Documentos/PythonEnvironments/
-# export PIPENV_VENV_IN_PROJECT=true
+# export XDG_CONFIG_HOME=$HOME/.config
+
 
 # Get ssh-agent to work with gpg-agent
 export SSH_AUTH_SOCK=$(gpgconf --list-dirs agent-ssh-socket)
@@ -132,6 +133,21 @@ export PATH="$PATH:`yarn global bin`"
 path+=('/home/martin/.cargo/bin')
 path+=('/home/martin/.local/bin')
 fpath+=~/.zfunc ; compinit
+
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+#__conda_setup="$('/home/martin/anaconda3/bin/conda' 'shell.zsh' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+#    eval "$__conda_setup"
+#else
+#    if [ -f "/home/martin/anaconda3/etc/profile.d/conda.sh" ]; then
+#        . "/home/martin/anaconda3/etc/profile.d/conda.sh"
+#    else
+#        export PATH="/home/martin/anaconda3/bin:$PATH"
+#    fi
+#fi
+#unset __conda_setup
+# <<< conda initialize <<<
 
 
 #THIS MUST BE AT THE END OF THE FILE FOR SDKMAN TO WORK!!!

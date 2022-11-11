@@ -34,6 +34,7 @@
     demo-it
     direnv
     eglot
+    ef-themes
     elisp-format
     gif-screencast
     kibit-helper
@@ -75,6 +76,9 @@
 
 (defun martinmariano/init-org-sidebar()
   (use-package org-sidebar))
+
+(defun martinmariano/init-ef-themes()
+  (use-package ef-themes))
 
 (defun martinmariano/post-init-org-roam()
   (setq org-roam-capture-templates my-org-roam-templates)
@@ -159,7 +163,6 @@
 (defun martinmariano/init-gif-screencast ()
   "docstring"
   (use-package gif-screencast))
-
 
 (defun martinmariano/init-elisp-format ())
 
