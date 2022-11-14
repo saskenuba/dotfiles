@@ -94,7 +94,8 @@ This function should only modify configuration layer settings."
      (org :variables
           org-enable-roam-support t
           org-enable-roam-server t
-          org-enable-roam-protocol t)
+          org-enable-roam-protocol t
+          org-enable-hugo-support t)
      syntax-checking
      version-control
      yaml
@@ -632,6 +633,13 @@ before packages are loaded."
 
   (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
   (setq org-roam-v2-ack t)
+  (setq org-hugo-base-dir "/~/Documentos/Programming/Hugo/martin-blog")
+  (with-eval-after-load 'org
+    (org-babel-do-load-languages
+     'org-babel-load-languages
+     '((clojure . t)
+       (python . t)
+       (shell . t))))
 
   ; Clojure hooks
   (add-hook 'clojure-mode-hook 'lsp)

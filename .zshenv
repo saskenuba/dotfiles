@@ -4,6 +4,9 @@ VISUAL=emacs
 EDITOR=emacs
 RANGER_LOAD_DEFAULT_RC=false
 
+XDG_CONFIG_HOME=$HOME/.config
+XDG_CACHE_HOME=$HOME/.cache
+
 transliterate () {
 
 	filename=$1
