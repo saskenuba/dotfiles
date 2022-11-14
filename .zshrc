@@ -5,13 +5,14 @@ export TERM="xterm-256color"
 export LANG="en_US.UTF-8"
 
 # Path to your oh-my-zsh installation.
-export ZSH=/home/martin/.oh-my-zsh
+export ZSH=~/.oh-my-zsh
 
 # Set name of the theme to load. Optionally, if you set this to "random"
 # it'll load a random theme each time that oh-my-zsh is loaded.
 # See https://github.com/robbyrussell/oh-my-zsh/wiki/Themes
-POWERLEVEL9K_MODE='awesome-fontconfig'
-ZSH_THEME="powerlevel9k/powerlevel9k"
+
+# POWERLEVEL9K_MODE='awesome-fontconfig'
+ZSH_THEME="random"
 
 # Uncomment the following line to use case-sensitive completion.
 # CASE_SENSITIVE="true"

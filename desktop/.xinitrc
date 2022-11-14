@@ -51,7 +51,7 @@ fi
 
 setxkbmap -layout us -variant intl
 echo UPDATESTARTUPTTY | gpg-connect-agent
-feh --bg-scale ~/Documentos/Images/Wallpaper/restaurant_street_by_arsenixc-dc8by2t.jpg ~/Documentos/Images/Wallpaper/watchmaker_house_by_arsenixc-d9dv2ge.jpg
+feh --bg-scale ~/Documentos/Images/Wallpaper/wallpaper8.jpg ~/Documentos/Images/Wallpaper/wallpaper6.jpg
 wmname LG3D &
 xsettingsd &
 /home/martin/.start.sh &
