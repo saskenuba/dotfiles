@@ -31,6 +31,7 @@ vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action H
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
 
 
+
 " ============================================================================
 " IDE actions
 " ============================================================================
@@ -46,6 +47,8 @@ nmap <leader>fs      :action SaveAll<CR>
 " Reload .ideavimrc
 nmap <leader>R :source ~/.ideavimrc<CR>
 vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/.ideavimrc<CR>
+
+" vmap ctrlR :action EditorScrollToCenter
 
 " Cursive Related =================
 

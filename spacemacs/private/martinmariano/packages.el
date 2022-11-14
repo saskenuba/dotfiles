@@ -39,7 +39,6 @@
     gif-screencast
     kibit-helper
     magit-lfs
-    org-roam-ui
     org-sidebar
     traad
     tree-sitter
@@ -103,10 +102,6 @@
 (defun martinmariano/init-company-org-roam()
   :ensure t
   :init (spacemacs|add-company-backends :backends company-org-roam :modes org-mode))
-
-(defun martinmariano/init-org-roam-ui()
-  :ensure t
-  :after  'org-roam)
 
 (defun martinmariano/init-magit-lfs()
   (use-package magit-lfs
