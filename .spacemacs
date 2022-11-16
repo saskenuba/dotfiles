@@ -51,34 +51,27 @@ This function should only modify configuration layer settings."
           lsp-rust-server 'rust-analyzer)
      shell
      shell-scripts
-     treemacs
      spacemacs-project
+     treemacs
 
      ;; programming
-     (python :variables
-             python-backend 'lsp
-             python-fill-column 99
-             lsp-pyls-configuration-sources ["flake8"])
-     typescript
-     rust
-     (javascript :variables
-                 javascript-repl `skewer
-                 javascript-backend 'lsp)
      (clojure :variables
               clojure-enable-clj-refactor t
               clojure-enable-linters 'joker
               clojure-enable-kaocha-runner t
               clojure-enable-sayid t
               clojure-enable-fancify-symbols t)
-     (c-c++ :variables c-c++-backend 'lsp-ccls)
+     (javascript :variables
+                 javascript-repl `skewer
+                 javascript-backend 'lsp)
+     rust
      typescript
-     sql
-
 
      ;; web
      html
      csv
-     (markdown :variables markdown-live-preview-engine 'vmd)
+     (markdown :variables
+               markdown-live-preview-engine 'vmd)
 
      ;; utilities
      asciidoc
@@ -306,13 +299,14 @@ It should only modify the values of Spacemacs settings."
    ;; (default t)
    dotspacemacs-colorize-cursor-according-to-state t
 
-   ;; Default font, or prioritized list of fonts. `powerline-scale' allows to
-   ;; quickly tweak the mode-line size to make separators look not too crappy.
-   dotspacemacs-default-font '("Iosevka SS04"
-                               :size 13
+   ;; Default font or prioritized list of fonts. The `:size' can be specified as
+   ;; a non-negative integer (pixel size), or a floating-point (point size).
+   ;; Point size is recommended, because it's device independent. (default 10.0)
+   dotspacemacs-default-font '("Cousine Nerd Font Mono"
+                               :size 9.0
                                :weight light
-                               :width normal
-                               :powerline-scale 1.1)
+                               :width normal)
+
    ;; The leader key
    dotspacemacs-leader-key "SPC"
 
@@ -428,6 +422,11 @@ It should only modify the values of Spacemacs settings."
    ;; the transparency level of a frame when it's inactive or deselected.
    ;; Transparency can be toggled through `toggle-transparency'. (default 90)
    dotspacemacs-inactive-transparency 90
+
+   ;; A value from the range (0..100), in increasing opacity, which describes the
+   ;; transparency level of a frame background when it's active or selected. Transparency
+   ;; can be toggled through `toggle-background-transparency'. (default 90)
+   dotspacemacs-background-transparency 90
 
    ;; If non-nil show the titles of transient states. (default t)
    dotspacemacs-show-transient-state-title t
