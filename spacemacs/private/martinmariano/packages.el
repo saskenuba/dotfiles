@@ -31,10 +31,14 @@
 
 (defconst martinmariano-packages
   '(
+    ;; auto complete
+    corfu
+    cape
+
     demo-it
     direnv
-    eglot
     ef-themes
+    eglot
     elisp-format
     gif-screencast
     kibit-helper
@@ -46,28 +50,37 @@
   "Org Roam needs the graphviz package, along with the protocol
    .desktop handler to allow linking from the browser.")
 
+(defun martinmariano/init-corfu()
+  (use-package corfu
+    :ensure t
 
-(defconst my-org-roam-templates
-  '(("d" "default" plain (function org-roam--capture-get-point) "%?"
-     :file-name "%<%d-%m-%Y>-${slug}"
-     :target (file+head "#+TITLE: ${title}
-#+ROAM_ALIAS:
-#+ROAM_TAGS:
-#+CREATED: %u")
-     :unnarrowed t))
+    :custom
+    (corfu-auto t)
+    (corfu-auto-delay 0)
+    (corfu-cycle t)
+    (corfu-preselect-first t)
+    (corfu-quit-no-match t)
+    (corfu-separator ?\s)
+
+    :bind
+    (:map corfu-map
+          ("TAB" . corfu-next)
+          ([tab] . corfu-next)
+          ("S-TAB" . corfu-previous)
+          ("SPC" . corfu-insert-separator))
+
+    :init
+    (setq completion-styles '(orderless basic))
+    (global-corfu-mode))
   )
 
-(defconst my-org-roam-ref-templates
-  '(("r" "ref" plain (function org-roam--capture-get-point)
-     "%?"
-     :file-name "web/${slug}"
-     :head
-     "#+TITLE: ${title}
-#+ROAM_KEY: ${ref}
-#+ROAM_ALIAS:
-#+ROAM_TAGS:
-#+CREATED: %u"
-     :unnarrowed t)))
+(defun martinmariano/init-cape()
+  (use-package
+    cape
+    :ensure t
+    :init
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+    (add-to-list 'completion-at-point-functions #'cape-file)))
 
 (defun martinmariano/init-direnv()
   (use-package direnv
@@ -128,38 +141,16 @@
     :init (spacemacs/set-leader-keys-for-major-mode 'python-mode "rr" 'traad-rename)
     :defer t))
 
-;; (defun martinmariano/init-sphinx-doc ()
-;;   "docstring"
-;;   (use-package sphinx-doc
-;;     :defer t
-;;     :init
-;;     (add-hook 'python-mode-hook 'sphinx-doc-mode)
-;;     (spacemacs/set-leader-keys-for-major-mode 'python-mode "id" 'sphinx-doc)))
-
 (defun martinmariano/init-demo-it ()
   "docstring"
   (use-package demo-it))
-
-; (defun martinmariano/init-poet-theme ())
-
-;; Theme
-(defun martinmariano/init-doom-themes ()
-  :init
-  (load-theme 'doom-one t)
-  :config
-  (custom-set-faces
-
- ; js2-mode
- '(js2-object-property ((t (:foreground "#fe743f"))))
-
-; org-mode
- '(org-block-begin-line ((t (:foreground "#827591" :background "#373040"))))))
 
 (defun martinmariano/init-gif-screencast ()
   "docstring"
   (use-package gif-screencast))
 
-(defun martinmariano/init-elisp-format ())
+(defun martinmariano/init-elisp-format ()
+  (use-package elisp-format))
 
 (defmacro modus-themes-format-sexp (sexp &rest objects)
   `(eval (read (format ,(format "%S" sexp) ,@objects))))
@@ -196,3 +187,24 @@
            modus-%1$s-theme-scale-5 1.33)
      (load-theme 'modus-%1$s t))
    theme))
+
+(defconst my-org-roam-templates
+  '(("d" "default" plain (function org-roam--capture-get-point) "%?"
+     :file-name "%<%d-%m-%Y>-${slug}"
+     :target (file+head "#+TITLE: ${title}
+#+ROAM_ALIAS:
+#+ROAM_TAGS:
+#+CREATED: %u")
+     :unnarrowed t)))
+
+(defconst my-org-roam-ref-templates
+  '(("r" "ref" plain (function org-roam--capture-get-point)
+     "%?"
+     :file-name "web/${slug}"
+     :head
+     "#+TITLE: ${title}
+#+ROAM_KEY: ${ref}
+#+ROAM_ALIAS:
+#+ROAM_TAGS:
+#+CREATED: %u"
+     :unnarrowed t)))
