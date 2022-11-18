@@ -645,21 +645,6 @@ before packages are loaded."
   (add-hook 'clojurescript-mode-hook 'lsp)
   (add-hook 'clojurec-mode-hook 'lsp)
 
-  ; (require 'dbml-mode)
-
-  ;; (defun check-expansion ()
-  ;;   (save-excursion (if (looking-at "\\_>") t (backward-char 1)
-  ;;                       (if (looking-at "\\.") t (backward-char 1)
-  ;;                           (if (looking-at "->") t nil)))))
-
-  ;; (setq hippie-expand-try-functions-list '(yas-hippie-try-expand (lambda (arg)
-  ;;                                                                  (call-interactively
-  ;;                                                                   'company-complete))
-  ;;                                                                try-expand-dabbrev-visible
-  ;;                                                                try-expand-dabbrev-all-buffers))
-
-
-  ;; (global-set-key (kbd "C-SPC")  'hippie-expand)
   (global-set-key (kbd "C-SPC")  'completion-at-point)
   (global-set-key (kbd "M-;")  'evilnc-comment-or-uncomment-lines)
 
@@ -667,18 +652,23 @@ before packages are loaded."
   (setq cider-font-lock-dynamically '(macro core function var))
   (setq cider-redirect-server-output-to-repl nil)
   (setq cljr-warn-on-eval nil)
-  (setq cider-merge-sessions 'host)
+  (setq cider-merge-sessions 'host) ;; needed to host a session of clj and another of cljs
 
   ;; check https://github.com/minad/corfu/issues/41#issuecomment-974724805
   ;; lsp-mode seems to be bugged and can't filter suggestions correctly
   ;; this solves it by disabling
   (add-hook 'lsp-mode-hook (lambda ()
-                             (setq lsp-completion-provider :none)))
+                             (setq lsp-completion-provider :none)
+                             (mm/consult-configure)))
   (add-hook 'lsp-completion-mode-hook
-            (lambda ()
-              (setf (alist-get 'styles
-		                           (alist-get 'lsp-capf completion-category-defaults))
-	                  '(orderless basic))))
+             (lambda ()
+               (setf (alist-get 'styles
+	 	                            (alist-get 'cider completion-category-defaults nil))
+	                   '(basic))
+
+               (setf (alist-get 'styles
+	 	                           (alist-get 'lsp-capf completion-category-defaults))
+	                   '(orderless basic))))
 
   (setq cider-eldoc-display-for-symbol-at-point nil)
   (setq cider-eldoc-display-context-dependent-info nil)
@@ -720,6 +710,9 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mt" 'cider-send-reset-tests)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mG" 'cider-send-go)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mh" 'cider-send-halt)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "is" 'consult-yasnippet)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "//" 'consult-ripgrep)
+  (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "/s" 'consult-lsp-symbols)
 
   ;; Difftastic shortcuts
   (transient-define-prefix th/magit-aux-commands ()

@@ -288,3 +288,78 @@ current buffer's, reload dir-locals."
     (th/magit--with-difftastic
      (get-buffer-create name)
      `("git" "--no-pager" "diff" "--ext-diff" ,@(when arg (list arg))))))
+
+(defun mm/cape-capf-setup-lsp ()
+  "Replace the default `lsp-completion-at-point' with its
+`cape-capf-buster' version. Also add `cape-file' and
+`company-yasnippet' backends."
+
+  ;; (setf (elt (cl-member 'lsp-completion-at-point completion-at-point-functions) 0)
+  ;;       (cape-super-capf (cape-capf-buster #'lsp-completion-at-point)
+  ;;                        #'cape-dabbrev))
+
+  ;; TODO 2022-02-28: Maybe use `cape-wrap-predicate' to have candidates
+  ;; listed when I want?
+  ;; (add-to-list 'completion-at-point-functions #'cape-file)
+  )
+
+(defun mm/cape-capf-setup-clojure ()
+
+
+  ;; we replace our completions after cider hooks up
+  (add-hook 'cider-mode-hook
+            (lambda ()
+              (setq completion-at-point-functions
+                    (list (cape-super-capf (cape-capf-buster #'lsp-completion-at-point)
+                                           #'cider-complete-at-point
+                                           #'cape-dabbrev)
+                          #'cape-file)
+                    )))
+  )
+
+(defun mm/cape-capf-ignore-keywords-elisp (cand)
+  "Ignore keywords with forms that begin with \":\" (e.g. :history)."
+  (or (not (keywordp cand))
+      (eq (char-after (car completion-in-region--data)) ?:)))
+
+(defun mm/cape-capf-setup-elisp ()
+  "Replace the default `elisp-completion-at-point'
+completion-at-point-function. Doing it this way will prevent
+disrupting the addition of other capfs (e.g. merely setting the
+variable entirely, or adding to list).
+
+Additionally, add `cape-file' as early as possible to the list."
+  (setf (elt (cl-member 'elisp-completion-at-point completion-at-point-functions) 0)
+        #'elisp-completion-at-point)
+
+  ;; I prefer this being early/first in the list
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-symbol t)
+  )
+
+(defun mm/cape-capf-setup-org ()
+  (if (org-roam-file-p)
+      (org-roam--register-completion-functions-h)
+    (let (result)
+      (dolist (element (list
+                        (cape-super-capf #'cape-ispell #'cape-dabbrev)
+                        (cape-company-to-capf #'company-yasnippet))
+                       result)
+        (add-to-list 'completion-at-point-functions element)))
+    ))
+
+(defun mm/consult-configure()
+
+  ;; TODO this should be generic over any lsp-mode
+  (add-hook 'clojure-mode-hook
+            (lambda ()
+              (consult-customize
+               consult-ripgrep
+               consult-git-grep
+               consult-grep
+               consult-lsp-symbols
+               :preview-key '(:debounce 0.1 any))
+              )
+            )
+
+  )

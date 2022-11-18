@@ -54,9 +54,17 @@
   (use-package corfu
     :ensure t
 
+
+    :hook
+    ((lsp-completion-mode . mm/cape-capf-setup-lsp))
+    ((emacs-lisp-mode . mm/cape-capf-setup-elisp))
+    ((clojure-mode . mm/cape-capf-setup-clojure))
+    ((org-mode . mm/cape-capf-setup-org))
+
     :custom
     (corfu-auto t)
-    (corfu-auto-delay 0)
+    (corfu-auto-delay 0.25)
+    (corfu-auto-prefix 2)
     (corfu-cycle t)
     (corfu-preselect-first t)
     (corfu-quit-no-match t)
@@ -71,16 +79,23 @@
 
     :init
     (setq completion-styles '(orderless basic))
-    (global-corfu-mode))
-  )
+    (global-corfu-mode)
+
+    ))
 
 (defun martinmariano/init-cape()
-  (use-package
-    cape
+  (use-package cape
+
     :ensure t
+
+    :custom (cape-dabbrev-min-length 3)
+
     :init
-    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-    (add-to-list 'completion-at-point-functions #'cape-file)))
+
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev t)
+    (add-to-list 'completion-at-point-functions #'cape-file t)
+    ;; (add-to-list 'completion-at-point-functions #'cape-abbrev t)
+    ))
 
 (defun martinmariano/init-direnv()
   (use-package direnv
