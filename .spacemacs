@@ -713,8 +713,11 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "is" 'consult-yasnippet)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "//" 'consult-ripgrep)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "/s" 'consult-lsp-symbols)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "is" 'consult-yasnippet)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "//" 'consult-ripgrep)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "/s" 'consult-lsp-symbols)
 
-  ;; Difftastic shortcuts
+    ;; Difftastic shortcuts
   (transient-define-prefix th/magit-aux-commands ()
     "My personal auxiliary magit commands."
     ["Auxiliary commands"

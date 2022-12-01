@@ -310,12 +310,14 @@ current buffer's, reload dir-locals."
   (add-hook 'cider-mode-hook
             (lambda ()
               (setq completion-at-point-functions
-                    (list (cape-super-capf (cape-capf-buster #'lsp-completion-at-point)
+                    (list (cape-super-capf ; #_(cape-capf-buster #'lsp-completion-at-point)
+                                           #'lsp-completion-at-point
                                            #'cider-complete-at-point
                                            #'cape-dabbrev)
                           #'cape-file)
                     )))
   )
+
 
 (defun mm/cape-capf-ignore-keywords-elisp (cand)
   "Ignore keywords with forms that begin with \":\" (e.g. :history)."

@@ -44,6 +44,7 @@
     kibit-helper
     magit-lfs
     org-sidebar
+    symex
     traad
     tree-sitter
     tree-sitter-langs)
@@ -166,6 +167,33 @@
 
 (defun martinmariano/init-elisp-format ()
   (use-package elisp-format))
+
+
+(defun martinmariano/init-symex ()
+  (use-package
+    symex
+
+    :init
+    (setq symex--user-evil-keyspec
+          '(("j" . symex-go-up)
+            ("k" . symex-go-down)
+            ("C-j" . symex-climb-branch)
+            ("C-k" . symex-descend-branch)
+            ("M-j" . symex-goto-highest)
+            ("M-k" . symex-goto-lowest)
+            ("M-1" . symex-cycle-quote)
+
+            ("M-[" . symex-create-curly)
+            ("M-]" . symex-wrap-curly)))
+
+    :config
+    (symex-initialize)
+
+    :hook
+    ((clojure-mode . (lambda () (setq symex-quote-prefix-list (list "#" "'"))))
+     (clojurescript-mode . (lambda () (setq symex-quote-prefix-list (list "#" "'"))))
+
+     )))
 
 (defmacro modus-themes-format-sexp (sexp &rest objects)
   `(eval (read (format ,(format "%S" sexp) ,@objects))))

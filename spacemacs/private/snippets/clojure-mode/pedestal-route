@@ -1,0 +1,11 @@
+# -*- mode: snippet -*-
+# name: pedestal route
+# key: pedroute
+# --
+(def ${1:route-name}
+  {:name                   ::$1
+   :zougue-required-scopes []
+   :enter
+   (fn [ctx]
+     $2
+     )})

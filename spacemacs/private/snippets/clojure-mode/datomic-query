@@ -4,5 +4,6 @@
 # --
 
 (d/q '{:find  [${1:variable-name}]
+       :in    [$]
        :where [[$1 ${2::something} _]]}
        $3)
