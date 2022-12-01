@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# name: goog.DEBUG
+# key: gd
+# --
+(when ^boolean goog.DEBUG
+  $1)
