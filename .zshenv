@@ -7,6 +7,9 @@ RANGER_LOAD_DEFAULT_RC=false
 XDG_CONFIG_HOME=$HOME/.config
 XDG_CACHE_HOME=$HOME/.cache
 
+# Better performance for emacs LSP-mode https://emacs-lsp.github.io/lsp-mode/page/performance/#use-plists-for-deserialization
+LSP_USE_PLISTS=true
+
 transliterate () {
 
 	filename=$1
