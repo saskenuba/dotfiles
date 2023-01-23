@@ -46,8 +46,7 @@
     org-sidebar
     symex
     traad
-    tree-sitter
-    tree-sitter-langs)
+    )
   "Org Roam needs the graphviz package, along with the protocol
    .desktop handler to allow linking from the browser.")
 
@@ -140,14 +139,6 @@
 (defun martinmariano/init-kibit-helper()
   (use-package kibit-helper))
 
-(defun martinmariano/init-tree-sitter-langs ()
-  (use-package tree-sitter-langs))
-
-(defun martinmariano/init-tree-sitter ()
-  (use-package tree-sitter :init
-    (require 'tree-sitter-langs)
-    (add-hook 'python-mode-hook #'tree-sitter-mode)))
-
 (defun martinmariano/init-eglot ()
   (use-package eglot))
 
@@ -182,6 +173,7 @@
             ("M-j" . symex-goto-highest)
             ("M-k" . symex-goto-lowest)
             ("M-1" . symex-cycle-quote)
+            ("C-M-l"  . clojure-align)
 
             ("M-[" . symex-create-curly)
             ("M-]" . symex-wrap-curly)))
@@ -190,10 +182,22 @@
     (symex-initialize)
 
     :hook
-    ((clojure-mode . (lambda () (setq symex-quote-prefix-list (list "#" "'"))))
-     (clojurescript-mode . (lambda () (setq symex-quote-prefix-list (list "#" "'"))))
+    ((clojure-mode . (lambda ()
+                       (setq symex-quote-prefix-list (list "#" "'" "#_"))
 
-     )))
+                       (evil-define-key 'normal symex-mode-map
+                         (kbd "<escape>") 'symex-mode-interface)
+
+                       (evil-define-key 'insert symex-mode-map
+                         (kbd "<escape>") 'symex-mode-interface)))
+
+     (clojurescript-mode . (lambda ()
+                             (setq symex-quote-prefix-list (list "#" "'" "#_") )
+                             (evil-define-key 'normal symex-mode-map
+                               (kbd "<escape>") 'symex-mode-interface)
+
+                             (evil-define-key 'insert symex-mode-map
+                               (kbd "<escape>") 'symex-mode-interface))))))
 
 (defmacro modus-themes-format-sexp (sexp &rest objects)
   `(eval (read (format ,(format "%S" sexp) ,@objects))))
