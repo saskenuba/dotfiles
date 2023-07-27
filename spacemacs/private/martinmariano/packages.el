@@ -34,7 +34,7 @@
     ;; auto complete
     corfu
     cape
-
+    cljstyle-format
     demo-it
     direnv
     ef-themes
@@ -43,7 +43,6 @@
     gif-screencast
     kibit-helper
     magit-lfs
-    org-sidebar
     symex
     traad
     )
@@ -158,6 +157,17 @@
 
 (defun martinmariano/init-elisp-format ()
   (use-package elisp-format))
+
+(defun martinmariano/init-cljstyle-format ()
+  (use-package cljstyle-format
+
+    :config
+    (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "=c" 'cljstyle-format-buffer)
+    (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "=c" 'cljstyle-format-buffer)
+    (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "=c" 'cljstyle-format-buffer)
+
+    (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "=r" 'cljstyle-format-region)
+    (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "=r" 'cljstyle-format-region)))
 
 
 (defun martinmariano/init-symex ()
