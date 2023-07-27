@@ -84,11 +84,11 @@ This function should only modify configuration layer settings."
           git-enable-magit-delta-plugin t)
 
      json
-     (org :variables
-          org-enable-roam-support t
-          org-enable-roam-server t
-          org-enable-roam-protocol t
-          org-enable-hugo-support t)
+     ;; (org :variables
+     ;;      org-enable-roam-support t
+     ;;      org-enable-roam-server t
+     ;;      org-enable-roam-protocol t
+     ;;      org-enable-hugo-support t)
      syntax-checking
      version-control
      yaml
@@ -627,7 +627,7 @@ before packages are loaded."
   (setq history-delete-duplicates t)
 
   ; Clojure-lsp is installed through the clojure-lsp package on AUR
-  (setq lsp-log-io t)
+  ; (setq lsp-log-io t)
   ; (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
 
   (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
@@ -679,6 +679,7 @@ before packages are loaded."
   (setq lsp-enable-indentation nil)
   (spacemacs/toggle-evil-safe-lisp-structural-editing-on-register-hook-clojure-mode)
 
+  (setq lsp-clojure-server-command '("/usr/bin/clojure-lsp"))
   (define-key smartparens-mode-map (kbd "U") 'sp-backward-up-sexp)
   (lsp-treemacs-sync-mode 1)
 
@@ -705,6 +706,7 @@ before packages are loaded."
   ; Clojure shortcuts
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "GG" 'xref-find-definitions-other-window)
   (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "GG" 'xref-find-definitions-other-window)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "GG" 'xref-find-definitions-other-window)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mr" 'cider-send-restart)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mR" 'cider-send-reset)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "mt" 'cider-send-reset-tests)
@@ -713,6 +715,14 @@ before packages are loaded."
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "is" 'consult-yasnippet)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "//" 'consult-ripgrep)
   (spacemacs/set-leader-keys-for-major-mode 'clojure-mode "/s" 'consult-lsp-symbols)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "mr" 'cider-send-restart)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "mR" 'cider-send-reset)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "mt" 'cider-send-reset-tests)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "mG" 'cider-send-go)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "mh" 'cider-send-halt)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "is" 'consult-yasnippet)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "//" 'consult-ripgrep)
+  (spacemacs/set-leader-keys-for-major-mode 'clojurec-mode "/s" 'consult-lsp-symbols)
   (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "is" 'consult-yasnippet)
   (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "//" 'consult-ripgrep)
   (spacemacs/set-leader-keys-for-major-mode 'clojurescript-mode "/s" 'consult-lsp-symbols)
@@ -737,7 +747,7 @@ before packages are loaded."
   ;; can specify them in `ef-themes-to-toggle' and then invoke the command
   ;; `ef-themes-toggle'.  All the themes are included in the variable
   ;; `ef-themes-collection'.
-  (setq ef-themes-to-toggle '(ef-light ef-bio))
+  (setq ef-themes-to-toggle '(ef-day ef-cyprus ef-bio))
   (disable-theme (car custom-enabled-themes))
   (ef-themes-toggle)
   ; (modus-vivendi-theme-load)
@@ -790,7 +800,7 @@ This function is called at the very end of Spacemacs initialization."
      ("sqlite" . sql)
      ("javascript" . js2)))
  '(package-selected-packages
-   '(cape marginalia corfu vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags helm-tramp tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide orgit magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
+   '(cljstyle-format cape marginalia corfu vimrc-mode helm-gtags ggtags dactyl-mode counsel-gtags helm-tramp tree-sitter-langs tree-sitter eglot lsp-python-ms python indium gif-screencast demo-it writeroom-mode web-mode tide magit-svn helm-xref evil-nerd-commenter evil-magit dumb-jump doom-modeline docker diff-hl browse-at-remote aggressive-indent ace-window ace-link counsel swiper ivy flycheck company helm magit-popup magit transient lv pythonic haml-mode cider clojure-mode js2-mode all-the-icons virtualenvwrapper dash evil org-plus-contrib hydra yasnippet-snippets yapfify yaml-mode ws-butler winum which-key web-beautify volatile-highlights visual-fill-column vi-tilde-fringe uuidgen use-package typescript-mode traad toml-mode toc-org tagedit tablist symon string-inflection sphinx-doc spaceline-all-the-icons smeargle slim-mode shrink-path sesman scss-mode sayid sass-mode restart-emacs rainbow-delimiters racer queue pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pippel pipenv pip-requirements persp-mode pcre2el password-generator paradox overseer org-projectile org-present org-pomodoro org-mime org-download org-bullets org-brain open-junk-file neotree nameless move-text mmm-mode markdown-toc magit-gitflow macrostep lorem-ipsum livid-mode live-py-mode link-hint json-navigator json-mode js2-refactor js-doc indent-guide importmagic impatient-mode hungry-delete hlint-refactor hl-todo hindent highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-purpose helm-projectile helm-org-rifle helm-mode-manager helm-make helm-hoogle helm-gitignore helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag haskell-snippets goto-chg google-translate golden-ratio gnuplot gitignore-templates gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gh-md fuzzy font-lock+ flycheck-rust flycheck-pos-tip flycheck-haskell flx-ido fill-column-indicator fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-org evil-numbers evil-multiedit evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-cleverparens evil-args evil-anzu emmet-mode elisp-slime-nav eldoc-eval editorconfig dotenv-mode dockerfile-mode docker-tramp diminish define-word cython-mode csv-mode counsel-projectile company-web company-tern company-statistics company-ghci company-cabal company-anaconda column-enforce-mode cmm-mode clojure-snippets clj-refactor clean-aindent-mode cider-eval-sexp-fu centered-cursor-mode cargo auto-yasnippet auto-highlight-symbol auto-compile adoc-mode ace-jump-helm-line ac-ispell))
  '(safe-local-variable-values
    '((cider-lein-parameters . "with-profile -user,+pretty,+dev-local,+dev,+test repl :headless :host localhost")
      (cider-ns-refresh-after-fn . "user/reset")

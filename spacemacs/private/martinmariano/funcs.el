@@ -353,15 +353,15 @@ Additionally, add `cape-file' as early as possible to the list."
 (defun mm/consult-configure()
 
   ;; TODO this should be generic over any lsp-mode
-  (add-hook 'clojure-mode-hook
-            (lambda ()
-              (consult-customize
-               consult-ripgrep
-               consult-git-grep
-               consult-grep
-               consult-lsp-symbols
-               :preview-key '(:debounce 0.1 any))
-              )
-            )
+  ;; (add-hook 'clojure-mode-hook
+  ;;           (lambda ()
+  ;;             (consult-customize
+  ;;              consult-ripgrep
+  ;;              consult-git-grep
+  ;;              consult-grep
+  ;;              consult-lsp-symbols
+  ;;              :preview-key '(:debounce 0.1 any))
+  ;;             )
+  ;;           )
 
   )
