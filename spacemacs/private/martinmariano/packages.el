@@ -32,9 +32,9 @@
 (defconst martinmariano-packages
   '(
     ;; auto complete
-    corfu
     cape
     cljstyle-format
+    corfu
     demo-it
     direnv
     ef-themes
@@ -43,6 +43,7 @@
     gif-screencast
     kibit-helper
     magit-lfs
+    modus-themes
     symex
     traad
     )
@@ -134,6 +135,9 @@
   (use-package magit-lfs
     :ensure t
     :pin melpa))
+
+(defun martinmariano/init-modus-themes()
+  (use-package modus-themes))
 
 (defun martinmariano/init-kibit-helper()
   (use-package kibit-helper))
