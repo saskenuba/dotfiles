@@ -5,6 +5,7 @@ set surround
 set wrapsearch
 
 let mapleader = " "
+" nnoremap <S-Enter> <C-W>w
 
 " ============================================================================
 " key bindings for quickly moving between windows
@@ -31,21 +32,26 @@ vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action H
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
 
 
+function! OpenSplitAndRestorePosition()
+    execute "vsplit"
+    execute "action GotoDeclaration<CR>"
+endfunction
 
 " ============================================================================
 " IDE actions
 " ============================================================================
 nmap gd              :action GotoDeclaration<CR>
+nmap gG              :call OpenSplitAndRestorePosition()<CR>
 nmap gh              :action QuickJavaDoc<CR>
 nmap gr              :action FindUsages<CR>
-nmap gs              :action GotoSymbol<CR>
-nmap <leader>bb      :action Build<CR>
+nmap gt              :action GotoTypeDeclaration<CR>
+nmap <leader>bb      :action Rust.Build<CR>
 nmap <leader>br      :action Run<CR>
 nmap <leader>bs      :action Stop<CR>
 nmap <leader>fs      :action SaveAll<CR>
 
 " Reload .ideavimrc
-nmap <leader>R :source ~/.ideavimrc<CR>
+nmap <leader>R :action IdeaVim.ReloadVimRc.reload<CR>
 vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/.ideavimrc<CR>
 
 " vmap ctrlR :action EditorScrollToCenter
