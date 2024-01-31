@@ -109,7 +109,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq vertico-scroll-margin 0)
   (setq vertico-count 13))
 
-(use-package all-the-icons)
+(use-package all-the-icons
+  :if (display-graphic-p))
 
 (use-package all-the-icons-completion
   :after (marginalia all-the-icons)
@@ -170,13 +171,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (setq which-key-idle-delay 1))
 
-
 ;; Example configuration for Consult
 (use-package consult
 
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :ensure t
-  :init
+  :general
   (global-definer
     "bb" #'consult-buffer
     "f/" #'consult-fd
@@ -296,8 +296,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package magit
   
   :general
-  (+general-global-menu! "Magit" "g"
-    "s" #'magit-status-quick))
+  (global-definer
+   "gs" #'magit-status-quick))
 
 (use-package forge
   :after magit)
@@ -336,6 +336,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "SPC" '(execute-extended-command :which-key "Execute command")
   "qr"  #'restart-emacs
   "qq"  #'kill-emacs
+  "TAB" '((lambda () (interactive) (switch-to-buffer nil))
+	  :which-key "Swap to last used buffer")
   
   "ik" '(lambda () (interactive) (evil-insert-newline-above))
   "ij" '(lambda () (interactive) (evil-insert-newline-below))
@@ -366,7 +368,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode)))
+   '(marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
