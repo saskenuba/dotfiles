@@ -187,7 +187,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :ensure t
   :general
   (global-definer
-    "bb" #'consult-buffer
     "f/" #'consult-fd
     "/"  #'consult-ripgrep)
 
@@ -343,9 +342,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (global-set-key (kbd "s-;") 'symex-mode-interface)  ; or whatever keybinding you like
   :hook
   ((emacs-lisp-mode . (lambda ()
-					; (setq symex-quote-prefix-list (list "#" "'" "#_"))
+			(setq symex-quote-prefix-list (list "'" "#'"))
 			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
 			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
+(use-package avy)
 
 ;; Spacemacs-like buffer menus
 (global-definer
@@ -357,10 +357,15 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   
   "ik" '(lambda () (interactive) (evil-insert-newline-above))
   "ij" '(lambda () (interactive) (evil-insert-newline-below))
+  "jj" '(avy-goto-char-timer :which-key "Ace jump")
   
-  "bd" '(kill-current-buffer :which-key "Kill this buffer")
+  
   "hs" '((lambda () (interactive) (describe-symbol (symbol-at-point)))
 	 :which-key "Describe symbol at point"))
+
+(+general-global-menu! "Buffer" "b"
+  "b" #'consult-buffer
+  "d" '(kill-current-buffer :which-key "Kill this buffer"))
 
 (+general-global-menu! "Window" "w"
   "h"  #'evil-window-left
@@ -385,7 +390,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode)))
+   '(marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+ '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
