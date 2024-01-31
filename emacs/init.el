@@ -1,4 +1,5 @@
-; Font settings
+; Font settings  -*- lexical-binding: t; -*-
+
 (defvar martmacs/default-font-size 100)
 (set-face-attribute 'default nil :font "CommitMono Nerd Font" :height martmacs/default-font-size)
 
@@ -60,7 +61,8 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 
-;;; packages 
+;;; other (refactor later)
+
 
 ;;; packages 
 
@@ -137,9 +139,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
-  (evil-set-undo-system #'undo-redo)
+  
   :config
   (evil-mode 1)
+  (evil-set-undo-system #'undo-redo)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
   (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join))
 
@@ -151,7 +154,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package command-log-mode)
 
 (use-package ef-themes
-  :init (load-theme 'ef-arbutus :no-confirm))
+  :init (load-theme 'ef-cyprus :no-confirm))
 
 (use-package orderless
   :custom
