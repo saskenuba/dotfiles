@@ -62,6 +62,7 @@
 
 ;;; packages 
 
+;;; packages 
 
 (use-package general
   :config
@@ -131,7 +132,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq evil-want-keybinding nil)
   (setq evil-want-C-u-scroll t)
   (setq evil-want-C-i-jump nil)
-  (evil-set-undo-system 'undo-redo)
+  (evil-set-undo-system #'undo-redo)
   :config
   (evil-mode 1)
   (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
@@ -257,6 +258,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (corfu-cycle t)
   (corfu-preselect-first t)
   (corfu-quit-no-match t)
+  (corfu-quit-at-boundary nil)
   (corfu-separator ?\s)
 
   :bind
@@ -268,8 +270,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ;; be used globally (M-/).  See also the customization variable
   ;; `global-corfu-modes' to exclude certain modes.
   :init
+  (global-corfu-mode)
+
+  :general
   (setq completion-styles '(orderless basic))
-  (global-corfu-mode))
+  ("C-SPC" #'completion-at-point))
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -294,7 +299,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (clojure-mode    . rainbow-delimiters-mode))
 
 (use-package magit
-  
   :general
   (global-definer
    "gs" #'magit-status-quick))
