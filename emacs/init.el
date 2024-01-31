@@ -4,9 +4,21 @@
 
 (setq inhibit-startup-message t)        ; Disable visible scrollbar
 (scroll-bar-mode -1)          ; Disable the toolbar
-(tool-bar-mode -1)           ; Disable tooltips
-(tooltip-mode -1)        ; Give some breathing room
-(set-fringe-mode 10)            ; Disable the menu bar
+
+; Saves last location
+(desktop-save-mode 1)
+
+; Disable tooltips
+(tool-bar-mode -1)
+
+; Give some breathing room
+(tooltip-mode -1)
+
+; Disable the menu bar
+(set-fringe-mode 10)
+
+; Set to use y and n simply by pressing the key
+(setopt use-short-answers t)
 
 ;; Set up the visible bell
 (menu-bar-mode -1)
@@ -45,57 +57,47 @@
   (add-hook mode (lambda () (display-line-numbers-mode 0))))
 
 
-
-
 ;;; packages 
 
-;; Enable vertico
+
+(use-package general
+  :config
+  (general-create-definer global-definer
+    :keymaps 'override
+    :states '(insert emacs normal hybrid motion visual operator)
+    :prefix "SPC"
+    :non-normal-prefix "S-SPC")
+
+  (defmacro +general-global-menu! (name infix-key &rest body)
+    "Create a definer named +general-global-NAME wrapping global-definer.
+Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY."
+    (declare (indent 2))
+    `(progn
+       (general-create-definer ,(intern (concat "+general-global-" name))
+	 :wrapping global-definer
+	 :prefix-map (quote ,(intern (concat "+general-global-" name "-map")))
+	 :infix ,infix-key
+	 :wk-full-keys nil
+	 "" '(:ignore t :which-key ,name))
+       (,(intern (concat "+general-global-" name))
+	,@body))))
+
+(use-package iedit)
+;;; Enable vertico
 (use-package vertico
   :init
   (vertico-mode)
-
   ;; Different scroll margin
   (setq vertico-scroll-margin 0))
 
-;; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init
-  (savehist-mode))
-
 ;; (use-package all-the-icons)
-
 ;; (use-package doom-modeline
 ;;   :init (doom-modeline-mode 1)
 ;;   :custom ((doom-modeline-height 15)))
 
-(use-package general
-  :config
-  (general-create-definer efs/leader-keys
-    :keymaps '(normal insert visual emacs)
-    :prefix "SPC"
-    :global-prefix "C-SPC")
-
-  (efs/leader-keys
-    "SPC" '(execute-extended-command :which-key "Execute command")
-    "qr"  #'restart-emacs
-    "qq"  #'kill-emacs
-    
-    "wh"  #'evil-window-left
-    "wl"  #'evil-window-right
-    "ws"  #'evil-window-vsplit
-    "w2"  #'evil-window-vsplit
-    "w1"  #'delete-other-windows
-    "wd"  #'delete-window
-    
-    "bd"  '(kill-buffer :which-key "Kill this buffer")
-    "hs" '((lambda () (interactive) (describe-symbol (symbol-at-point)))
-	   :which-key "Describe symbol at point")
-    
-    "fei" '((lambda () (interactive) (find-file "~/.emacs.d/init.el"))
-	    :which-key "Open init.el")
-    "ff" '(find-file :which-key)
-    
-    "fs"  '(save-buffer :which-key "Save buffer")))
+; Persist history over Emacs restarts. Vertico sorts by history position.
+(use-package savehist
+  :init (savehist-mode))
 
 (use-package evil
   :init
@@ -138,7 +140,7 @@
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :ensure t
   :init
-  (efs/leader-keys
+  (global-definer
     "bb" #'consult-buffer
     "f/" #'consult-fd
     "/"  #'consult-ripgrep)
@@ -255,9 +257,10 @@
   (clojure-mode    . rainbow-delimiters-mode))
 
 (use-package magit
-  :init
-  (efs/leader-keys
-    "gs" #'magit-status))
+  
+  :general
+  (+general-global-menu! "Magit" "g"
+    "s" #'magit-status-quick))
 
 (use-package forge
   :after magit)
@@ -272,17 +275,15 @@
 (use-package symex
   :init
   (setq symex--user-evil-keyspec
-	'(("j" . symex-go-up)
-	  ("k" . symex-go-down)
-	  ("C-j" . symex-climb-branch)
-	  ("C-k" . symex-descend-branch)
-	  ("M-j" . symex-goto-highest)
-	  ("M-k" . symex-goto-lowest)
-	  ("M-1" . symex-cycle-quote)
-	  ; ("C-M-l"  . clojure-align)
-
-          ("M-[" . symex-create-curly)
-          ("M-]" . symex-wrap-curly)))
+	'(("j"		.	symex-go-up)
+	  ("k"		.	symex-go-down)
+	  ("C-j"	.	symex-climb-branch)
+	  ("C-k"	.	symex-descend-branch)
+	  ("M-j"	.	symex-goto-highest)
+	  ("M-k"	.	symex-goto-lowest)
+	  ("M-1"	.	symex-cycle-quote)
+          ("M-["	.	symex-create-curly)
+          ("M-]"	.	symex-wrap-curly)))
   
   :config
   (symex-initialize)
@@ -290,12 +291,35 @@
   :hook
   ((emacs-lisp-mode . (lambda ()
 					; (setq symex-quote-prefix-list (list "#" "'" "#_"))
+			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
 
-			(evil-define-key 'normal symex-mode-map
-                          (kbd "<escape>") 'symex-mode-interface)
+;; Spacemacs-like buffer menus
+(global-definer
+  "SPC" '(execute-extended-command :which-key "Execute command")
+  "qr"  #'restart-emacs
+  "qq"  #'kill-emacs
+  
+  "ik" '(lambda () (interactive) (evil-insert-newline-above))
+  "ij" '(lambda () (interactive) (evil-insert-newline-below))
+  
+  "bd" '(kill-current-buffer :which-key "Kill this buffer")
+  "hs" '((lambda () (interactive) (describe-symbol (symbol-at-point)))
+	 :which-key "Describe symbol at point"))
 
-			(evil-define-key 'insert symex-mode-map
-                          (kbd "<escape>") 'symex-mode-interface)))))
+(+general-global-menu! "Window" "w"
+  "h"  #'evil-window-left
+  "l"  #'evil-window-right
+  "s"  #'evil-window-vsplit
+  "2"  #'evil-window-vsplit
+  "1"  #'delete-other-windows
+  "d"  #'delete-window)
+
+(+general-global-menu! "File" "f"
+  "ei" '((lambda () (interactive) (find-file "~/.emacs.d/init.el"))
+	 :which-key "Open init.el")
+  "f" '(find-file :which-key)
+  "s"  '(save-buffer :which-key "Save buffer"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
