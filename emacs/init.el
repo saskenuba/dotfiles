@@ -111,15 +111,20 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq vertico-count 13))
 
 (use-package all-the-icons
+  :straight t
   :if (display-graphic-p))
 
 (use-package all-the-icons-completion
+  :straight t
   :after (marginalia all-the-icons)
   :hook  (marginalia-mode . all-the-icons-completion-marginalia-setup)
   :init  (all-the-icons-completion-mode))
 
 ;; (use-package doom-modeline
+;;   :straight t
+;;   :ensure t
 ;;   :init (doom-modeline-mode 1)
+;;   :config (setq inhibit-compacting-font-caches t)
 ;;   :custom ((doom-modeline-height 15)))
 
 ; Persist history over Emacs restarts. Vertico sorts by history position.
@@ -270,10 +275,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ;; be used globally (M-/).  See also the customization variable
   ;; `global-corfu-modes' to exclude certain modes.
   :init
+  (setq completion-styles '(orderless basic))
   (global-corfu-mode)
 
   :general
-  (setq completion-styles '(orderless basic))
   ("C-SPC" #'completion-at-point))
 
 ;; A few more useful configurations...
@@ -302,6 +307,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :general
   (global-definer
    "gs" #'magit-status-quick))
+
+(use-package magit-delta
+  :straight (magit-delta :type git :host github :repo "dandavison/magit-delta")
+  :hook (magit-mode . magit-delta-mode))
 
 (use-package forge
   :after magit)
@@ -356,7 +365,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "s"  #'evil-window-vsplit
   "2"  #'evil-window-vsplit
   "1"  #'delete-other-windows
-  "d"  #'delete-window)
+  "d"  #'delete-window
+  "r"  #'evil-window-rotate-downwards)
 
 (+general-global-menu! "File" "f"
   "ei" '((lambda () (interactive) (find-file "~/.emacs.d/init.el"))
