@@ -28,22 +28,25 @@
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-;; Initialize package sources
-(require 'package)
+;; Use straight.el instead of package
+(setq package-enable-at-startup nil)
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
 
-(setq package-archives '(("melpa" . "https://melpa.org/packages/")
-                         ("org" . "https://orgmode.org/elpa/")
-                         ("elpa" . "https://elpa.gnu.org/packages/")))
-
-(package-initialize)
-(unless package-archive-contents
- (package-refresh-contents))
-
-;; Initialize use-package on non-Linux platforms
-(unless (package-installed-p 'use-package)
-   (package-install 'use-package))
-
-(require 'use-package)
+(straight-use-package 'use-package)
 (setq use-package-always-ensure t)
 
 (column-number-mode)
@@ -83,14 +86,36 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	,@body))))
 
 (use-package iedit)
-;;; Enable vertico
+
+;;; Enable vertico and extensions
 (use-package vertico
+  :demand t
+  :straight (vertico :files (:defaults "extensions/*")
+		     :includes (vertico-indexed
+				vertico-flat
+				vertico-grid
+				vertico-mouse
+				vertico-quick
+				vertico-buffer
+				vertico-repeat
+				vertico-reverse
+				vertico-directory
+				vertico-multiform
+				vertico-unobtrusive))
   :init
   (vertico-mode)
+  ; (vertico-multiform-mode)
   ;; Different scroll margin
-  (setq vertico-scroll-margin 0))
+  (setq vertico-scroll-margin 0)
+  (setq vertico-count 13))
 
-;; (use-package all-the-icons)
+(use-package all-the-icons)
+
+(use-package all-the-icons-completion
+  :after (marginalia all-the-icons)
+  :hook  (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :init  (all-the-icons-completion-mode))
+
 ;; (use-package doom-modeline
 ;;   :init (doom-modeline-mode 1)
 ;;   :custom ((doom-modeline-height 15)))
@@ -122,10 +147,22 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :init (load-theme 'ef-arbutus :no-confirm))
 
 (use-package orderless
-  :ensure t
   :custom
-  (completion-styles '(orderless basic))
-  (completion-category-overrides '((file (styles basic partial-completion)))))
+  (orderless-matching-styles
+   '(orderless-literal
+     orderless-prefixes
+     orderless-initialism
+     orderless-regexp)))
+
+(use-package marginalia
+  :general
+  (:keymaps 'minibuffer-local-map
+	    "M-A" 'marginalia-cycle)
+  :custom
+  (marginalia-max-relative-age 0)
+  (marginalia-align 'right)
+  :init
+  (marginalia-mode))
 
 (use-package which-key
   :init (which-key-mode)
