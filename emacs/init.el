@@ -70,7 +70,7 @@
   :config
   (general-create-definer global-definer
     :keymaps 'override
-    :states '(insert emacs normal hybrid motion visual operator)
+    :states '(emacs normal hybrid motion visual operator)
     :prefix "SPC"
     :non-normal-prefix "S-SPC")
 
@@ -119,7 +119,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package all-the-icons-completion
   :straight t
   :after (marginalia all-the-icons)
-  :hook  (marginalia-mode . all-the-icons-completion-marginalia-setup)
+  :hook  ((marginalia-mode . all-the-icons-completion-marginalia-setup))
   :init  (all-the-icons-completion-mode))
 
 ;; (use-package doom-modeline
@@ -302,8 +302,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :ensure t
   :defer t
   :hook
-  (emacs-lisp-mode . rainbow-delimiters-mode)
-  (clojure-mode    . rainbow-delimiters-mode))
+  ((emacs-lisp-mode . rainbow-delimiters-mode)
+   (clojure-mode    . rainbow-delimiters-mode)))
 
 (use-package magit
   :general
@@ -312,7 +312,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package magit-delta
   :straight (magit-delta :type git :host github :repo "dandavison/magit-delta")
-  :hook (magit-mode . magit-delta-mode))
+  :hook ((magit-mode . magit-delta-mode)))
 
 (use-package forge
   :after magit)
@@ -346,6 +346,79 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
 			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
 (use-package avy)
+
+(use-package markdown-mode
+  :init (setq markdown-command "multimarkdown")
+  :mode ("README\\.md'" . gfm-mode))
+
+(use-package yasnippet
+  :init (yas-global-mode 1))
+
+(setq straight-disable-native-compile '("lsp-bridge"))
+
+(use-package lsp-bridge
+  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+			 :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+			 :build (:not compile))
+  :init (global-lsp-bridge-mode)
+
+  ; :hook ((rust-mode . lsp-bridge-mode))
+
+  :config (setq lsp-bridge-peek-list-height 10)
+  :general (global-definer "a" #'lsp-bridge-code-action))
+
+(global-unset-key (kbd ","))
+
+(defun my-rust-mode-setup ()
+  "Custom setup for rust-mode."
+  (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
+  (corfu-mode -1) ; Deactivate corfu-mode
+  (acm-mode 1) ; Activate acm-mode
+  (general-create-definer rust-definer
+    :keymaps 'override
+    :states '(emacs normal hybrid motion visual operator)
+    :prefix ",")
+
+  (rust-definer
+    "a" #'lsp-bridge-code-action
+    "r" #'lsp-bridge-rename
+    "e" #'lsp-bridge-diagnostic-list
+
+    "bc" #'rust-run-clippy
+    
+    "hh" #'lsp-bridge-show-documentation
+    "gi" #'lsp-bridge-find-impl
+    "gI" #'lsp-bridge-find-impl-other-window
+    "gr" #'lsp-bridge-find-references
+    "Gr" #'lsp-bridge-peek
+    "gt" #'lsp-bridge-find-type-def
+    "gT" #'lsp-bridge-find-type-def-other-window
+    "gd" #'lsp-bridge-find-def
+    "gG" #'lsp-bridge-find-def-other-window))
+
+(general-evil-setup t)
+(add-hook 'rust-mode-hook 'my-rust-mode-setup)
+(add-hook 'lsp-bridge-peek-mode-hook 'evil-normalize-keymaps)
+(add-hook 'lsp-bridge-ref-mode-hook 'evil-normalize-keymaps)
+(nmap :keymaps 'lsp-bridge-peek-keymap
+  "j" 'lsp-bridge-peek-list-next-line
+  "k" 'lsp-bridge-peek-list-prev-line
+  "J" 'lsp-bridge-peek-tree-next-branch
+  "K" 'lsp-bridge-peek-tree-previous-branch
+  "RET" 'lsp-bridge-peek-jump
+
+  "q" 'lsp-bridge-peek-abort
+  "<escape>" 'lsp-bridge-peek-abort)
+
+(nmap :keymaps 'lsp-bridge-ref-mode-map
+  "j" 'lsp-bridge-ref-jump-next-keyword
+  "k" 'lsp-bridge-ref-jump-prev-keyword
+  "J" 'lsp-bridge-ref-jump-next-file
+  "K" 'lsp-bridge-ref-jump-prev-file
+  "RET" 'lsp-bridge-ref-open-file-and-stay
+
+  "q" 'lsp-bridge-ref-quit
+  "<escape>" 'lsp-bridge-ref-quit)
 
 ;; Spacemacs-like buffer menus
 (global-definer
