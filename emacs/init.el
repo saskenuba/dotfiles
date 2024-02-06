@@ -151,6 +151,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (evil-collection-init))
 
+(use-package evil-surround
+  :config
+  (global-evil-surround-mode 1))
+
 (use-package command-log-mode)
 
 (use-package ef-themes
@@ -163,6 +167,23 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
      orderless-prefixes
      orderless-initialism
      orderless-regexp)))
+
+(use-package pdf-tools)
+
+(use-package auctex
+  :hook (('LaTeX-mode-hook . 'latex/auto-fill-mode)
+	 ('LaTeX-mode-hook . 'TeX-source-correlate-mode)
+	 ('doc-view-mode-hook . 'auto-revert-mode))
+  
+  :config
+  (setq TeX-parse-self t)
+  (setq TeX-auto-save t)
+  (setq TeX-engine #'latex-build-engine)
+  (setq TeX-command-default #'latex-build-command)
+
+  ; set zathura as default viewer
+  (add-to-list 'TeX-view-program-list '("Zathura" ("zathura" " %o")))
+  (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura")))
 
 (use-package marginalia
   :general
@@ -383,8 +404,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "a" #'lsp-bridge-code-action
     "r" #'lsp-bridge-rename
     "e" #'lsp-bridge-diagnostic-list
+    "=" #'rust-format-buffer
 
     "bc" #'rust-run-clippy
+    "bb" #'rust-compile
+    "bt" #'rust-test
     
     "hh" #'lsp-bridge-show-documentation
     "gi" #'lsp-bridge-find-impl
@@ -454,6 +478,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 :which-key "Open init.el")
   "f" '(find-file :which-key)
   "s"  '(save-buffer :which-key "Save buffer"))
+
+(+general-global-menu! "Project" "p"
+  "f" #'project-find-file)
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
