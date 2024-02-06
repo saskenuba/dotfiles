@@ -18,7 +18,9 @@ nmap <leader>wj <c-w>j
 nmap <leader>wv <c-w>v
 nmap <leader>ws <c-w>s
 nmap <leader>wc <c-w>c
-nmap <leader>wm :action HideAllWindows<CR>
+nmap <leader>wm :action MoveEditorToOppositeTabGroup<CR>
+nmap <leader>wo :action OpenEditorInOppositeTabGroup<CR>
+" nmap <leader>wm :action HideAllWindows<CR>
 nmap <leader>wz :action ToggleDistractionFreeMode<CR>
 
 vmap <leader>wh <c-w>h
