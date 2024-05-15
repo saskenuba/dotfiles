@@ -52,31 +52,17 @@
 ;; Set up the visible bell
 (menu-bar-mode -1)
 
+;; Setup support for recent files
+(recentf-mode 1)
+(setq recentf-max-menu-items 25)
+(setq recentf-max-saved-items 25)
+
+;; Setup bell
 (setq visible-bell t)
 
 ;; Make ESC quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-;; Use straight.el instead of package
-(setq package-enable-at-startup nil)
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
-      (bootstrap-version 7))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
-
-(straight-use-package 'use-package)
-(setq use-package-always-ensure t)
 
 (column-number-mode)
 (global-display-line-numbers-mode t)
@@ -91,10 +77,91 @@
 
 ;;; other (refactor later)
 
+;; https://github.com/Fuco1/.emacs.d/blob/af82072196564fa57726bdbabf97f1d35c43b7f7/site-lisp/redef.el#L20-L94
+(defun Fuco1/lisp-indent-function (indent-point state)
+  "This function is the normal value of the variable `lisp-indent-function'.
+
+The function `calculate-lisp-indent' calls this to determine
+if the arguments of a Lisp function call should be indented specially.
+
+INDENT-POINT is the position at which the line being indented begins.
+Point is located at the point to indent under (for default indentation);
+STATE is the `parse-partial-sexp' state for that position.
+
+If the current line is in a call to a Lisp function that has a non-nil
+property `lisp-indent-function' (or the deprecated `lisp-indent-hook'),
+it specifies how to indent.  The property value can be:
+
+* `defun', meaning indent `defun'-style
+  \(this is also the case if there is no property and the function
+  has a name that begins with \"def\", and three or more arguments);
+
+* an integer N, meaning indent the first N arguments specially
+  (like ordinary function arguments), and then indent any further
+  arguments like a body;
+
+* a function to call that returns the indentation (or nil).
+  `lisp-indent-function' calls this function with the same two arguments
+  that it itself received.
+
+This function returns either the indentation to use, or nil if the
+Lisp function does not specify a special indentation."
+  (let ((normal-indent (current-column))
+        (orig-point (point)))
+    (goto-char (1+ (elt state 1)))
+    (parse-partial-sexp (point) calculate-lisp-indent-last-sexp 0 t)
+    (cond
+     ;; car of form doesn't seem to be a symbol, or is a keyword
+     ((and (elt state 2)
+           (or (not (looking-at "\\sw\\|\\s_"))
+               (looking-at ":")))
+      (if (not (> (save-excursion (forward-line 1) (point))
+                  calculate-lisp-indent-last-sexp))
+          (progn (goto-char calculate-lisp-indent-last-sexp)
+                 (beginning-of-line)
+                 (parse-partial-sexp (point)
+                                     calculate-lisp-indent-last-sexp 0 t)))
+      ;; Indent under the list or under the first sexp on the same
+      ;; line as calculate-lisp-indent-last-sexp.  Note that first
+      ;; thing on that line has to be complete sexp since we are
+      ;; inside the innermost containing sexp.
+      (backward-prefix-chars)
+      (current-column))
+     ((and (save-excursion
+             (goto-char indent-point)
+             (skip-syntax-forward " ")
+             (not (looking-at ":")))
+           (save-excursion
+             (goto-char orig-point)
+             (looking-at ":")))
+      (save-excursion
+        (goto-char (+ 2 (elt state 1)))
+        (current-column)))
+     (t
+      (let ((function (buffer-substring (point)
+                                        (progn (forward-sexp 1) (point))))
+            method)
+        (setq method (or (function-get (intern-soft function)
+                                       'lisp-indent-function)
+                         (get (intern-soft function) 'lisp-indent-hook)))
+        (cond ((or (eq method 'defun)
+                   (and (null method)
+                        (> (length function) 3)
+                        (string-match "\\`def" function)))
+               (lisp-indent-defform state indent-point))
+              ((integerp method)
+               (lisp-indent-specform method state
+                                     indent-point normal-indent))
+              (method
+               (funcall method indent-point state))))))))
+
+(add-hook 'emacs-lisp-mode-hook
+	  (lambda () (setq-local lisp-indent-function #'Fuco1/lisp-indent-function)))
 
 ;;; packages 
 
 (use-package general
+  :ensure t
   :config
   (general-create-definer global-definer
     :keymaps 'override
@@ -116,36 +183,30 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
        (,(intern (concat "+general-global-" name))
 	,@body))))
 
-(use-package iedit)
+; (use-package iedit)
+
+(use-package org)
+
+(use-package evil-iedit-state
+  :commands (evil-iedit-state evil-iedit-state/iedit-mode)
+  :init
+  (setq iedit-current-symbol-default t
+	iedit-only-at-symbol-boundaries t
+	iedit-toggle-key-default nil))
+
 
 ;;; Enable vertico and extensions
 (use-package vertico
   :demand t
-  :straight (vertico :files (:defaults "extensions/*")
-		     :includes (vertico-indexed
-				vertico-flat
-				vertico-grid
-				vertico-mouse
-				vertico-quick
-				vertico-buffer
-				vertico-repeat
-				vertico-reverse
-				vertico-directory
-				vertico-multiform
-				vertico-unobtrusive))
   :init
   (vertico-mode)
-  ; (vertico-multiform-mode)
-  ;; Different scroll margin
   (setq vertico-scroll-margin 0)
   (setq vertico-count 13))
 
 (use-package all-the-icons
-  :straight t
   :if (display-graphic-p))
 
 (use-package all-the-icons-completion
-  :straight t
   :after (marginalia all-the-icons)
   :hook  ((marginalia-mode . all-the-icons-completion-marginalia-setup))
   :init  (all-the-icons-completion-mode))
@@ -183,7 +244,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (global-evil-surround-mode 1))
 
-(use-package command-log-mode)
+; (use-package command-log-mode)
 
 (use-package ef-themes
   :init (load-theme 'ef-cyprus :no-confirm))
@@ -199,6 +260,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package pdf-tools)
 
 (use-package auctex
+  :defer t
   :hook (('LaTeX-mode-hook . 'latex/auto-fill-mode)
 	 ('LaTeX-mode-hook . 'TeX-source-correlate-mode)
 	 ('doc-view-mode-hook . 'auto-revert-mode))
@@ -360,7 +422,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    "gs" #'magit-status-quick))
 
 (use-package magit-delta
-  :straight (magit-delta :type git :host github :repo "dandavison/magit-delta")
   :hook ((magit-mode . magit-delta-mode)))
 
 (use-package forge
@@ -390,7 +451,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (symex-initialize)
   (global-set-key (kbd "s-;") 'symex-mode-interface)  ; or whatever keybinding you like
   :hook
-  ((emacs-lisp-mode . (lambda ()
+  ((clojure-mode . (lambda ()
+		     (setq symex-quote-prefix-list (list "#'"))
+		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
+   (emacs-lisp-mode . (lambda ()
 			(setq symex-quote-prefix-list (list "'" "#'"))
 			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
 			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
@@ -403,24 +468,88 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package yasnippet
   :init (yas-global-mode 1))
 
-(setq straight-disable-native-compile '("lsp-bridge"))
 
-(use-package lsp-bridge
-  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
-			 :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-			 :build (:not compile))
-  :init (global-lsp-bridge-mode)
+;(use-package lsp-bridge
+;  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
+;			 :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
+;			 :build (:not compile))
+;  :init (global-lsp-bridge-mode)
 
   ; :hook ((rust-mode . lsp-bridge-mode))
 
-  :config (setq lsp-bridge-peek-list-height 10)
-  :general (global-definer "a" #'lsp-bridge-code-action))
+;  :config (setq lsp-bridge-peek-list-height 10)
+;  :general (global-definer "a" #'lsp-bridge-code-action))
 
-(global-unset-key (kbd ","))
+(setq read-process-output-max (* 1024 1024))
+(setq gc-cons-threshold 100000000)
+
+(use-package lsp-mode
+  :init (setq lsp-keymap-prefix "C-c l")
+  :hook ((clojure-mode . lsp)
+	 (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp)
+
+(use-package lsp-ui
+  :after lsp-mode
+  :commands lsp-ui-mode)
+
+(use-package lsp-treemacs
+  :after lsp-mode
+  :commands lsp-treemacs-errors-list)
+
+(use-package org-roam
+  :config
+  (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
+  (org-roam-db-autosync-mode)
+  (setq org-M-RET-may-split-line nil)
+
+  :general
+  ("M-S-<return>" #'org-insert-item))
+
+(use-package ox-hugo
+  :after ox)
+
+(use-package uuidgen)
+
+(use-package cider)
+
+(use-package clojure-mode)
+
+(defun my-clojure-mode-setup ()
+  "Custom setup for clojure-mode."
+  ; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
+  ; (corfu-mode -1) ; Deactivate corfu-mode
+  ; (acm-mode 1) ; Activate acm-mode
+  (general-create-definer clojure-definer
+    :keymaps 'override
+    :states '(emacs normal hybrid motion visual operator)
+    :prefix ",")
+
+  (clojure-definer
+   "a" #'lsp-bridge-code-action
+   "r" #'lsp-bridge-rename
+   "e" #'lsp-bridge-diagnostic-list
+   
+   ;; "=" #'rust-format-buffer
+   
+   "cj" #'cider-jack-in-clj
+   "cc" #'cider-connect-clj
+   "ck" #'sesman-quit
+   ; "rs" #'cider-switch-to-repl-buffer
+   
+   "hh" #'lsp-bridge-show-documentation
+   "gi" #'lsp-bridge-find-impl
+   "gI" #'lsp-bridge-find-impl-other-window
+   "gr" #'lsp-bridge-find-references
+   "Gr" #'lsp-bridge-peek
+   "gt" #'lsp-bridge-find-type-def
+   "gT" #'lsp-bridge-find-type-def-other-window
+   "gd" #'lsp-bridge-find-def
+   "gG" #'lsp-bridge-find-def-other-window))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
-  (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
+  ; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
   (corfu-mode -1) ; Deactivate corfu-mode
   (acm-mode 1) ; Activate acm-mode
   (general-create-definer rust-definer
@@ -429,27 +558,28 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     :prefix ",")
 
   (rust-definer
-    "a" #'lsp-bridge-code-action
-    "r" #'lsp-bridge-rename
-    "e" #'lsp-bridge-diagnostic-list
-    "=" #'rust-format-buffer
+   "a" #'lsp-bridge-code-action
+   "r" #'lsp-bridge-rename
+   "e" #'lsp-bridge-diagnostic-list
+   "=" #'rust-format-buffer
 
-    "bc" #'rust-run-clippy
-    "bb" #'rust-compile
-    "bt" #'rust-test
-    
-    "hh" #'lsp-bridge-show-documentation
-    "gi" #'lsp-bridge-find-impl
-    "gI" #'lsp-bridge-find-impl-other-window
-    "gr" #'lsp-bridge-find-references
-    "Gr" #'lsp-bridge-peek
-    "gt" #'lsp-bridge-find-type-def
-    "gT" #'lsp-bridge-find-type-def-other-window
-    "gd" #'lsp-bridge-find-def
-    "gG" #'lsp-bridge-find-def-other-window))
+   "bc" #'rust-run-clippy
+   "bb" #'rust-compile
+   "bt" #'rust-test
+   
+   "hh" #'lsp-bridge-show-documentation
+   "gi" #'lsp-bridge-find-impl
+   "gI" #'lsp-bridge-find-impl-other-window
+   "gr" #'lsp-bridge-find-references
+   "Gr" #'lsp-bridge-peek
+   "gt" #'lsp-bridge-find-type-def
+   "gT" #'lsp-bridge-find-type-def-other-window
+   "gd" #'lsp-bridge-find-def
+   "gG" #'lsp-bridge-find-def-other-window))
 
 (general-evil-setup t)
 (add-hook 'rust-mode-hook 'my-rust-mode-setup)
+(add-hook 'clojure-mode-hook 'my-clojure-mode-setup)
 (add-hook 'lsp-bridge-peek-mode-hook 'evil-normalize-keymaps)
 (add-hook 'lsp-bridge-ref-mode-hook 'evil-normalize-keymaps)
 (nmap :keymaps 'lsp-bridge-peek-keymap
@@ -519,6 +649,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
    '(marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+ '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
