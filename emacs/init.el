@@ -1,13 +1,41 @@
 ; Font settings  -*- lexical-binding: t; -*-
 
+;; This is only needed once, near the top of the file
+(eval-when-compile 
+
+  ;; Add MELPA repository
+  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+
+  ;; Add MELPA Stable repository
+  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+
+  ;; Add Org ELPA repository
+  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+
+  (require 'use-package))
+
+; force download and installation of packages
+(setq use-package-always-ensure t)
+
+(if init-file-debug
+      (setq use-package-verbose t
+            use-package-expand-minimally nil
+            use-package-compute-statistics t
+            debug-on-error t)
+    (setq use-package-verbose nil
+          use-package-expand-minimally t))
+
 (defvar martmacs/default-font-size 100)
 (set-face-attribute 'default nil :font "CommitMono Nerd Font" :height martmacs/default-font-size)
 
-(setq inhibit-startup-message t)        ; Disable visible scrollbar
-(scroll-bar-mode -1)          ; Disable the toolbar
+; Disable visible scrollbar
+(setq inhibit-startup-message t)
+
+; Disable the toolbar
+(scroll-bar-mode -1)
 
 ; Saves last location
-(desktop-save-mode 1)
+; (desktop-save-mode 1)
 
 ; Disable tooltips
 (tool-bar-mode -1)
