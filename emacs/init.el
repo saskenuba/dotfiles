@@ -532,7 +532,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package cider)
 
-(use-package clojure-mode)
+(use-package clojure-mode
+  :hook ((clojure-mode . evil-cleverparens-mode)
+	 (clojurescript-mode . evil-cleverparens-mode)
+	 (clojurec-mode . evil-cleverparens-mode)))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
