@@ -416,6 +416,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ((emacs-lisp-mode . rainbow-delimiters-mode)
    (clojure-mode    . rainbow-delimiters-mode)))
 
+(use-package flycheck
+  :init (global-flycheck-mode))
+
 (use-package magit
   :general
   (global-definer
@@ -428,7 +431,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :after magit)
 
 (use-package smartparens
-  :ensure t
   :init   (smartparens-global-mode)
   :hook
   ((emacs-lisp-mode . (lambda () (smartparens-strict-mode))))
@@ -493,9 +495,26 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :after lsp-mode
   :commands lsp-ui-mode)
 
+(use-package treemacs
+  :general
+  ("M-S-0" #'treemacs-select-window))
+
 (use-package lsp-treemacs
-  :after lsp-mode
+  :after '(lsp-mode treemacs)
   :commands lsp-treemacs-errors-list)
+
+;(use-package treemacs-all-the-icons
+;  :after '(all-the-icons treemacs)
+;  :if treemacs-use-all-the-icons-theme
+;  :hook ((treemacs-mode . (lambda () (treemacs-load-theme 'all-the-icons)))))
+
+(use-package treemacs-evil
+  :after treemacs
+  :hook '(treemacs-mode-hook . evil-treemacs-state))
+
+(use-package treemacs-magit
+  :defer t
+  :after '(treemacs magit))
 
 (use-package org-roam
   :config
@@ -532,20 +551,21 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    
    ;; "=" #'rust-format-buffer
    
-   "cj" #'cider-jack-in-clj
-   "cc" #'cider-connect-clj
-   "ck" #'sesman-quit
+   "sj" #'cider-jack-in-clj
+   "sc" #'cider-connect-clj
+   "sq" #'sesman-quit
+   "sa" #'cider-switch-to-repl-buffer
    ; "rs" #'cider-switch-to-repl-buffer
    
-   "hh" #'lsp-bridge-show-documentation
-   "gi" #'lsp-bridge-find-impl
+   "hh" #'lsp-ui-doc--display
+   "gi" #'lsp-find-implementation
    "gI" #'lsp-bridge-find-impl-other-window
-   "gr" #'lsp-bridge-find-references
-   "Gr" #'lsp-bridge-peek
+   "gr" #'lsp-find-references
+   "Gr" #'lsp-ui-peek-find-references
    "gt" #'lsp-bridge-find-type-def
    "gT" #'lsp-bridge-find-type-def-other-window
-   "gd" #'lsp-bridge-find-def
-   "gG" #'lsp-bridge-find-def-other-window))
+   "gd" #'lsp-find-definition
+   "gD" #'xref-find-definitions-other-window))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
@@ -574,7 +594,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    "Gr" #'lsp-bridge-peek
    "gt" #'lsp-bridge-find-type-def
    "gT" #'lsp-bridge-find-type-def-other-window
-   "gd" #'lsp-bridge-find-def
+   "gd" #'lsp-find-definition
    "gG" #'lsp-bridge-find-def-other-window))
 
 (general-evil-setup t)
@@ -683,7 +703,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
