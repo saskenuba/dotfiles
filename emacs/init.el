@@ -530,45 +530,76 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package uuidgen)
 
-(use-package cider)
+(use-package cider
+  :hook '((clojure-mode . cider-mode)
+	  (cider-repl-mode . eldoc-mode)
+	  (cider-mode . eldoc-mode))
+
+  :init
+  (setq cider-stacktrace-default-filters '(tooling dup)
+	cider-repl-pop-to-buffer-on-connect nil
+	cider-prompt-save-file-on-load nil
+	cider-repl-use-clojure-font-lock t)
+
+  :config
+  (nmap :keymaps 'cider-stacktrace-mode-map
+    "C-j" 'cider-stacktrace-next-cause
+    "C-k" 'cider-stacktrace-previous-cause
+    "TAB" 'cider-stacktrace-cycle-current-cause
+    "0"   'cider-stacktrace-cycle-all-causes
+    "1"   'cider-stacktrace-cycle-cause-1
+    "2"   'cider-stacktrace-cycle-cause-2
+    "3"   'cider-stacktrace-cycle-cause-3
+    "4"   'cider-stacktrace-cycle-cause-4
+    "5"   'cider-stacktrace-cycle-cause-5
+    "a"   'cider-stacktrace-toggle-all
+    "c"   'cider-stacktrace-toggle-clj
+    "d"   'cider-stacktrace-toggle-duplicates
+    "J"   'cider-stacktrace-toggle-java
+    "r"   'cider-stacktrace-toggle-repl
+    "T"   'cider-stacktrace-toggle-tooling))
 
 (use-package clojure-mode
   :hook ((clojure-mode . evil-cleverparens-mode)
 	 (clojurescript-mode . evil-cleverparens-mode)
 	 (clojurec-mode . evil-cleverparens-mode)))
 
+(use-package flycheck-clj-kondo)
+
+(use-package flycheck-joker)
+
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
-  ; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
-  ; (corfu-mode -1) ; Deactivate corfu-mode
-  ; (acm-mode 1) ; Activate acm-mode
+					; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
+					; (corfu-mode -1) ; Deactivate corfu-mode
+					; (acm-mode 1) ; Activate acm-mode
   (general-create-definer clojure-definer
     :keymaps 'override
     :states '(emacs normal hybrid motion visual operator)
     :prefix ",")
 
   (clojure-definer
-   "a" #'lsp-bridge-code-action
-   "r" #'lsp-bridge-rename
-   "e" #'lsp-bridge-diagnostic-list
-   
-   ;; "=" #'rust-format-buffer
-   
-   "sj" #'cider-jack-in-clj
-   "sc" #'cider-connect-clj
-   "sq" #'sesman-quit
-   "sa" #'cider-switch-to-repl-buffer
-   ; "rs" #'cider-switch-to-repl-buffer
-   
-   "hh" #'lsp-ui-doc--display
-   "gi" #'lsp-find-implementation
-   "gI" #'lsp-bridge-find-impl-other-window
-   "gr" #'lsp-find-references
-   "Gr" #'lsp-ui-peek-find-references
-   "gt" #'lsp-bridge-find-type-def
-   "gT" #'lsp-bridge-find-type-def-other-window
-   "gd" #'lsp-find-definition
-   "gD" #'xref-find-definitions-other-window))
+    "a" #'lsp-bridge-code-action
+    "r" #'lsp-bridge-rename
+    "e" #'lsp-bridge-diagnostic-list
+    
+    ;; "=" #'rust-format-buffer
+    
+    "sj" #'cider-jack-in-clj
+    "sc" #'cider-connect-clj
+    "sq" #'sesman-quit
+    "sa" #'cider-switch-to-repl-buffer
+					; "rs" #'cider-switch-to-repl-buffer
+    
+    "hh" #'lsp-ui-doc--display
+    "gi" #'lsp-find-implementation
+    "gI" #'lsp-bridge-find-impl-other-window
+    "gr" #'lsp-find-references
+    "Gr" #'lsp-ui-peek-find-references
+    "gt" #'lsp-bridge-find-type-def
+    "gT" #'lsp-bridge-find-type-def-other-window
+    "gd" #'lsp-find-definition
+    "gD" #'xref-find-definitions-other-window))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
