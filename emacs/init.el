@@ -181,19 +181,39 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 :wk-full-keys nil
 	 "" '(:ignore t :which-key ,name))
        (,(intern (concat "+general-global-" name))
-	,@body))))
+	,@body)))
+  
+  (general-evil-setup t))
 
-; (use-package iedit)
+(use-package expand-region)
+
+(use-package iedit)
 
 (use-package org)
 
+(use-package helpful)
+
 (use-package evil-iedit-state
-  :commands (evil-iedit-state evil-iedit-state/iedit-mode)
+  :after (iedit expand-region)
+
+  :commands (evil-iedit-state
+	     evil-iedit-state/iedit-mode)
+
   :init
   (setq iedit-current-symbol-default t
 	iedit-only-at-symbol-boundaries t
-	iedit-toggle-key-default nil))
+	iedit-toggle-key-default nil)
 
+  :general
+  (mmap
+      "#" #'evil-iedit-state/iedit-mode-from-expand-region
+      "*" #'evil-iedit-state/iedit-mode-from-expand-region))
+
+;; (general-define-key
+;;    :states '(normal motion)
+;;    :keymaps 'evil-iedit-state-map
+;;    "#" #'iedit-prev-occurrence
+;;    "*" #'iedit-next-occurrence)
 
 ;;; Enable vertico and extensions
 (use-package vertico
@@ -240,6 +260,22 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (evil-collection-init))
 
+(use-package evil-lion
+  :ensure t
+  :config
+  (evil-lion-mode))
+
+(use-package evil-visualstar
+  :after evil-collection
+  :commands (evil-visualstar/begin-search-forward
+	     evil-visualstar/begin-search-backward)
+  :init
+  (global-evil-visualstar-mode)
+  :general
+  (:keymaps 'evil-visual-state-map
+   "*" #'evil-visualstar/begin-search-forward
+   "#" #'evil-visualstar/begin-search-backward))
+
 (use-package evil-surround
   :config
   (global-evil-surround-mode 1))
@@ -248,6 +284,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package ef-themes
   :init (load-theme 'ef-cyprus :no-confirm))
+
+(use-package modus-themes)
 
 (use-package orderless
   :custom
@@ -381,8 +419,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   :bind
   (:map corfu-map
-	("TAB" . corfu-next)
-	([tab] . corfu-next))
+   ("TAB" . corfu-next)
+   ([tab] . corfu-next))
 
   ;; Recommended: Enable Corfu globally.  This is recommended since Dabbrev can
   ;; be used globally (M-/).  See also the customization variable
@@ -393,6 +431,46 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   :general
   ("C-SPC" #'completion-at-point))
+
+(use-package cape
+  ;; Bind dedicated completion commands
+  ;; Alternative prefix keys: C-c p, M-p, M-+, ...
+  ;; :bind
+  ;; (("C-c p p" . completion-at-point) ;; capf
+  ;; 	 ("C-c p t" . complete-tag)        ;; etags
+  ;; 	 ("C-c p d" . cape-dabbrev)        ;; or dabbrev-completion
+  ;; 	 ("C-c p h" . cape-history)
+  ;; 	 ("C-c p f" . cape-file)
+  ;; 	 ("C-c p k" . cape-keyword)
+  ;; 	 ("C-c p s" . cape-elisp-symbol)
+  ;; 	 ("C-c p e" . cape-elisp-block)
+  ;; 	 ("C-c p a" . cape-abbrev)
+  ;; 	 ("C-c p l" . cape-line)
+  ;; 	 ("C-c p w" . cape-dict)
+  ;; 	 ("C-c p :" . cape-emoji)
+  ;; 	 ("C-c p \\" . cape-tex)
+  ;; 	 ("C-c p _" . cape-tex)
+  ;; 	 ("C-c p ^" . cape-tex)
+  ;; 	 ("C-c p &" . cape-sgml)
+  ;; 	 ("C-c p r" . cape-rfc1345))
+  :init
+  ;; Add to the global default value of `completion-at-point-functions' which is
+  ;; used by `completion-at-point'.  The order of the functions matters, the
+  ;; first function returning a result wins.  Note that the list of buffer-local
+  ;; completion functions takes precedence over the global list.
+  (add-hook 'completion-at-point-functions #'cape-dabbrev)
+  (add-hook 'completion-at-point-functions #'cape-file)
+  (add-hook 'completion-at-point-functions #'cape-elisp-block)
+  ;;(add-hook 'completion-at-point-functions #'cape-history)
+  ;;(add-hook 'completion-at-point-functions #'cape-keyword)
+  ;;(add-hook 'completion-at-point-functions #'cape-tex)
+  ;;(add-hook 'completion-at-point-functions #'cape-sgml)
+  ;;(add-hook 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-hook 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-hook 'completion-at-point-functions #'cape-dict)
+  ;;(add-hook 'completion-at-point-functions #'cape-elisp-symbol)
+  ;;(add-hook 'completion-at-point-functions #'cape-line)
+  )
 
 ;; A few more useful configurations...
 (use-package emacs
@@ -431,12 +509,24 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :after magit)
 
 (use-package smartparens
-  :init   (smartparens-global-mode)
+  :init
+  (setq sp-show-pair-from-inside t)
+  (setq sp-cancel-autoskip-on-backward-movement nil)
+  (setq sp-show-pair-delay 0.2)
+  (smartparens-global-mode)
+
   :hook
   ((emacs-lisp-mode . (lambda () (smartparens-strict-mode))))
   :config (require 'smartparens-config))
 
+(use-package evil-cleverparens
+  :hook ((emacs-lisp-mode . evil-cleverparens-mode)
+	 (clojure-mode . evil-cleverparens-mode)
+	 (clojurescript-mode . evil-cleverparens-mode)
+	 (clojurec-mode . evil-cleverparens-mode)))
+
 (use-package symex
+  :after evil-cleverparens
   :init
   (setq symex--user-evil-keyspec
 	'(("j"		.	symex-go-up)
@@ -446,8 +536,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	  ("M-j"	.	symex-goto-highest)
 	  ("M-k"	.	symex-goto-lowest)
 	  ("M-1"	.	symex-cycle-quote)
-          ("M-["	.	symex-create-curly)
-          ("M-]"	.	symex-wrap-curly)))
+	  ("M-["	.	symex-create-curly)
+	  ("M-]"	.	symex-wrap-curly)))
   
   :config
   (symex-initialize)
@@ -460,7 +550,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    (emacs-lisp-mode . (lambda ()
 			(setq symex-quote-prefix-list (list "'" "#'"))
 			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
+			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface))))
+  :config
+  ;; (add-hook 'clojure-mode-hook (lambda () (add-to-list 'symex--evil-keyspec '("C-M-l" . clojure-align))))
+  )
+
 (use-package avy)
 
 (use-package markdown-mode
@@ -489,15 +583,24 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :init (setq lsp-keymap-prefix "C-c l")
   :hook ((clojure-mode . lsp)
 	 (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp)
+  :commands lsp
+  
+  :config
+  (setq lsp-completion-provider :none)
+
+  (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
+  ;; evil bindings for peek mode
+  (with-eval-after-load 'lsp-ui
+    (general-define-key lsp-ui-peek-mode-map (kbd "h") #'lsp-ui-peek--select-prev-file)
+    (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
+    (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
+    (define-key lsp-ui-peek-mode-map (kbd "l") #'lsp-ui-peek--select-next-file)))
 
 (use-package lsp-ui
   :after lsp-mode
   :commands lsp-ui-mode)
 
-(use-package treemacs
-  :general
-  ("M-S-0" #'treemacs-select-window))
+(use-package treemacs)
 
 (use-package lsp-treemacs
   :after '(lsp-mode treemacs)
@@ -579,8 +682,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     :prefix ",")
 
   (clojure-definer
-    "a" #'lsp-bridge-code-action
-    "r" #'lsp-bridge-rename
+    "a" #'lsp-execute-code-action
+    "r" #'lsp-rename
     "e" #'lsp-bridge-diagnostic-list
     
     ;; "=" #'rust-format-buffer
@@ -599,7 +702,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "gt" #'lsp-bridge-find-type-def
     "gT" #'lsp-bridge-find-type-def-other-window
     "gd" #'lsp-find-definition
-    "gD" #'xref-find-definitions-other-window))
+    "Gd" #'xref-find-definitions-other-window))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
@@ -631,7 +734,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    "gd" #'lsp-find-definition
    "gG" #'lsp-bridge-find-def-other-window))
 
-(general-evil-setup t)
 (add-hook 'rust-mode-hook 'my-rust-mode-setup)
 (add-hook 'clojure-mode-hook 'my-clojure-mode-setup)
 (add-hook 'lsp-bridge-peek-mode-hook 'evil-normalize-keymaps)
@@ -694,6 +796,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (+general-global-menu! "Project" "p"
   "f" #'project-find-file)
 
+(+general-global-menu! "Treemacs" "t"
+  "t" #'treemacs)
+
 
 ;; LSP booster to make json parsing comms faster
 ;; installation needed: https://github.com/blahgeek/emacs-lsp-booster
@@ -729,6 +834,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 ;; end of lsp booster
 
+
+(defvar mylayers
+  '("clojure.el"))
+
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
@@ -737,7 +846,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((comp))))
 (custom-set-faces
@@ -746,3 +855,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+(provide 'init)
+
+;;; init.el ends here
