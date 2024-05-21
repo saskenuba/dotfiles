@@ -581,20 +581,28 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package lsp-mode
   :init (setq lsp-keymap-prefix "C-c l")
-  :hook ((clojure-mode . lsp)
-	 (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp
+  :hook '((clojure-mode . lsp)
+	  (lsp-mode . lsp-enable-which-key-integration))
+  :commands (lsp lsp-completion-provider)
   
   :config
+  (setenv "PATH" (concat "/usr/local/bin" path-separator (getenv "PATH")))
+  (dolist (m '(clojure-mode
+	       clojurec-mode
+	       clojurescript-mode
+	       clojurex-mode))
+    (add-to-list 'lsp-language-id-configuration `(,m . "clojure")))
+  
   (setq lsp-completion-provider :none)
-
   (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
+
   ;; evil bindings for peek mode
-  (with-eval-after-load 'lsp-ui
-    (general-define-key lsp-ui-peek-mode-map (kbd "h") #'lsp-ui-peek--select-prev-file)
-    (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
-    (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
-    (define-key lsp-ui-peek-mode-map (kbd "l") #'lsp-ui-peek--select-next-file)))
+  ;; (with-eval-after-load 'lsp-ui
+  ;;   (general-define-key lsp-ui-peek-mode-map (kbd "h") #'lsp-ui-peek--select-prev-file)
+  ;;   (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
+  ;;   (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
+  ;;   (define-key lsp-ui-peek-mode-map (kbd "l") #'lsp-ui-peek--select-next-file))
+  )
 
 (use-package lsp-ui
   :after lsp-mode
@@ -610,6 +618,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ;  :after '(all-the-icons treemacs)
 ;  :if treemacs-use-all-the-icons-theme
 ;  :hook ((treemacs-mode . (lambda () (treemacs-load-theme 'all-the-icons)))))
+
+(use-package consult-lsp)
 
 (use-package treemacs-evil
   :after treemacs
@@ -699,6 +709,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "gI" #'lsp-bridge-find-impl-other-window
     "gr" #'lsp-find-references
     "Gr" #'lsp-ui-peek-find-references
+    "gs" #'consult-lsp-symbols
     "gt" #'lsp-bridge-find-type-def
     "gT" #'lsp-bridge-find-type-def-other-window
     "gd" #'lsp-find-definition
@@ -846,9 +857,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(consult-lsp helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
- '(warning-suppress-types '((comp))))
+ '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
