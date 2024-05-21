@@ -32,6 +32,7 @@ vmap <leader>ws <c-w>s
 vmap <leader>wc <c-w>c
 vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
+nmap <leader>jj :action emacsIDEAs.AceJump<CR>
 
 
 function! OpenSplitAndRestorePosition()
