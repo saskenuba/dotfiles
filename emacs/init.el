@@ -1,7 +1,7 @@
 ; Font settings  -*- lexical-binding: t; -*-
 
 ;; This is only needed once, near the top of the file
-(eval-when-compile 
+(eval-when-compile
 
   ;; Add MELPA repository
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
@@ -26,7 +26,10 @@
           use-package-expand-minimally t))
 
 (defvar martmacs/default-font-size 100)
-(set-face-attribute 'default nil :font "CommitMono Nerd Font" :height martmacs/default-font-size)
+(set-face-attribute 'default nil
+		    :font "CommitMono Nerd Font"
+		    :height martmacs/default-font-size)
+;; (set-frame-font "CommitMono Nerd Font" nil t)
 
 ; Disable visible scrollbar
 (setq inhibit-startup-message t)
@@ -158,7 +161,7 @@ Lisp function does not specify a special indentation."
 (add-hook 'emacs-lisp-mode-hook
 	  (lambda () (setq-local lisp-indent-function #'Fuco1/lisp-indent-function)))
 
-;;; packages 
+;;; packages
 
 (use-package general
   :ensure t
@@ -184,6 +187,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	,@body)))
   
   (general-evil-setup t))
+
+;; automatically cleanup whitespace
+(use-package ws-butler
+  :init (ws-butler-global-mode))
 
 (use-package expand-region)
 
@@ -283,9 +290,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ; (use-package command-log-mode)
 
 (use-package ef-themes
-  :init (load-theme 'ef-cyprus :no-confirm))
+  ;:init (load-theme 'ef-cyprus :no-confirm)
+  )
 
-(use-package modus-themes)
+(use-package modus-themes
+  :init (load-theme 'modus-vivendi :no-confirm)
+  )
 
 (use-package orderless
   :custom
@@ -594,6 +604,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     (add-to-list 'lsp-language-id-configuration `(,m . "clojure")))
   
   (setq lsp-completion-provider :none)
+  (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
   (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
 
   ;; evil bindings for peek mode
@@ -644,6 +655,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package uuidgen)
 
 (use-package cider
+  :defer t
   :hook '((clojure-mode . cider-mode)
 	  (cider-repl-mode . eldoc-mode)
 	  (cider-mode . eldoc-mode))
@@ -681,6 +693,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package flycheck-joker)
 
+(use-package kaocha-runner
+  :defer t)
+
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
 					; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
@@ -694,12 +709,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (clojure-definer
     "a" #'lsp-execute-code-action
     "r" #'lsp-rename
-    "e" #'lsp-bridge-diagnostic-list
     
     ;; "=" #'rust-format-buffer
+    "eb" #'cider-load-buffer
     
     "sj" #'cider-jack-in-clj
-    "sc" #'cider-connect-clj
+    "scj" #'cider-connect-clj
     "sq" #'sesman-quit
     "sa" #'cider-switch-to-repl-buffer
 					; "rs" #'cider-switch-to-repl-buffer
@@ -857,7 +872,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(consult-lsp helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
