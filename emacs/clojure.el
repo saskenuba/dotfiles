@@ -1,3 +1,31 @@
+(defun clojure/fancify-symbols (mode)
+  "Pretty symbols for Clojure's anonymous functions and sets,
+   like (λ [a] (+ a 5)), ƒ(+ % 5), and ∈{2 4 6}."
+  (font-lock-add-keywords mode
+                          `(("(\\(fn\\)[[[:space:]]"
+                             (0 (progn (compose-region (match-beginning 1)
+                                                       (match-end 1) "λ")
+                                       nil)))
+                            ("(\\(partial\\)[[[:space:]]"
+                             (0 (progn (compose-region (match-beginning 1)
+                                                       (match-end 1) "Ƥ")
+                                       nil)))
+                            ("(\\(comp\\)[[[:space:]]"
+                             (0 (progn (compose-region (match-beginning 1)
+                                                       (match-end 1) "∘")
+                                       nil)))
+                            ("\\(#\\)("
+                             (0 (progn (compose-region (match-beginning 1)
+                                                       (match-end 1) "ƒ")
+                                       nil)))
+                            ("\\(#\\){"
+                             (0 (progn (compose-region (match-beginning 1)
+                                                       (match-end 1) "∈")
+                                       nil))))))
+
+(clojure/fancify-symbols 'cider-repl-mode)
+(clojure/fancify-symbols 'cider-clojure-interaction-mode)
+
 (defun cider-eval-in-repl-no-focus (form)
   "Insert FORM in the REPL buffer and eval it."
   (while (string-match "\\`[ \t\n\r]+\\|[ \t\n\r]+\\'" form)
