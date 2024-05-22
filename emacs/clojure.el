@@ -23,6 +23,18 @@
                                                        (match-end 1) "∈")
                                        nil))))))
 
+(defun lsp-find-implementation-other-window ()
+  "Find the implementation of the symbol at point and open it in another window."
+  (interactive)
+  (let ((orig-window (selected-window))
+	(orig-buffer (current-buffer)))
+    (lsp-find-implementation)
+    (let ((new-buffer (current-buffer)))
+      (switch-to-buffer-other-window new-buffer)
+      (select-window orig-window)
+      (switch-to-buffer orig-buffer)
+      (other-window 1))))
+
 (clojure/fancify-symbols 'cider-repl-mode)
 (clojure/fancify-symbols 'cider-clojure-interaction-mode)
 

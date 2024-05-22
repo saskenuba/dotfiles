@@ -7,7 +7,7 @@
   (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
 
   ;; Add MELPA Stable repository
-  (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+  ;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
 
   ;; Add Org ELPA repository
   (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
@@ -289,6 +289,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 ; (use-package command-log-mode)
 
+(use-package evil-cleverparens
+  :hook ((emacs-lisp-mode . evil-cleverparens-mode)
+	 (clojure-mode . evil-cleverparens-mode)
+	 (clojurescript-mode . evil-cleverparens-mode)
+	 (clojurec-mode . evil-cleverparens-mode)))
+
 (use-package ef-themes
   ;:init (load-theme 'ef-cyprus :no-confirm)
   )
@@ -312,7 +318,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :hook (('LaTeX-mode-hook . 'latex/auto-fill-mode)
 	 ('LaTeX-mode-hook . 'TeX-source-correlate-mode)
 	 ('doc-view-mode-hook . 'auto-revert-mode))
-  
+
   :config
   (setq TeX-parse-self t)
   (setq TeX-auto-save t)
@@ -333,13 +339,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :init
   (marginalia-mode))
 
+;; Example configuration for Consult
 (use-package which-key
   :init (which-key-mode)
   :diminish which-key-mode
   :config
   (setq which-key-idle-delay 1))
 
-;; Example configuration for Consult
 (use-package consult
 
   ;; Replace bindings. Lazily loaded due by `use-package'.
@@ -442,6 +448,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :general
   ("C-SPC" #'completion-at-point))
 
+;; A few more useful configurations...
 (use-package cape
   ;; Bind dedicated completion commands
   ;; Alternative prefix keys: C-c p, M-p, M-+, ...
@@ -482,7 +489,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ;;(add-hook 'completion-at-point-functions #'cape-line)
   )
 
-;; A few more useful configurations...
 (use-package emacs
   :init
   ;; TAB cycle if there are only few candidates
@@ -533,12 +539,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :hook
   ((emacs-lisp-mode . (lambda () (smartparens-strict-mode))))
   :config (require 'smartparens-config))
-
-(use-package evil-cleverparens
-  :hook ((emacs-lisp-mode . evil-cleverparens-mode)
-	 (clojure-mode . evil-cleverparens-mode)
-	 (clojurescript-mode . evil-cleverparens-mode)
-	 (clojurec-mode . evil-cleverparens-mode)))
 
 (use-package symex
   :after evil-cleverparens
@@ -712,6 +712,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package kaocha-runner
   :defer t)
+
+(use-package docker
+  :ensure t)
+
+(use-package docker-compose-mode)
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
@@ -890,7 +895,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(docker-compose-mod docker just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
