@@ -12,6 +12,12 @@
         (goto-char (point-max))))))
 
 
+(defun cider-test-run-focused-test ()
+  "Run test around point."
+  (interactive)
+  (cider-load-buffer)
+  (cider-test-run-test))
+
 (defun cider-send-ns-form-to-repl ()
   "Send buffer's ns form to REPL and evaluate it without changing
 the focus."
@@ -25,7 +31,43 @@ the focus."
 		    (list (cape-capf-super #'lsp-completion-at-point
 					   #'cider-complete-at-point
 					   #'dabbrev-capf))))))
+(defun cider-run-flowstorm ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (require '[flow-storm.api :as fs-api])
+	(fs-api/local-connect))"))
+
+(defun cider-send-reset ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (reset))"))
+
+(defun cider-send-reset-tests ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (reset-tests))"))
+
+(defun cider-send-restart ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (restart))"))
+
+(defun cider-send-go ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (go))"))
+
+(defun cider-send-halt ()
+  (interactive)
+  (cider-interactive-eval
+   "(do (ns user)
+        (halt))"))
+
 
 
 (provide 'clojure)
-;;;
+
