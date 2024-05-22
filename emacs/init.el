@@ -691,6 +691,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "J"   'cider-stacktrace-toggle-java
     "r"   'cider-stacktrace-toggle-repl
     "T"   'cider-stacktrace-toggle-tooling)
+
+  (nmap :keymaps 'cider-inspector-mode-map
+    "j"   'cider-inspector-next-inspectable-object
+    "k"   'cider-inspector-previous-inspectable-object
+    "l"   'cider-inspector-next-sibling
+    "h"   'cider-inspector-previous-sibling
+    "d"  'cider-inspector-def-current-val
+    "<tab>"  'cider-inspector-operate-on-point)
   )
 
 (use-package clojure-mode
@@ -717,17 +725,18 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   (clojure-definer
     "a" #'lsp-execute-code-action
-    "r" #'lsp-rename
+    "rr" #'lsp-rename
     
     ;; "=" #'rust-format-buffer
     "eb" #'cider-load-buffer
+    "el" #'cider-inspect-last-result
     
-    "sj" #'cider-jack-in-clj
-    "scj" #'cider-connect-clj
+    "scj" #'cider-jack-in-clj
+    "scc" #'cider-connect-clj
     "sq" #'sesman-quit
     "sa" #'cider-switch-to-repl-buffer
-					; "rs" #'cider-switch-to-repl-buffer
-    
+    "sb" #'cider-load-buffer
+
     "hh" #'lsp-ui-doc--display
     "gi" #'lsp-find-implementation
     "gI" #'lsp-bridge-find-impl-other-window
@@ -737,7 +746,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "gt" #'lsp-bridge-find-type-def
     "gT" #'lsp-bridge-find-type-def-other-window
     "gd" #'lsp-find-definition
-    "Gd" #'xref-find-definitions-other-window))
+    "gG" #'xref-find-definitions-other-window))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
@@ -881,7 +890,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
