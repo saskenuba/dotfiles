@@ -29,7 +29,6 @@
 (set-face-attribute 'default nil
 		    :font "CommitMono Nerd Font"
 		    :height martmacs/default-font-size)
-;; (set-frame-font "CommitMono Nerd Font" nil t)
 
 ; Disable visible scrollbar
 (setq inhibit-startup-message t)
@@ -230,6 +229,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq vertico-scroll-margin 0)
   (setq vertico-count 13))
 
+;; Remember to run `all-the-icons-install-fonts'
 (use-package all-the-icons
   :if (display-graphic-p))
 
@@ -510,7 +510,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package magit
   :general
   (global-definer
-   "gs" #'magit-status-quick))
+   "gs" #'magit-status-quick)
+
+  ;; (:keymaps 'git-commit-mode-map
+  ;;  "," #'with-editor-finish
+  ;;  "c" #'with-editor-cancel)
+  )
 
 (use-package magit-delta
   :hook ((magit-mode . magit-delta-mode)))
@@ -685,7 +690,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "d"   'cider-stacktrace-toggle-duplicates
     "J"   'cider-stacktrace-toggle-java
     "r"   'cider-stacktrace-toggle-repl
-    "T"   'cider-stacktrace-toggle-tooling))
+    "T"   'cider-stacktrace-toggle-tooling)
+  )
 
 (use-package clojure-mode
   :hook ((clojure-mode . evil-cleverparens-mode)
