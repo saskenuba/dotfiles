@@ -666,6 +666,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	cider-prompt-save-file-on-load nil
 	cider-repl-use-clojure-font-lock t)
 
+  ;; insert custom deps
+  (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.15.5")))
+
   :config
   (nmap :keymaps 'cider-stacktrace-mode-map
     "C-j" 'cider-stacktrace-next-cause
