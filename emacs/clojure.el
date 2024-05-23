@@ -107,6 +107,18 @@ the focus."
    "(do (ns user)
         (halt))"))
 
+(defun json->edn ()
+  "Convert the selected region, or entire file, from JSON to EDN."
+  (interactive)
+  (let ((b (if mark-active (region-beginning) (point-min)))
+        (e (if mark-active (region-end) (point-max)))
+        (jet (when (executable-find "jet")
+               "jet --pretty --keywordize keyword --from json --to edn")))
+    (if jet
+      (let ((p (point)))
+        (shell-command-on-region b e jet (current-buffer) t)
+        (goto-char p))
+      (user-error "Could not find jet installed"))))
 
 
 (provide 'clojure)

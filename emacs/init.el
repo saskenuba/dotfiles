@@ -56,8 +56,8 @@
 
 ;; Setup support for recent files
 (recentf-mode 1)
-(setq recentf-max-menu-items 25)
-(setq recentf-max-saved-items 25)
+(setq recentf-max-menu-items 50)
+(setq recentf-max-saved-items 50)
 
 ;; Setup bell
 (setq visible-bell t)
@@ -559,7 +559,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (global-set-key (kbd "s-;") 'symex-mode-interface)  ; or whatever keybinding you like
   :hook
   ((clojure-mode . (lambda ()
-		     (setq symex-quote-prefix-list (list "#'"))
+		     (setq symex-quote-prefix-list (list "'" "@" "#" "#_"))
 		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
 		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
    (emacs-lisp-mode . (lambda ()
@@ -734,17 +734,20 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     
     ;; "=" #'rust-format-buffer
     "eb" #'cider-load-buffer
-    "el" #'cider-inspect-last-result
+    "evl" #'cider-inspect-last-result
     
     "scj" #'cider-jack-in-clj
     "scc" #'cider-connect-clj
     "sq" #'sesman-quit
     "sa" #'cider-switch-to-repl-buffer
     "sb" #'cider-load-buffer
+    "sn" #'cider-send-ns-form-to-repl
+
+    "tt" #'cider-test-run-test
 
     "hh" #'lsp-ui-doc--display
     "gi" #'lsp-find-implementation
-    "gI" #'lsp-bridge-find-impl-other-window
+    "gI" #'lsp-find-implementation-other-window
     "gr" #'lsp-find-references
     "Gr" #'lsp-ui-peek-find-references
     "gs" #'consult-lsp-symbols
@@ -848,6 +851,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (+general-global-menu! "Treemacs" "t"
   "t" #'treemacs)
 
+(+general-global-menu! "Text" "x"
+  "tj" #'json->edn)
 
 ;; LSP booster to make json parsing comms faster
 ;; installation needed: https://github.com/blahgeek/emacs-lsp-booster
