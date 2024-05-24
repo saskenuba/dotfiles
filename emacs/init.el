@@ -610,7 +610,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   
   (setq lsp-completion-provider :none)
   (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
-  (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
+  (setq lsp-enable-file-watchers nil)
+  ; (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
 
   ;; evil bindings for peek mode
   ;; (with-eval-after-load 'lsp-ui
@@ -624,11 +625,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :after lsp-mode
   :commands lsp-ui-mode)
 
-(use-package treemacs)
+; (use-package treemacs)
 
 (use-package lsp-treemacs
   :after '(lsp-mode treemacs)
-  :commands lsp-treemacs-errors-list)
+  :commands lsp-treemacs-errors-list
+  :init (lsp-treemacs-sync-mode 1))
 
 ;(use-package treemacs-all-the-icons
 ;  :after '(all-the-icons treemacs)
@@ -638,7 +640,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package consult-lsp)
 
 (use-package treemacs-evil
-  :after treemacs
   :hook '(treemacs-mode-hook . evil-treemacs-state))
 
 (use-package treemacs-magit
@@ -675,6 +676,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.15.5")))
 
   :config
+  (add-hook 'cider-mode-hook
+	    (lambda ()
+	      (setq completion-at-point-functions
+		    (list #'cider-complete-at-point
+			  #'lsp-completion-at-point
+			  #'dabbrev-capf))))
+
+  :general
   (nmap :keymaps 'cider-stacktrace-mode-map
     "C-j" 'cider-stacktrace-next-cause
     "C-k" 'cider-stacktrace-previous-cause
@@ -843,7 +852,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "ei" '((lambda () (interactive) (find-file "~/.emacs.d/init.el"))
 	 :which-key "Open init.el")
   "f" '(find-file :which-key)
-  "s"  '(save-buffer :which-key "Save buffer"))
+  "s"  '(save-buffer :which-key "Save buffer")
+  "S" '(evil-write-all :which-key "Save opened buffers"))
 
 (+general-global-menu! "Project" "p"
   "f" #'project-find-file)
@@ -900,7 +910,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  '(custom-safe-themes
    '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
  '(package-selected-packages
-   '(docker-compose-mod docker just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-evil treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
+   '(treemacs-evil docker-compose-mod docker just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
  '(safe-local-variable-values '((TeX-encoding . UTF-8)))
  '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces

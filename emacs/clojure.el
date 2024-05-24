@@ -68,8 +68,8 @@ the focus."
   (add-hook 'cider-mode-hook
 	    (lambda ()
 	      (setq completion-at-point-functions
-		    (list (cape-capf-super #'lsp-completion-at-point
-					   #'cider-complete-at-point
+		    (list (cape-capf-super #'cider-complete-at-point
+					   #'lsp-completion-at-point
 					   #'dabbrev-capf))))))
 (defun cider-run-flowstorm ()
   (interactive)
