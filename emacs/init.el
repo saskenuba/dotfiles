@@ -748,8 +748,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package docker-compose-mode)
 
-(load (expand-file-name "clojure.el"))
-(load (expand-file-name "elisp.el"))
+(load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
+(load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
