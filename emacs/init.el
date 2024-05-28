@@ -769,6 +769,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     ;; "=" #'rust-format-buffer
     "eb" #'cider-load-buffer
     "evl" #'cider-inspect-last-result
+
+    "if" #'cider-run-flowstorm
     
     "scj" #'cider-jack-in-clj
     "scc" #'cider-connect-clj
@@ -886,7 +888,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "S" '(evil-write-all :which-key "Save opened buffers"))
 
 (+general-global-menu! "Project" "p"
-  "f" #'project-find-file)
+  "f" #'project-find-file
+  "b" #'consult-project-buffer)
 
 (+general-global-menu! "Treemacs" "t"
   "t" #'treemacs)
