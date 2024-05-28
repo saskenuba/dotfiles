@@ -514,6 +514,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :init (global-flycheck-mode))
 
 (use-package magit
+  :config
+  (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
+
   :general
   (global-definer
    "gs" #'magit-status-quick)
