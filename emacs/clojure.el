@@ -75,13 +75,13 @@ the focus."
   (interactive)
   (cider-interactive-eval
    "(do (require '[flow-storm.api :as fs-api])
-	(fs-api/local-connect))"))
+	(fs-api/local-connect)
+        (fs-api/start-recording))"))
 
 (defun cider-send-reset ()
   (interactive)
   (cider-interactive-eval
-   "(do (ns user)
-        (reset))"))
+   "(do (reset))"))
 
 (defun cider-send-reset-tests ()
   (interactive)
