@@ -597,6 +597,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package lsp-mode
   :init (setq lsp-keymap-prefix "C-c l")
   :hook '((clojure-mode . lsp)
+	  (rust-ts-mode . lsp)
 	  (lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-completion-provider)
   
@@ -611,6 +612,16 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq lsp-completion-provider :none)
   (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
   (setq lsp-enable-file-watchers nil)
+  (setq lsp-log-io nil)
+  (setq lsp-response-timeout 1)
+
+  ;; show function docs on cursor
+  (setq lsp-ui-doc-show-with-cursor t)
+  (setq lsp-ui-doc-show-with-mouse nil)
+  (setq lsp-ui-doc-position 'top)
+  (setq lsp-eldoc-render-all nil)
+  (setq lsp-signature-render-documentation t)
+
   ; (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
 
   ;; evil bindings for peek mode
@@ -715,6 +726,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 (clojurescript-mode . evil-cleverparens-mode)
 	 (clojurec-mode . evil-cleverparens-mode)))
 
+(use-package clj-refactor
+  :hook ((clojure-mode . (lambda () (clj-refactor-mode 1)))))
+
+(use-package flycheck-clojure
+  :config
+  (flycheck-clojure-setup))
+
 (use-package flycheck-clj-kondo)
 
 (use-package flycheck-joker)
@@ -740,6 +758,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (clojure-definer
     "a" #'lsp-execute-code-action
     "rr" #'lsp-rename
+    "rs" #'clojure-sort-ns
     
     ;; "=" #'rust-format-buffer
     "eb" #'cider-load-buffer
@@ -751,8 +770,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "sa" #'cider-switch-to-repl-buffer
     "sb" #'cider-load-buffer
     "sn" #'cider-send-ns-form-to-repl
+    "sN" #'cider-repl-set-ns
+
+    "mr" #'cider-send-reset
 
     "tt" #'cider-test-run-test
+    "tn" #'cider-test-run-ns-tests
 
     "hh" #'lsp-ui-doc--display
     "gi" #'lsp-find-implementation
