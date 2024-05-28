@@ -559,7 +559,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (global-set-key (kbd "s-;") 'symex-mode-interface)  ; or whatever keybinding you like
   :hook
   ((clojure-mode . (lambda ()
-		     (setq symex-quote-prefix-list (list "'" "@" "#" "#_"))
+		     (setq-local symex-quote-prefix-list (list "#" "'" "@" "#_"))
 		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
 		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
    (emacs-lisp-mode . (lambda ()
@@ -745,6 +745,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package docker-compose-mode)
 
+(load (expand-file-name "clojure.el"))
+(load (expand-file-name "elisp.el"))
+
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
 					; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
@@ -791,8 +794,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
   ; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
-  (corfu-mode -1) ; Deactivate corfu-mode
-  (acm-mode 1) ; Activate acm-mode
+  ; (corfu-mode -1) ; Deactivate corfu-mode
+  ; (acm-mode 1) ; Activate acm-mode
   (general-create-definer rust-definer
     :keymaps 'override
     :states '(emacs normal hybrid motion visual operator)
@@ -860,7 +863,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (+general-global-menu! "Buffer" "b"
   "b" #'consult-buffer
-  "d" '(kill-current-buffer :which-key "Kill this buffer"))
+  "d" '(kill-current-buffer :which-key "Kill this buffer")
+  "Y" '(buffer-yank-all :which-key "Yank whole buffer"))
 
 (+general-global-menu! "Window" "w"
   "h"  #'evil-window-left
