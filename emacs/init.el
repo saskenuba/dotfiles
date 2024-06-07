@@ -690,12 +690,15 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.15.5")))
 
   :config
+  (cider-enable-flex-completion)
+  (setq cider-test-fail-fast nil)
   (add-hook 'cider-mode-hook
 	    (lambda ()
 	      (setq completion-at-point-functions
 		    (list #'cider-complete-at-point
 			  #'lsp-completion-at-point
 			  #'dabbrev-capf))))
+  (setq cider-font-lock-dynamically '(macro core function var))
 
   :general
   (nmap :keymaps 'cider-stacktrace-mode-map
@@ -784,6 +787,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
     "tt" #'cider-test-run-test
     "tn" #'cider-test-run-ns-tests
+    "tp" #'cider-test-run-project-tests
 
     "hh" #'lsp-ui-doc--display
     "gi" #'lsp-find-implementation
@@ -815,7 +819,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    "bc" #'rust-run-clippy
    "bb" #'rust-compile
    "bt" #'rust-test
-   
+
    "hh" #'lsp-bridge-show-documentation
    "gi" #'lsp-bridge-find-impl
    "gI" #'lsp-bridge-find-impl-other-window
@@ -828,6 +832,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (add-hook 'rust-mode-hook 'my-rust-mode-setup)
 (add-hook 'clojure-mode-hook 'my-clojure-mode-setup)
+(add-hook 'clojure-mode-hook (lambda () (set-fill-column 100)))
 (add-hook 'lsp-bridge-peek-mode-hook 'evil-normalize-keymaps)
 (add-hook 'lsp-bridge-ref-mode-hook 'evil-normalize-keymaps)
 (nmap :keymaps 'lsp-bridge-peek-keymap
@@ -857,12 +862,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "qq"  #'kill-emacs
   "TAB" '((lambda () (interactive) (switch-to-buffer nil))
 	  :which-key "Swap to last used buffer")
-  
+
   "ik" '(lambda () (interactive) (evil-insert-newline-above))
   "ij" '(lambda () (interactive) (evil-insert-newline-below))
   "jj" '(avy-goto-char-timer :which-key "Ace jump")
-  
-  
+
+
   "hs" '((lambda () (interactive) (describe-symbol (symbol-at-point)))
 	 :which-key "Describe symbol at point"))
 
