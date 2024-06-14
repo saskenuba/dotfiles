@@ -611,10 +611,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	       clojurescript-mode
 	       clojurex-mode))
     (add-to-list 'lsp-language-id-configuration `(,m . "clojure")))
-  
+
   (setq lsp-completion-provider :none)
   (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
-  (setq lsp-enable-file-watchers nil)
+  (setq lsp-enable-file-watchers t)
+  (setq lsp-ui-sideline-show-diagnostics t)
   (setq lsp-log-io nil)
   (setq lsp-response-timeout 1)
 
@@ -735,11 +736,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package clj-refactor
   :hook ((clojure-mode . (lambda () (clj-refactor-mode 1)))))
 
-(use-package flycheck-clojure
-  :config
-  (flycheck-clojure-setup))
+;; (use-package flycheck-clojure
+;;   :config
+;;   (flycheck-clojure-setup))
 
-(use-package flycheck-clj-kondo)
+;; (use-package flycheck-clj-kondo)
 
 (use-package flycheck-joker)
 
@@ -751,14 +752,17 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package docker-compose-mode)
 
+(use-package tree-mode)
+
+(use-package json-navigator
+  :hook ((hierarchy-tabulated-mode . tree-mode)))
+
+;; load additional layers
 (load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
 (load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
-					; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
-					; (corfu-mode -1) ; Deactivate corfu-mode
-					; (acm-mode 1) ; Activate acm-mode
   (general-create-definer clojure-definer
     :keymaps 'override
     :states '(emacs normal hybrid motion visual operator)
@@ -768,13 +772,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "a" #'lsp-execute-code-action
     "rr" #'lsp-rename
     "rs" #'clojure-sort-ns
-    
+
     ;; "=" #'rust-format-buffer
     "eb" #'cider-load-buffer
     "evl" #'cider-inspect-last-result
 
     "if" #'cider-run-flowstorm
-    
+
     "scj" #'cider-jack-in-clj
     "scc" #'cider-connect-clj
     "sq" #'sesman-quit
@@ -785,7 +789,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
     "mr" #'cider-send-reset
 
-    "tt" #'cider-test-run-test
+    "tt" #'cider-test-run-focused-test
     "tn" #'cider-test-run-ns-tests
     "tp" #'cider-test-run-project-tests
 
@@ -798,7 +802,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "gt" #'lsp-bridge-find-type-def
     "gT" #'lsp-bridge-find-type-def-other-window
     "gd" #'lsp-find-definition
-    "gG" #'xref-find-definitions-other-window))
+    "gG" #'xref-find-definitions-other-window
+
+    "==" #'lsp-format-buffer
+    "=r" #'lsp-format-region))
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
@@ -936,6 +943,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
 ;; end of lsp booster
 
+;; Add a hook to enable emacs-lisp-mode for .dir-locals.el files
+(defun enable-emacs-lisp-mode-for-dir-locals ()
+  "Enable `emacs-lisp-mode` for .dir-locals.el files."
+  (when (and buffer-file-name
+             (string-equal (file-name-nondirectory buffer-file-name) ".dir-locals.el"))
+    (emacs-lisp-mode)))
+
+(add-hook 'find-file-hook 'enable-emacs-lisp-mode-for-dir-locals)
 
 (defvar mylayers
   '("clojure.el"))
