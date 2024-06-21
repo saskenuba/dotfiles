@@ -25,10 +25,18 @@
     (setq use-package-verbose nil
           use-package-expand-minimally t))
 
-(defvar martmacs/default-font-size 100)
+(defvar martmacs/default-font-size 95)
+
+;; Cool fonts:
+;; - CommitMono Nerd Font
+;; - Cousine Nerd Font Mono
+;; - Hasklug Nerd Font
+;; - LiterationMono Nerd Font
 (set-face-attribute 'default nil
-		    :font "CommitMono Nerd Font"
-		    :height martmacs/default-font-size)
+		    :font   "Cousine Nerd Font Mono"
+		    :height martmacs/default-font-size
+                    :weight 'medium
+                    :width  'normal)
 
 ; Disable visible scrollbar
 (setq inhibit-startup-message t)
@@ -248,6 +256,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ; Persist history over Emacs restarts. Vertico sorts by history position.
 (use-package savehist
   :init (savehist-mode))
+
+(use-package writeroom-mode
+  :hook '((writeroom-mode . (lambda () (display-line-numbers-mode)))))
 
 (use-package evil
   :init
@@ -529,6 +540,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package magit-delta
   :hook ((magit-mode . magit-delta-mode)))
 
+(use-package magit-lfs
+  :after magit)
+
 (use-package forge
   :after magit)
 
@@ -675,6 +689,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package uuidgen)
 
+(use-package envrc
+  :hook (after-init . envrc-global-mode))
+
 (use-package cider
   :defer t
   :hook '((clojure-mode . cider-mode)
@@ -696,9 +713,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (add-hook 'cider-mode-hook
 	    (lambda ()
 	      (setq completion-at-point-functions
+		    ;; (list #'cider-complete-at-point
+		    ;; 	  #'lsp-completion-at-point
+		    ;; 	  #'dabbrev-capf)
+
 		    (list #'cider-complete-at-point
 			  #'lsp-completion-at-point
-			  #'dabbrev-capf))))
+			  #'cape-dabbrev)
+		    )))
   (setq cider-font-lock-dynamically '(macro core function var))
 
   :general
@@ -787,13 +809,17 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "sn" #'cider-send-ns-form-to-repl
     "sN" #'cider-repl-set-ns
 
+    "mg" #'cider-send-go
+    "mh" #'cider-send-halt
     "mr" #'cider-send-reset
+    "mt" #'cider-send-reload-tests
 
     "tt" #'cider-test-run-focused-test
     "tn" #'cider-test-run-ns-tests
     "tp" #'cider-test-run-project-tests
 
-    "hh" #'lsp-ui-doc--display
+    "hh" #'cider-doc
+    "hc" #'cider-clojuredocs
     "gi" #'lsp-find-implementation
     "gI" #'lsp-find-implementation-other-window
     "gr" #'lsp-find-references
@@ -881,6 +907,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (+general-global-menu! "Buffer" "b"
   "b" #'consult-buffer
   "d" '(kill-current-buffer :which-key "Kill this buffer")
+  "P" '(copy-clipboard-to-whole-buffer :which-key "Paste clipboard to whole buffer")
   "Y" '(buffer-yank-all :which-key "Yank whole buffer"))
 
 (+general-global-menu! "Window" "w"
