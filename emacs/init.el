@@ -25,7 +25,10 @@
     (setq use-package-verbose nil
           use-package-expand-minimally t))
 
-(defvar martmacs/default-font-size 95)
+(package-refresh-contents :async)
+
+;; (defvar martmacs/default-font-size 95)
+(defvar martmacs/default-font-size 110)
 
 ;; Cool fonts:
 ;; - CommitMono Nerd Font
@@ -71,7 +74,7 @@
 (setq visible-bell t)
 
 ;; Set to always split vertically
-(setq split-width-threshold 0)
+(setq split-width-threshold 100)
 (setq split-height-threshold nil)
 
 ;; Make ESC quit prompts
@@ -203,6 +206,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package ws-butler
   :init (ws-butler-global-mode))
 
+(use-package sudo-edit)
+
 (use-package expand-region)
 
 (use-package iedit)
@@ -261,6 +266,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package savehist
   :init (savehist-mode))
 
+(use-package window-purpose
+  :init (purpose-mode)
+  :config
+  (add-to-list 'purpose-user-mode-purposes '(magit-status-mode . magit))
+  (add-to-list 'purpose-user-mode-purposes '(cider-repl-mode . repl))
+  ; (purpose-compile-user-configuration)
+  )
+
 (use-package writeroom-mode
   :hook '((writeroom-mode . (lambda () (display-line-numbers-mode)))))
 
@@ -315,8 +328,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   )
 
 (use-package modus-themes
-  :init (load-theme 'modus-vivendi :no-confirm)
-  )
+  :init (load-theme 'modus-vivendi-tinted :no-confirm))
 
 (use-package orderless
   :custom
@@ -709,7 +721,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	cider-repl-use-clojure-font-lock t)
 
   ;; insert custom deps
-  (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.16.0")))
+  (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.17.4")))
 
   :config
   (cider-enable-flex-completion)
@@ -924,13 +936,15 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "2"  #'evil-window-vsplit
   "1"  #'delete-other-windows
   "d"  #'delete-window
-  "r"  #'evil-window-rotate-downwards)
+  "r"  #'evil-window-rotate-downwards
+  "="  #'balance-windows)
 
 (+general-global-menu! "File" "f"
   "ei" '((lambda () (interactive) (find-file "~/.emacs.d/init.el"))
 	 :which-key "Open init.el")
   "f" '(find-file :which-key)
-  "s"  '(save-buffer :which-key "Save buffer")
+  "r" '(rename-file :which-key "Rename file")
+  "s" '(save-buffer :which-key "Save buffer")
   "S" '(evil-write-all :which-key "Save opened buffers"))
 
 (+general-global-menu! "Project" "p"
@@ -985,9 +999,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     (emacs-lisp-mode)))
 
 (add-hook 'find-file-hook 'enable-emacs-lisp-mode-for-dir-locals)
-
-(defvar mylayers
-  '("clojure.el"))
 
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
