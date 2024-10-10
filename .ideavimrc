@@ -65,7 +65,7 @@ vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/
 
 " Sexp editing mappings straight from paredit.vim
 map <leader>J :action :cursive.actions.paredit/join<CR>
-map <S-\|> :action :cursive.actions.paredit/split<CR>
+map <S-\> :action :cursive.actions.paredit/split<CR>
 map <leader>S :action :cursive.actions.paredit/splice<CR>
 map <S-k> :action :cursive.actions.paredit/raise<CR>
 
@@ -84,10 +84,10 @@ map <leader>k :action :cursive.actions.paredit/splice-killing-backwards<CR>
 map <leader>j :action :cursive.actions.paredit/splice-killing-forwards<CR>
 
 " Shift + wrapping symbol for wrapping
-map <S-)> :action :cursive.actions.paredit/wrap-paren<CR>
+map <S-0> :action :cursive.actions.paredit/wrap-paren<CR>
 map <S-]> :action :cursive.actions.paredit/wrap-square<CR>
-map <A-S-}> :action :cursive.actions.paredit/wrap-curly<CR>
-map <S-"> :action :cursive.actions.paredit/wrap-quotes<CR>
+map <A-S-]> :action :cursive.actions.paredit/wrap-curly<CR>
+" map <S-"> :action :cursive.actions.paredit/wrap-quotes<CR>
 
 " vim delete and change, with sexps!
 map <leader>x :action :cursive.actions.paredit/kill-sexp<CR>
