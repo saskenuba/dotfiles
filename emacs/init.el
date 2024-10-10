@@ -772,7 +772,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 (clojurec-mode . evil-cleverparens-mode)))
 
 (use-package clj-refactor
-  :hook ((clojure-mode . (lambda () (clj-refactor-mode 1)))))
+  :hook ((clojure-mode . (lambda () (clj-refactor-mode 1))))
+
+  :config
+  (setq cljr-add-ns-to-blank-clj-files nil))
 
 ;; (use-package flycheck-clojure
 ;;   :config
@@ -818,6 +821,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "if" #'cider-run-flowstorm
 
     "scj" #'cider-jack-in-clj
+    "scJ" #'cider-jack-in-clj&cljs
     "scc" #'cider-connect-clj
     "sq" #'sesman-quit
     "sa" #'cider-switch-to-repl-buffer
