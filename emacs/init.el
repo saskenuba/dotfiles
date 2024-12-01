@@ -1,21 +1,30 @@
 ; Font settings  -*- lexical-binding: t; -*-
 
-;; This is only needed once, near the top of the file
-(eval-when-compile
+(setq custom-file (locate-user-emacs-file "custom.el"))
+(load custom-file :no-error-if-file-is-missing)
 
-  ;; Add MELPA repository
-  (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+;;; Set up the package manager
 
-  ;; Add MELPA Stable repository
-  ;; (add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(require 'package)
+(package-initialize)
 
-  ;; Add Org ELPA repository
-  (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 
-  (require 'use-package))
+(when (< emacs-major-version 29)
+  (unless (package-installed-p 'use-package)
+    (unless package-archive-contents
+      (package-refresh-contents))
+    (package-install 'use-package)))
+
+(add-to-list 'display-buffer-alist
+             '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
+               (display-buffer-no-window)
+               (allow-no-window . t)))
 
 ; force download and installation of packages
 (setq use-package-always-ensure t)
+(package-refresh-contents :async)
 
 (if init-file-debug
       (setq use-package-verbose t
@@ -25,7 +34,6 @@
     (setq use-package-verbose nil
           use-package-expand-minimally t))
 
-(package-refresh-contents :async)
 
 ;; (defvar martmacs/default-font-size 95)
 (defvar martmacs/default-font-size 110)
