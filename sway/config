@@ -27,6 +27,8 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 # Custom keybindings
 set $offline_docs zeal
 set $filemanager ranger
+set $bluetooth blueman-applet
+set $audio_control pavucontrol
 
 ### Output configuration
 #
@@ -90,7 +92,8 @@ input 1267:12424:DELL083F:00_04F3:3088_Touchpad {
 
     bindsym $mod+z exec $offline_docs
     bindsym $mod+Shift+e exec $filemanager
-
+    bindsym $mod+Shift+a exec $bluetooth
+    bindsym $mod+Ctrl+a exec $audio_control
 
     # Drag floating windows by holding down $mod and left mouse button.
     # Resize them with right mouse button + $mod.
@@ -257,3 +260,9 @@ assign [class="firefox"] workspace 9
 
 ## Dev workspace
 assign [class="Emacs"] workspace 2
+
+## Offline Docs
+assign [class="zeal"] workspace 4
+
+## Spotify
+assign [class="spotify"] workspace 3
