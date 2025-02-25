@@ -729,7 +729,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	cider-repl-use-clojure-font-lock t)
 
   ;; insert custom deps
-  (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.17.4")))
+  ;; (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.17.4")))
 
   :config
   (cider-enable-flex-completion)
@@ -746,6 +746,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 			  #'cape-dabbrev)
 		    )))
   (setq cider-font-lock-dynamically '(macro core function var))
+  (setq cider-download-java-sources t)
 
   :general
   (nmap :keymaps 'cider-stacktrace-mode-map
@@ -805,6 +806,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package json-navigator
   :hook ((hierarchy-tabulated-mode . tree-mode)))
+
+(use-package emojify
+  :hook (after-init . global-emojify-mode))
 
 ;; load additional layers
 (load (expand-file-name "mylayers/clojure.el" user-emacs-directory))

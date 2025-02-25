@@ -29,6 +29,26 @@ buffer's dir-locals."
   (clipboard-yank)
   (deactivate-mark))
 
+(defun copy-project-relative-file-path-and-line ()
+  "Copy the project-relative file path and line number of the
+current buffer's point."
+  (interactive)
+  (let ((file (buffer-file-name)))
+    (unless file
+      (user-error "Buffer is not visiting a file"))
+    (let ((proj (project-current)))
+      (unless proj
+        (user-error "Not in a project"))
+      (let* ((root (project-root proj))
+             (rel-path (file-relative-name file root))
+             (line (line-number-at-pos (point) t))
+             (in-project (file-in-directory-p file root)))
+        (unless in-project
+          (user-error "File is not within the project"))
+        (let ((result (format "%s:%d" rel-path line)))
+          (kill-new result)
+          (message "Copied: %s" result))))))
+
 (provide 'elisp)
 
 ;;; elisp.el ends here
