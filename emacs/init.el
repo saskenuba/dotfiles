@@ -693,7 +693,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package consult-lsp)
 
 (use-package treemacs-evil
-  :hook '(treemacs-mode-hook . evil-treemacs-state))
+  :hook (treemacs-mode . evil-treemacs-state))
 
 (use-package treemacs-magit
   :defer t
@@ -794,11 +794,22 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 ;; (use-package flycheck-joker)
 
+(use-package aidermacs
+  :bind (("C-c a" . aidermacs-transient-menu))
+  :config
+  ; defun my-get-openrouter-api-key yourself elsewhere for security reasons
+  :custom
+  ; See the Configuration section below
+  (aidermacs-default-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
+  (aidermacs-architect-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
+  (aidermacs-use-architect-mode t))
+
 (use-package kaocha-runner
   :defer t)
 
 (use-package docker
-  :ensure t)
+  :ensure t
+  :mode ("Dockerfile\\'" . dockerfile-ts-mode))
 
 (use-package docker-compose-mode)
 
