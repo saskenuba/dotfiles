@@ -7,9 +7,7 @@
 
 (require 'package)
 (package-initialize)
-
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-(add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t)
 
 (when (< emacs-major-version 29)
   (unless (package-installed-p 'use-package)
@@ -620,18 +618,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package yasnippet
   :init (yas-global-mode 1))
 
-
-;(use-package lsp-bridge
-;  :straight '(lsp-bridge :type git :host github :repo "manateelazycat/lsp-bridge"
-;			 :files (:defaults "*.el" "*.py" "acm" "core" "langserver" "multiserver" "resources")
-;			 :build (:not compile))
-;  :init (global-lsp-bridge-mode)
-
-  ; :hook ((rust-mode . lsp-bridge-mode))
-
-;  :config (setq lsp-bridge-peek-list-height 10)
-;  :general (global-definer "a" #'lsp-bridge-code-action))
-
 (setq read-process-output-max (* 1024 1024))
 (setq gc-cons-threshold 100000000)
 
@@ -794,14 +780,20 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 ;; (use-package flycheck-joker)
 
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (exec-path-from-shell-copy-env "OPENROUTER_API_KEY")
+  (exec-path-from-shell-copy-env "GEMINI_API_KEY"))
+
 (use-package aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
-  :config
-  ; defun my-get-openrouter-api-key yourself elsewhere for security reasons
   :custom
-  ; See the Configuration section below
-  (aidermacs-default-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
-  (aidermacs-architect-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
+   ; See the Configuration section below
+  ;(aidermacs-default-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
+  ;(aidermacs-architect-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
+  (aidermacs-default-model "gemini/gemini-2.5-pro-exp-03-25")
+  (aidermacs-architect-model "gemini/gemini-2.5-pro-exp-03-25")
   (aidermacs-use-architect-mode t))
 
 (use-package kaocha-runner
