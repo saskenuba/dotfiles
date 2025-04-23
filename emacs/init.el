@@ -353,14 +353,15 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 ('doc-view-mode-hook . 'auto-revert-mode))
 
   :config
-  (setq TeX-parse-self t)
-  (setq TeX-auto-save t)
-  (setq TeX-engine #'latex-build-engine)
-  (setq TeX-command-default #'latex-build-command)
-
   ; set zathura as default viewer
   (add-to-list 'TeX-view-program-list '("Zathura" ("zathura" " %o")))
-  (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura")))
+  (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura"))
+
+  :custom
+  (TeX-parse-self t)
+  (TeX-auto-save t)
+  (TeX-engine #'latex-build-engine)
+  (TeX-command-default #'latex-build-command))
 
 (use-package marginalia
   :general
@@ -376,8 +377,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package which-key
   :init (which-key-mode)
   :diminish which-key-mode
-  :config
-  (setq which-key-idle-delay 1))
+  :custom
+  (which-key-idle-delay 1))
 
 (use-package consult
 
@@ -604,10 +605,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    (emacs-lisp-mode . (lambda ()
 			(setq symex-quote-prefix-list (list "'" "#'"))
 			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface))))
-  :config
-  ;; (add-hook 'clojure-mode-hook (lambda () (add-to-list 'symex--evil-keyspec '("C-M-l" . clojure-align))))
-  )
+			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
 
 (use-package avy)
 
@@ -627,38 +625,29 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	  (rust-ts-mode . lsp)
 	  (lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-completion-provider)
-  
+
   :config
   (setenv "PATH" (concat "/usr/local/bin" path-separator (getenv "PATH")))
   (dolist (m '(clojure-mode
-	       clojurec-mode
-	       clojurescript-mode
-	       clojurex-mode))
+               clojurec-mode
+               clojurescript-mode
+               clojurex-mode))
     (add-to-list 'lsp-language-id-configuration `(,m . "clojure")))
 
-  (setq lsp-completion-provider :none)
-  (setq lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
-  (setq lsp-enable-file-watchers t)
-  (setq lsp-ui-sideline-show-diagnostics t)
-  (setq lsp-log-io nil)
-  (setq lsp-response-timeout 1)
+  :custom
+  (lsp-completion-provider :none)
+  (lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
+  (lsp-enable-file-watchers t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-log-io nil)
+  (lsp-response-timeout 1)
 
   ;; show function docs on cursor
-  (setq lsp-ui-doc-show-with-cursor t)
-  (setq lsp-ui-doc-show-with-mouse nil)
-  (setq lsp-ui-doc-position 'top)
-  (setq lsp-eldoc-render-all nil)
-  (setq lsp-signature-render-documentation t)
-
-  ; (add-hook 'lsp-ui-peek-mode-hook 'evil-normalize-keymaps)
-
-  ;; evil bindings for peek mode
-  ;; (with-eval-after-load 'lsp-ui
-  ;;   (general-define-key lsp-ui-peek-mode-map (kbd "h") #'lsp-ui-peek--select-prev-file)
-  ;;   (define-key lsp-ui-peek-mode-map (kbd "j") #'lsp-ui-peek--select-next)
-  ;;   (define-key lsp-ui-peek-mode-map (kbd "k") #'lsp-ui-peek--select-prev)
-  ;;   (define-key lsp-ui-peek-mode-map (kbd "l") #'lsp-ui-peek--select-next-file))
-  )
+  (lsp-ui-doc-show-with-cursor t)
+  (lsp-ui-doc-show-with-mouse nil)
+  (lsp-ui-doc-position 'top)
+  (lsp-eldoc-render-all nil)
+  (lsp-signature-render-documentation t))
 
 (use-package lsp-ui
   :after lsp-mode
@@ -678,6 +667,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package consult-lsp)
 
+(use-package consult-flycheck)
+
 (use-package treemacs-evil
   :hook (treemacs-mode . evil-treemacs-state))
 
@@ -687,9 +678,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package org-roam
   :config
-  (setq org-roam-directory "~/Dropbox/Pessoal/Notes")
   (org-roam-db-autosync-mode)
-  (setq org-M-RET-may-split-line nil)
+  :custom
+  (org-roam-directory "~/Dropbox/Pessoal/Notes")
+  (org-M-RET-may-split-line nil)
 
   :general
   ("M-S-<return>" #'org-insert-item))
@@ -711,15 +703,18 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :init
   (setq cider-stacktrace-default-filters '(tooling dup)
 	cider-repl-pop-to-buffer-on-connect nil
-	cider-prompt-save-file-on-load nil
 	cider-repl-use-clojure-font-lock t)
 
   ;; insert custom deps
   ;; (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.17.4")))
+  :custom
+  (cider-test-fail-fast nil)
+  (cider-font-lock-dynamically '(macro core function var))
+  (cider-download-java-sources t)
+  (cider-prompt-save-file-on-load nil)
 
   :config
   (cider-enable-flex-completion)
-  (setq cider-test-fail-fast nil)
   (add-hook 'cider-mode-hook
 	    (lambda ()
 	      (setq completion-at-point-functions
@@ -729,10 +724,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 		    (list #'cider-complete-at-point
 			  #'lsp-completion-at-point
-			  #'cape-dabbrev)
-		    )))
-  (setq cider-font-lock-dynamically '(macro core function var))
-  (setq cider-download-java-sources t)
+			  #'cape-dabbrev))))
 
   :general
   (nmap :keymaps 'cider-stacktrace-mode-map
@@ -772,14 +764,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (setq cljr-add-ns-to-blank-clj-files nil))
 
-;; (use-package flycheck-clojure
-;;   :config
-;;   (flycheck-clojure-setup))
-
-;; (use-package flycheck-clj-kondo)
-
-;; (use-package flycheck-joker)
-
 (use-package exec-path-from-shell
   :ensure t
   :config
@@ -816,6 +800,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ;; load additional layers
 (load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
 (load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
+(load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
@@ -880,8 +865,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     :prefix ",")
 
   (rust-definer
-   "a" #'lsp-bridge-code-action
-   "r" #'lsp-bridge-rename
+   "a" #'lsp-execute-code-action
+   "r" #'lsp-rename
    "e" #'lsp-bridge-diagnostic-list
    "=" #'rust-format-buffer
 
@@ -890,7 +875,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    "bt" #'rust-test
 
    "hh" #'lsp-bridge-show-documentation
-   "gi" #'lsp-bridge-find-impl
+   "gi" #'lsp-find-implementation
    "gI" #'lsp-bridge-find-impl-other-window
    "gr" #'lsp-bridge-find-references
    "Gr" #'lsp-bridge-peek
