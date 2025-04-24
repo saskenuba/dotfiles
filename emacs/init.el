@@ -798,9 +798,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :hook (after-init . global-emojify-mode))
 
 ;; load additional layers
-(load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
-(load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
 (load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
+(load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
+(load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
