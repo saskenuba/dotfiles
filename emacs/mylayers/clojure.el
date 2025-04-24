@@ -1,3 +1,27 @@
+;;; Code
+
+(defun my/setup-clojure-flycheck-cache ()
+  "Set up the buffer-local Flycheck cache for Clojure modes.
+This function sets `my/flycheck-local-cache` to chain the appropriate
+splint checker after the lsp checker based on the major-mode."
+  (setq-local my/flycheck-local-cache
+              (pcase major-mode
+                ((or 'clojure-mode 'clojure-ts-mode)
+                 '((lsp . ((next-checkers . (splint-clj))))))
+                ((or 'clojurescript-mode 'clojure-ts-clojurescript-mode)
+                 '((lsp . ((next-checkers . (splint-cljs))))))
+                ((or 'clojurec-mode 'clojure-ts-clojurec-mode)
+                 '((lsp . ((next-checkers . (splint-cljc))))))
+                (_ nil))))
+
+(add-hook 'clojure-mode-hook #'my/setup-clojure-flycheck-cache)
+(add-hook 'clojurescript-mode-hook #'my/setup-clojure-flycheck-cache)
+(add-hook 'clojurec-mode-hook #'my/setup-clojure-flycheck-cache)
+;; Add hooks for treesitter modes if needed and they don't inherit
+;; (add-hook 'clojure-ts-mode-hook #'my/setup-clojure-flycheck-cache)
+;; (add-hook 'clojure-ts-clojurescript-mode-hook #'my/setup-clojure-flycheck-cache)
+;; (add-hook 'clojure-ts-clojurec-mode-hook #'my/setup-clojure-flycheck-cache)
+
 (defun clojure/fancify-symbols (mode)
   "Pretty symbols for Clojure's anonymous functions and sets,
    like (λ [a] (+ a 5)), ƒ(+ % 5), and ∈{2 4 6}."

@@ -1,5 +1,19 @@
 ;;; Code
 
+;; buffer-local cache variable globally
+(defvar-local my/flycheck-local-cache nil
+  "Buffer-local cache for Flycheck checker properties.")
+
+(defun my/flycheck-checker-get (orig-fn checker property)
+  "Advice for flycheck-checker-get to use buffer-local cache.
+Intercepts calls to ORIG-FN (flycheck-checker-get) for CHECKER and
+PROPERTY.  Returns value from `my/flycheck-local-cache` if present,
+otherwise calls ORIG-FN."
+  (or (alist-get property (alist-get checker my/flycheck-local-cache))
+      (funcall orig-fn checker property)))
+
+(advice-add 'flycheck-checker-get :around #'my/flycheck-checker-get)
+
 (defun my-reload-dir-locals-for-current-buffer ()
   "Reload dir locals for the current buffer."
   (interactive)
