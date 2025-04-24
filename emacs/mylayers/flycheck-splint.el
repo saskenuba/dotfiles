@@ -1,10 +1,10 @@
 ;;; flycheck-splint.el --- Add splint linter to flycheck
 
-;; Copyright (C) 2019 Martin Mariano <michielborkent@gmail.com>
+;; Copyright (C) 2019 Martin Mariano <martin@hotmail.com.br>
 ;; This code borrows heavily from flycheck-clj-kondo:
 ;; https://github.com/candid82/flycheck-joker
 ;;
-;; Author: Martin Mariano <michielborkent@gmail.com>
+;; Author: Martin Mariano <martin@hotmail.com.br>
 ;; Created: 23 April 2025
 ;; Version: 0.0.1-snapshot
 ;; Homepage: https://github.com/borkdude/flycheck-clj-kondo
@@ -15,7 +15,7 @@
 ;; This package integrates splint with Emacs via flycheck.  To use it,
 ;; add to your init.el:
 
-;; (require 'flycheck-clj-kondo)
+;; (require 'flycheck-splint)
 
 ;; Make sure the splint binary is on your path.  For installation
 ;; instructions, see https://github.com/borkdude/clj-kondo.
@@ -49,7 +49,7 @@
 
 (defvar-local flycheck-splint-lang
   nil
-  "Buffer local variable to override the language used to lint the buffer with clj-kondo.
+  "Buffer local variable to override the language used to lint the buffer with splint.
 Useful if your file extension doesn't match your major-mode.")
 
 (defmacro flycheck-splint--define-checker
@@ -60,7 +60,7 @@ Argument LANG: language string.
 Argument MODES: a major mode symbol or a list thereof in which this checker is activated.
 Argument EXTRA-ARGS: passes extra args to the checker."
   `(flycheck-define-checker ,name
-     "See https://github.com/borkdude/clj-kondo"
+     "See https://github.com/saskenuba/flycheck-splint"
      :command ("splint" "-o" "clj-kondo" source ,@extra-args)
      :error-patterns
      ((error line-start (or "<stdin>" (file-name))
@@ -85,8 +85,6 @@ Argument EXTRA-ARGS: passes extra args to the checker."
                      ("cljs" (member major-mode '(clojurescript-mode clojure-ts-clojurescript-mode)))
                      ("cljc" (member major-mode '(clojurec-mode clojure-ts-clojurec-mode))))))))
 
-;; (macroexpand-1 '(flycheck-splint--define-checker clj-kondo-clj "clj" clojure-mode "--cache"))
-
 (defmacro flycheck-splint-define-checkers (&rest extra-args)
   "Define all splint checkers.
 Argument EXTRA-ARGS: passes extra arguments to the checkers."
@@ -99,5 +97,5 @@ Argument EXTRA-ARGS: passes extra arguments to the checkers."
 
 (flycheck-splint-define-checkers)
 
-(provide 'flycheck-clj-kondo)
-;;; flycheck-clj-kondo.el ends here
+(provide 'flycheck-splint)
+;;; flycheck-splint.el ends here
