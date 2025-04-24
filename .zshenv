@@ -25,6 +25,19 @@ pad-with-color() {
         convert $name.png -background '#8A4A52' -gravity center -extent 1920x1080 $name-padded.png
 }
 
+docker-remove-containers() {
+    docker stop $(docker ps -aq)
+    docker rm $(docker ps -aq)
+}
+
+docker-armageddon() {
+    docker-remove-containers
+    docker network prune -f
+    docker rmi -f $(docker images --filter dangling=true -qa)
+    docker volume rm $(docker volume ls --filter dangling=true -q)
+    docker rmi -f $(docker images -qa)
+}
+
 paste-carbon () {
 
 	RANDOM=$RANDOM
