@@ -321,20 +321,24 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (global-evil-surround-mode 1))
 
-; (use-package command-log-mode)
-
 (use-package evil-cleverparens
   :hook ((emacs-lisp-mode . evil-cleverparens-mode)
 	 (clojure-mode . evil-cleverparens-mode)
 	 (clojurescript-mode . evil-cleverparens-mode)
 	 (clojurec-mode . evil-cleverparens-mode)))
 
-(use-package ef-themes
-  ;:init (load-theme 'ef-cyprus :no-confirm)
-  )
+(use-package ef-themes)
 
-(use-package modus-themes
-  :init (load-theme 'modus-vivendi-tinted :no-confirm))
+(use-package modus-themes)
+
+(use-package circadian
+  :ensure t
+  :config
+  (setq calendar-latitude -23.484759)
+  (setq calendar-longitude -46.622821)
+  (setq circadian-themes '((:sunrise . modus-operandi)
+			   (:sunset  . modus-vivendi)))
+  (circadian-setup))
 
 (use-package orderless
   :custom
