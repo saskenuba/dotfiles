@@ -71,10 +71,20 @@
 ;; Set up the visible bell
 (menu-bar-mode -1)
 
-;; Setup support for recent files
-(recentf-mode 1)
 (setq recentf-max-menu-items 50)
 (setq recentf-max-saved-items 50)
+
+;; The built-in `savehist-mode' saves minibuffer histories.  Vertico
+;; can then use that information to put recently selected options at
+;; the top.
+;;
+;; Further reading: https://protesilaos.com/emacs/dotemacs#h:25765797-27a5-431e-8aa4-cc890a6a913a
+(savehist-mode 1)
+
+;; The built-in `recentf-mode' keeps track of recently visited files.
+;; You can then access those through the `consult-buffer' interface or
+;; with `recentf-open'/`recentf-open-files'.
+(recentf-mode 1)
 
 ;; Setup bell
 (setq visible-bell t)
@@ -268,10 +278,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ;;   :config (setq inhibit-compacting-font-caches t)
 ;;   :custom ((doom-modeline-height 15)))
 
-; Persist history over Emacs restarts. Vertico sorts by history position.
-(use-package savehist
-  :init (savehist-mode))
-
 (use-package window-purpose
   :init (purpose-mode)
   :config
@@ -330,6 +336,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package ef-themes)
 
 (use-package modus-themes)
+
+(use-package moe-theme)
 
 (use-package circadian
   :ensure t
@@ -551,18 +559,15 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package flycheck
   :init (global-flycheck-mode))
 
+(use-package transient)
+
 (use-package magit
   :config
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
 
   :general
   (global-definer
-   "gs" #'magit-status-quick)
-
-  ;; (:keymaps 'git-commit-mode-map
-  ;;  "," #'with-editor-finish
-  ;;  "c" #'with-editor-cancel)
-  )
+   "gs" #'magit-status-quick))
 
 (use-package magit-delta
   :hook ((magit-mode . magit-delta-mode)))
@@ -698,6 +703,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package envrc
   :hook (after-init . envrc-global-mode))
 
+(use-package rustic
+  :ensure t)
+
 (use-package cider
   :defer t
   :hook '((clojure-mode . cider-mode)
@@ -709,8 +717,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	cider-repl-pop-to-buffer-on-connect nil
 	cider-repl-use-clojure-font-lock t)
 
-  ;; insert custom deps
-  ;; (setq cider-jack-in-dependencies '(("com.github.flow-storm/flow-storm-dbg" "3.17.4")))
   :custom
   (cider-test-fail-fast nil)
   (cider-font-lock-dynamically '(macro core function var))
@@ -780,8 +786,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    ; See the Configuration section below
   ;(aidermacs-default-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
   ;(aidermacs-architect-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
-  (aidermacs-default-model "gemini/gemini-2.5-pro-exp-03-25")
-  (aidermacs-architect-model "gemini/gemini-2.5-pro-exp-03-25")
+  (aidermacs-default-model "gemini/gemini-2.5-pro-preview-05-06")
+  (aidermacs-architect-model "gemini/gemini-2.5-pro-preview-05-06")
   (aidermacs-use-architect-mode t))
 
 (use-package kaocha-runner
@@ -965,6 +971,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (+general-global-menu! "Text" "x"
   "tj" #'json->edn)
 
+(+general-global-menu! "Checkers" "!"
+  "c" '(consult-flycheck :which-key "Consult flycheck"))
+
 ;; LSP booster to make json parsing comms faster
 ;; installation needed: https://github.com/blahgeek/emacs-lsp-booster
 (defun lsp-booster--advice-json-parse (old-fn &rest args)
@@ -1003,7 +1012,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (defun enable-emacs-lisp-mode-for-dir-locals ()
   "Enable `emacs-lisp-mode` for .dir-locals.el files."
   (when (and buffer-file-name
-             (string-equal (file-name-nondirectory buffer-file-name) ".dir-locals.el"))
+             (or (string-equal (file-name-nondirectory buffer-file-name) ".dir-locals.el")
+		 (string-equal (file-name-nondirectory buffer-file-name) ".dir-locals-2.el")))
     (emacs-lisp-mode)))
 
 (add-hook 'find-file-hook 'enable-emacs-lisp-mode-for-dir-locals)
