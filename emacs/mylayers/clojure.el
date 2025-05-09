@@ -59,6 +59,8 @@ splint checker after the lsp checker based on the major-mode."
       (switch-to-buffer orig-buffer)
       (other-window 1))))
 
+(clojure/fancify-symbols 'clojure-mode)
+(clojure/fancify-symbols 'clojurescript-mode)
 (clojure/fancify-symbols 'cider-repl-mode)
 (clojure/fancify-symbols 'cider-clojure-interaction-mode)
 
