@@ -578,6 +578,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package forge
   :after magit)
 
+(use-package projectile)
+
+(use-package consult-projectile)
+
 (use-package smartparens
   :init
   (setq sp-show-pair-from-inside t)
@@ -759,7 +763,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "k"   'cider-inspector-previous-inspectable-object
     "l"   'cider-inspector-next-sibling
     "h"   'cider-inspector-previous-sibling
-    "d"  'cider-inspector-def-current-val
+    "d"   'cider-inspector-def-current-val
+    "P"   'cider-inspector-toggle-pretty-print
+    "S"   'cider-inspector-toggle-sort-maps
     "<tab>"  'cider-inspector-operate-on-point)
   )
 
@@ -962,7 +968,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "S" '(evil-write-all :which-key "Save opened buffers"))
 
 (+general-global-menu! "Project" "p"
-  "f" #'project-find-file
+  "f" #'consult-projectile-find-file
+  "F" #'consult-projectile-find-file-other-window
   "b" #'consult-project-buffer)
 
 (+general-global-menu! "Treemacs" "t"
@@ -1018,17 +1025,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (add-hook 'find-file-hook 'enable-emacs-lisp-mode-for-dir-locals)
 
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("73c55f5fd22b6fd44f1979b6374ca7cc0a1614ee8ca5d4f1366a0f67da255627" "01aef17f41edea53c665cb57320bd80393761f836be5ab0bd53292afc94bd14d" "a6a979c8b7ccb1d4536f4fa74a6e47674a3ce65feea3fecdf1d9dc448fac47e0" default))
- '(package-selected-packages
-   '(treemacs-evil docker-compose-mod docker just-mode justl ws-butler spacemacs-whitespace-cleanup helpful expand-region evil-lion modus-themes evil-visualstar cape flycheck-joker flycheck--joker flycheck-clj-kondo treemacs-all-the-icons treemacs-magit flycheck marginalia rainbow-delimiters smartparens-mode symex smartparens evil-collection evil command-log-mode))
- '(safe-local-variable-values '((TeX-encoding . UTF-8)))
- '(warning-suppress-types '((lsp-mode) (comp))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
