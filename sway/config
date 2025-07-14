@@ -246,9 +246,23 @@ gaps inner 0
 gaps outer 0
 # hide_edge_borders smart
 
-# bindsym XF86AudioRaiseVolume exec pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') +5%
-# bindsym XF86AudioLowerVolume exec pactl set-sink-volume $(pacmd list-sinks |awk '/* index:/{print $3}') -5%
-# bindsym XF86AudioMute exec pactl set-sink-mute $(pacmd list-sinks |awk '/* index:/{print $3}') toggle
+# == Function Keys (F1-F6) ==
+
+# Brightness Control (Example: Fn+F1/F2 mapped to brightness)
+# Replace XF86MonBrightnessDown/Up with your actual keysyms if different
+bindsym XF86MonBrightnessDown exec brightnessctl set 5%-
+bindsym XF86MonBrightnessUp exec brightnessctl set +5%
+
+# Volume Control (Example: Fn+F3/F4/F5 mapped to volume)
+bindsym XF86AudioMute          exec pamixer -t   # Toggle mute
+bindsym XF86AudioLowerVolume   exec pamixer -d 5 # Decrease volume by 5%
+bindsym XF86AudioRaiseVolume   exec pamixer -i 5 # Increase volume by 5%
+
+# Media Control (Example: Fn+F6 mapped to Play/Pause)
+# Replace XF86AudioPlay with your actual keysym if different
+bindsym XF86AudioPlay          exec playerctl play-pause
+# f8 bindsym Super_L
+# f9 bindsym XF86Search
 
 # Font settings
 font pango: IosevkaSS04:style=Regular 8
