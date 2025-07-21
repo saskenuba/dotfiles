@@ -228,7 +228,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package iedit)
 
-(use-package org)
+(use-package org
+  :custom
+  (org-babel-clojure-backend 'cider))
 
 (use-package helpful)
 
@@ -344,7 +346,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (setq calendar-latitude -23.484759)
   (setq calendar-longitude -46.622821)
-  (setq circadian-themes '((:sunrise . modus-operandi)
+  (setq circadian-themes '((:sunrise . modus-vivendi)
 			   (:sunset  . modus-vivendi)))
   (circadian-setup))
 
@@ -366,8 +368,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   :config
   ; set zathura as default viewer
-  (add-to-list 'TeX-view-program-list '("Zathura" ("zathura" " %o")))
-  (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura"))
+  ; (add-to-list 'TeX-view-program-list '("Zathura" ("zathura" " %o")))
+  ; (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura"))
 
   :custom
   (TeX-parse-self t)
@@ -627,7 +629,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :mode ("README\\.md'" . gfm-mode))
 
 (use-package yasnippet
-  :init (yas-global-mode 1))
+  :init (yas-global-mode 1)
+  :custom
+  (yas-snippet-dirs (list "~/.emacs.d/mylayers/snippets")))
 
 (setq read-process-output-max (* 1024 1024))
 (setq gc-cons-threshold 100000000)
@@ -698,6 +702,19 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   :general
   ("M-S-<return>" #'org-insert-item))
+
+(use-package org-roam-ui
+  :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+	org-roam-ui-follow t
+	org-roam-ui-update-on-save t
+	org-roam-ui-open-on-start t))
+
 
 (use-package ox-hugo
   :after ox)
@@ -972,6 +989,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "F" #'consult-projectile-find-file-other-window
   "b" #'consult-project-buffer)
 
+(+general-global-menu! "Org Roam" "r"
+  "f" #'org-roam-node-find
+  "i" #'org-roam-node-insert
+  "b" #'org-roam-buffer-toggle
+  "u" #'org-roam-ui-open
+  "ta" #'org-roam-tag-add
+  "tr" #'org-roam-tag-remove)
+
 (+general-global-menu! "Treemacs" "t"
   "t" #'treemacs)
 
@@ -1024,6 +1049,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     (emacs-lisp-mode)))
 
 (add-hook 'find-file-hook 'enable-emacs-lisp-mode-for-dir-locals)
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . nil)
+   (clojure . t)))
 
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
