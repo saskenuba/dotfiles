@@ -107,7 +107,8 @@ the focus."
 (defun cider-send-reset ()
   (interactive)
   (cider-interactive-eval
-   "(do (reset))"))
+   "(do (ns user)
+        (reset))"))
 
 (defun cider-send-reset-tests ()
   (interactive)

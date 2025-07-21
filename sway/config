@@ -26,7 +26,7 @@ set $menu dmenu_path | dmenu | xargs swaymsg exec --
 
 # Custom keybindings
 set $offline_docs zeal
-set $filemanager ranger
+set $filemanager yazi
 set $bluetooth blueman-applet
 set $audio_control pavucontrol
 

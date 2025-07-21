@@ -209,53 +209,53 @@ branches ('master', 'main', 'develop') and the current branch."
                main-integration-branch main-remote))))
 
 ; findlibrary magit-branch RET
-(with-eval-after-load 'magit-branch
-  ;; Redefine magit-branch to add our group.
-  (transient-define-prefix magit-branch (branch)
-    "Add, configure or remove a branch."
-    :man-page "git-branch"
-    [:if (lambda () (and magit-branch-direct-configure (transient-scope)))
-     :description
-     (lambda ()
-       (concat (propertize "Configure " 'face 'transient-heading)
-	       (propertize (transient-scope) 'face 'magit-branch-local)))
-     ("d" magit-branch.<branch>.description)
-     ("u" magit-branch.<branch>.merge/remote)
-     ("r" magit-branch.<branch>.rebase)
-     ("p" magit-branch.<branch>.pushRemote)]
-    [:if-non-nil magit-branch-direct-configure
-     :description "Configure repository defaults"
-     ("R" magit-pull.rebase)
-     ("P" magit-remote.pushDefault)
-     ("B" "Update default branch" magit-update-default-branch
-      :inapt-if-not magit-get-some-remote)]
-    ["Arguments"
-     (7 "-r" "Recurse submodules when checking out an existing branch"
-	"--recurse-submodules")]
-    [["Checkout"
-      ("b" "branch/revision"   magit-checkout)
-      ("l" "local branch"      magit-branch-checkout)
-      (6 "o" "new orphan"      magit-branch-orphan)]
-     [""
-      ("c" "new branch"        magit-branch-and-checkout)
-      ("s" "new spin-off"      magit-branch-spinoff)
-      (5 "w" "new worktree"    magit-worktree-checkout)]
-     ["Create"
-      ("n" "new branch"        magit-branch-create)
-      ("S" "new spin-out"      magit-branch-spinout)
-      (5 "W" "new worktree"    magit-worktree-branch)]
-     ["Do"
-      ("C" "configure..."      magit-branch-configure)
-      ("m" "rename"            magit-branch-rename)
-      ("x" "reset"             magit-branch-reset)
-      ("k" "delete"            magit-branch-delete)
-      ("K" "prune-gone"        my-magit-prune-conceptual-upstream)]
-     [""
-      (7 "h" "shelve"          magit-branch-shelve)
-      (7 "H" "unshelve"        magit-branch-unshelve)]]
-    (interactive (list (magit-get-current-branch)))
-    (transient-setup 'magit-branch nil nil :scope branch))
-  )
+;(with-eval-after-load 'magit-branch
+;  ;; Redefine magit-branch to add our group.
+;  (transient-define-prefix magit-branch (branch)
+;    "Add, configure or remove a branch."
+;    :man-page "git-branch"
+;    [:if (lambda () (and magit-branch-direct-configure (transient-scope)))
+;     :description
+;     (lambda ()
+;       (concat (propertize "Configure " 'face 'transient-heading)
+;	       (propertize (transient-scope) 'face 'magit-branch-local)))
+;     ("d" magit-branch.<branch>.description)
+;     ("u" magit-branch.<branch>.merge/remote)
+;     ("r" magit-branch.<branch>.rebase)
+;     ("p" magit-branch.<branch>.pushRemote)]
+;    [:if-non-nil magit-branch-direct-configure
+;     :description "Configure repository defaults"
+;     ("R" magit-pull.rebase)
+;     ("P" magit-remote.pushDefault)
+;     ("B" "Update default branch" magit-update-default-branch
+;      :inapt-if-not magit-get-some-remote)]
+;    ["Arguments"
+;     (7 "-r" "Recurse submodules when checking out an existing branch"
+;	"--recurse-submodules")]
+;    [["Checkout"
+;      ("b" "branch/revision"   magit-checkout)
+;      ("l" "local branch"      magit-branch-checkout)
+;      (6 "o" "new orphan"      magit-branch-orphan)]
+;     [""
+;      ("c" "new branch"        magit-branch-and-checkout)
+;      ("s" "new spin-off"      magit-branch-spinoff)
+;      (5 "w" "new worktree"    magit-worktree-checkout)]
+;     ["Create"
+;      ("n" "new branch"        magit-branch-create)
+;      ("S" "new spin-out"      magit-branch-spinout)
+;      (5 "W" "new worktree"    magit-worktree-branch)]
+;     ["Do"
+;      ("C" "configure..."      magit-branch-configure)
+;      ("m" "rename"            magit-branch-rename)
+;      ("x" "reset"             magit-branch-reset)
+;      ("k" "delete"            magit-branch-delete)
+;      ("K" "prune-gone"        my-magit-prune-conceptual-upstream)]
+;     [""
+;      (7 "h" "shelve"          magit-branch-shelve)
+;      (7 "H" "unshelve"        magit-branch-unshelve)]]
+;    (interactive (list (magit-get-current-branch)))
+;    (transient-setup 'magit-branch nil nil :scope branch))
+;  )
 
 (provide 'elisp)
 
