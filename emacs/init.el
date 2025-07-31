@@ -496,6 +496,20 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :general
   ("C-SPC" #'completion-at-point))
 
+(use-package embark
+  :ensure t
+  :bind
+  (("C-." . embark-act)         ;; pick some comfortable binding
+   ("C-;" . embark-dwim)        ;; smart default action
+   ("C-h B" . embark-bindings)) ;; alternative for `describe-bindings`
+  :init
+  ;; Optionally replace the key help with a completing-read interface
+  (setq prefix-help-command #'embark-prefix-help-command))
+
+(use-package embark-consult
+  :ensure t
+  :after (embark consult))
+
 ;; A few more useful configurations...
 (use-package cape
   ;; Bind dedicated completion commands
