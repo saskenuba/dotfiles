@@ -508,7 +508,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package embark-consult
   :ensure t
-  :after (embark consult))
+  :hook
+  (embark-collect-mode . consult-preview-at-point-mode))
 
 ;; A few more useful configurations...
 (use-package cape
