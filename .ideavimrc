@@ -96,3 +96,12 @@ map <leader>c :action :cursive.actions.paredit/kill-sexp<CR>
 
 " Cycle collection
 map <leader>C :action :cursive.actions.paredit/cycle-collection-type<CR>
+
+" more cursive actions
+nmap <leader>eb :action :cursive.repl.actions/load-file<CR>
+nmap <leader>el :action :cursive.repl.actions/run-last-sexp<CR>
+nmap <leader>sa :action :cursive.repl.actions/jump-to-repl<CR>
+nmap <leader>ek :action :cursive.repl.actions/run-top-sexp<CR>
+nmap <leader>en :action :cursive.repl.actions/switch-namespace<CR>
+nmap <leader>=e :action Tool_External Tools_std-clj-format<CR>
+nmap <leader>== :action ReformatCode<CR>
