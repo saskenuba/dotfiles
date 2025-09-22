@@ -43,11 +43,17 @@ The content is organized as follows:
 items/
   left/
     aerospace_scratchpad.sh
+    aerospace_workspaces.sh
+    apple.sh
   right/
+    battery.sh
     clock.sh
+    ram.sh
 plugins/
   left/
     aerospace_scratchpad.sh
+    aerospace_workspaces.sh
+    refresh_workspaces.sh
   right/
     battery.sh
     cpu.sh
@@ -87,20 +93,131 @@ sketchybar --add event scratchpad_update \
     --subscribe scratchpad mouse.entered mouse.exited mouse.exited.global mouse.clicked scratchpad_update
 </file>
 
+<file path="items/left/aerospace_workspaces.sh">
+#!/usr/bin/env bash
+
+# Create workspace items for 1-9 (no individual scripts)
+for i in {1..9}; do
+    sketchybar --add item workspace.$i left \
+        --set workspace.$i \
+        label="$i:0" \
+        label.font="$LABEL_FONT" \
+        label.color="$WS_DEFAULT_COLOR" \
+        icon.drawing=off \
+        click_script="aerospace workspace $i" \
+        drawing=off
+done
+
+# Single monitor that updates everything
+sketchybar --add item workspace_monitor left \
+    --set workspace_monitor \
+    drawing=off \
+    update_freq=3 \
+    script="$PLUGIN_DIR/left/aerospace_workplaces.sh" \
+    --subscribe workspace_monitor workspace_change
+</file>
+
+<file path="items/left/apple.sh">
+POPUP_OFF="sketchybar --set apple.logo popup.drawing=off"
+POPUP_CLICK_SCRIPT="sketchybar --set \$NAME popup.drawing=toggle"
+
+popup_props=(
+    popup.height=30
+)
+apple_logo=(
+    "${left_items_common[@]}"
+    "${popup_props[@]}"
+    icon="$APPLE"
+    icon.color="$RED"
+    icon.font.size=18
+    label.drawing=off
+    icon.y_offset=2
+    click_script="$POPUP_CLICK_SCRIPT"
+)
+pupup_item=(
+    # icon.padding_left=6
+    icon.padding_right=6
+    # label.padding_left=0
+    # label.padding_right=6
+    background.padding_right=10
+    background.padding_left=10
+    background.drawing=off
+)
+
+sketchybar --add item apple.logo left \
+    --set apple.logo "${apple_logo[@]}" \
+    \
+    --add item apple.prefs popup.apple.logo \
+    --set apple.prefs "${pupup_item[@]}" \
+    icon="$PREFERENCES" \
+    label="Preferences" \
+    icon.color="$WHITE" \
+    label.color="$WHITE" \
+    click_script="open -a 'System Preferences' ; $POPUP_OFF" \
+    \
+    --add item apple.activity popup.apple.logo \
+    --set apple.activity "${pupup_item[@]}" \
+    icon="$ACTIVITY" \
+    label="Activity" \
+    icon.color="$WHITE" \
+    label.color="$WHITE" \
+    click_script="open -a 'Activity Monitor' ; $POPUP_OFF" \
+    \
+    --add item apple.lock popup.apple.logo \
+    --set apple.lock "${pupup_item[@]}" \
+    icon="$LOCK" \
+    label="Lock Screen" \
+    icon.color="$WHITE" \
+    label.color="$WHITE" \
+    click_script="pmset displaysleepnow ; $POPUP_OFF"
+</file>
+
+<file path="items/right/battery.sh">
+battery=(
+    "${right_items_common[@]}"
+    update_freq=120
+    icon.color="$BATTERY_ICON_COLOR"
+    icon.y_offset=2
+    icon.font.size=19
+    script="$PLUGIN_DIR/right/battery.sh"
+    click_script="open \"x-apple.systempreferences:com.apple.Battery-Settings.extension\""
+    display=1
+)
+
+sketchybar --add item battery right \
+    --set battery "${battery[@]}" \
+    --subscribe battery system_woke power_source_change
+</file>
+
 <file path="items/right/clock.sh">
 #!/usr/bin/env bash
 
 clock=(
     update_freq=10
-    icon="??"
+    icon="$CLOCK"
     icon.color="$CLOCK_ICON_COLOR"
     label.color="$CLOCK_LABEL_COLOR"
     script="$PLUGIN_DIR/clock.sh"
     click_script="open -a Clock"
 )
 
-sketchybar --add item clock center \
+sketchybar --add item clock right \
     --set clock "${clock[@]}"
+</file>
+
+<file path="items/right/ram.sh">
+ram=(
+    "${right_items_common[@]}"
+    icon="$SYSTEM_RAM"
+    icon.color="$RAM_ICON_COLOR"
+    update_freq=10
+    script="$PLUGIN_DIR/right/ram.sh"
+    click_script="$SCRIPTS_DIR/run_external_bash.sh '/opt/homebrew/bin/btop && exit'"
+    display=1
+)
+
+sketchybar --add item ram right \
+    --set ram "${ram[@]}"
 </file>
 
 <file path="plugins/left/aerospace_scratchpad.sh">
@@ -187,34 +304,86 @@ fi
 sketchybar --set "$NAME" label="$SCRATCHPAD_COUNT"
 </file>
 
-<file path="plugins/right/battery.sh">
-#!/bin/sh
+<file path="plugins/left/aerospace_workspaces.sh">
+#!/usr/bin/env bash
 
-PERCENTAGE="$(pmset -g batt | grep -Eo "\d+%" | cut -d% -f1)"
-CHARGING="$(pmset -g batt | grep 'AC Power')"
+source "$CONFIG_DIR/colors.sh"
+
+# Get current focused workspace
+FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
+
+# Check all workspaces 1-9 and update them
+for WORKSPACE_ID in {1..9}; do
+    # Count windows in this workspace
+    WINDOW_COUNT=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null | wc -l | awk '{print $1}')
+    
+    # Format label as "workspace:count"
+    LABEL="$WORKSPACE_ID:$WINDOW_COUNT"
+    
+    # Only show workspaces that have windows
+    if [ "$WINDOW_COUNT" -gt 0 ]; then
+        # Workspace has windows - show it
+        if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
+            # This is the active workspace with windows
+            sketchybar --set workspace.$WORKSPACE_ID \
+                label="$LABEL" \
+                label.color="$WS_ACTIVE_LABEL_COLOR" \
+                background.color="$WS_ACTIVE_BG_COLOR" \
+                background.drawing=on \
+                drawing=on
+        else
+            # Inactive workspace with windows
+            sketchybar --set workspace.$WORKSPACE_ID \
+                label="$LABEL" \
+                label.color="$WS_WIHT_CLIENTS_LABEL_COLOR" \
+                background.color="$WS_WIHT_CLIENTS_BG_COLOR" \
+                background.drawing=on \
+                drawing=on
+        fi
+    else
+        # No windows - hide the workspace
+        sketchybar --set workspace.$WORKSPACE_ID \
+            drawing=off
+    fi
+done
+</file>
+
+<file path="plugins/left/refresh_workspaces.sh">
+#!/usr/bin/env bash
+
+# This script refreshes all workspace indicators
+# It will automatically show workspaces that have windows
+
+for i in {1..9}; do
+    "$CONFIG_DIR/plugins/left/aerospace_workspaces.sh" "$i"
+done
+</file>
+
+<file path="plugins/right/battery.sh">
+#!/usr/bin/env bash
+
+BATTERY_INFO="$(pmset -g batt)"
+PERCENTAGE=$(echo "$BATTERY_INFO" | grep -Eo "\d+%" | cut -d% -f1)
+CHARGING=$(echo "$BATTERY_INFO" | grep 'AC Power')
 
 if [ "$PERCENTAGE" = "" ]; then
-  exit 0
+    exit 0
 fi
 
+source "$CONFIG_DIR/icons.sh"
+
 case "${PERCENTAGE}" in
-  9[0-9]|100) ICON=""
-  ;;
-  [6-8][0-9]) ICON=""
-  ;;
-  [3-5][0-9]) ICON=""
-  ;;
-  [1-2][0-9]) ICON=""
-  ;;
-  *) ICON=""
+    9[0-9]|100) ICON="$BATTERY_100" ;;
+    [6-8][0-9]) ICON="$BATTERY_75" ;;
+    [3-5][0-9]) ICON="$BATTERY_50" ;;
+    [1-2][0-9]) ICON="$BATTERY_25" ;;
+    *) ICON="$BATTERY_0"
 esac
 
 if [[ "$CHARGING" != "" ]]; then
-  ICON=""
+    ICON="$BATTERY_CHARGING"
 fi
 
-# The item invoking this script (name $NAME) will get its icon and label
-# updated with the current battery status
 sketchybar --set "$NAME" icon="$ICON" label="${PERCENTAGE}%"
 </file>
 
@@ -359,8 +528,8 @@ ACCENT_PINK=0xffff79c6
 
 DEFAULT_LABEL_COLOR=0xff6272a4
 DEFAULT_ICON_COLOR=0xff94928F
-DEFAULT_BACKGROUND_COLOR=0xff2e3440
-DEFAULT_BAR_COLOR=0x40232634 # 0xff1e1e2e  0xff242933  0xff1e1e2e  0xff232634  0x40232634
+DEFAULT_BACKGROUND_COLOR=0x00000000
+DEFAULT_BAR_COLOR=0xff1e1e2e # 0xff232634  0x40232634
 
 ############################################
 # Items Colors
@@ -434,33 +603,158 @@ POPUP_BACKGROUND_COLOR=0x603C3E4F
 <file path="icons.sh">
 #!/usr/bin/env bash
 
-# Basic icons - add more as needed
-CLOCK="??"
-CALENDAR="??"
+# General Icons
+LOADING="?? "
+APPLE=""
+PREFERENCES="?? "
+ACTIVITY="?? "
+LOCK="?? "
+BELL="?? "
+BELL_DOT="?? "
+BLUETOOTH="? "
+RESTART="? "
+CLOCK="" CALENDAR="? "
+KEYBOARD="?? "
+QUESTION="?"
+USB="? "
+
+# Git Icons
+GIT_ISSUE="?? "
+GIT_DISCUSSION="?? "
+GIT_PULL_REQUEST="?? "
+GIT_COMMIT="?? "
+GIT_INDICATOR="?? "
+
+# Music Control Icons
+PLAYER_PLAY="? " # "?? "
+PLAYER_PAUSE="? " #"?? "
+PLAYER_STOP="? " # "?? "
+PLAYER_SHUFFLE="?? "
+PLAYER_REPEAT="?? " # "? "
+
+# Window Icons
+WINDOW_STACK="?? "
+WINDOW_FULLSCREEN_ZOOM="?? "
+WINDOW_PARENT_ZOOM="?? "
+WINDOW_FLOAT="?? " # "? "
+WINDOW_GRID="?? "
+
+# Battery Icons
+BATTERY_100=""
+BATTERY_75=""
+BATTERY_50=""
+BATTERY_25=""
+BATTERY_0=""
+BATTERY_CHARGING="󰂄"
+
+# Volume Icons
+VOLUME_100="?? "
+VOLUME_66="?? "
+VOLUME_33="?? "
+VOLUME_10="?? "
+VOLUME_0="?? "
+AIRPODS="?? "
+HEADPHONES="?? "
+
+VOL_DEVICE_INTERNAL="??"
+VOL_DEVICE_EX_MONITOR="??"
+VOL_DEVICE_EX_HEADPHONES="??"
+VOL_DEVICE_EX_DAC="??"
+
+MICROPHONE_ON="? " # "?? "
+MICROPHONE_OFF="? " # "?? "
+MICROPHONE_DEVICE_EXTERNAL="??" # "??" "??" "??" "??"
+MICROPHONE_DEVICE_INTERNAL="??"
+
+BLUETOOTH_ON="??"
+BLUETOOTH_OFF="??"
+
+EYE_ON="?? "
+EYE_OFF="?? "
+
+INPUT_FLAG_UA="????"
+INPUT_FLAG_ABC="????"
+
+PACKAGES_SYNC="?? " # "?? "
+PACKAGES_SYNC_OK="? " # "?? "
+
+FRONT_APP_SEPARATOR="?"
+
+# WiFi
+WIFI_CONNECTED="?? " # "?? " "?? "
+WIFI_DISCONNECTED="?? " #"?? " "?? "
+ETHERNET_CONNECTED="??"
+
+# System Icons
+SYSTEM_RAM="" # ?
+SYSTEM_DISK=""
+SYSTEM_CPU="󰻠" # "? "
+
+# Runners Icons
+RUNNER_SETTINGS="? " # "?? "
+RUNNER_UPDATES="? "
+
+# Svim Icons
+MODE_NORMAL="?? "
+MODE_INSERT="?? "
+MODE_VISUAL="?? "
+MODE_CMD="?? "
+MODE_PENDING="?? "
+
+# Aerospace Workspace Icons
+declare -A WS_ICONS
+WS_ICONS["1"]="? "
+WS_ICONS["2"]="? "
+WS_ICONS["3"]="? "
+WS_ICONS["4"]="?? "
+WS_ICONS["5"]="? "
+WS_ICONS["6"]="?? "
+WS_ICONS["7"]="? "
+WS_ICONS["8"]="? "
+WS_ICONS["9"]="? "
 </file>
 
 <file path="settings.sh">
 #!/usr/bin/env bash
 
-# Font settings
-ICON_FONT="SF Pro:Bold:16.0"
-LABEL_FONT="SF Pro:Medium:14.0"
+ICON_FONT="Hack Nerd Font:Regular:14.0"
+ICON_APP_FONT="Hack Nerd Font:Regular:12.0"
+LABEL_FONT="Hack Nerd Font:Bold:14.0"
 
-# Common item configurations
+right_items_common=(
+    icon.padding_left=6
+    icon.padding_right=5
+    label.padding_left=0
+    label.padding_right=6
+    background.padding_right=2
+    #background.padding_left=0
+)
+
 left_items_common=(
     icon.padding_left=6
     icon.padding_right=5
     label.padding_left=0
     label.padding_right=6
+    #background.padding_right=2
     background.padding_left=2
 )
 
-# Popup events for mouse interactions
+center_items_common=(
+    icon.padding_left=10
+    icon.padding_right=5
+    label.padding_left=0
+    label.padding_right=10
+)
+
 popup_events=(
     mouse.entered
     mouse.exited
     mouse.exited.global
 )
+
+popup() {
+    sketchybar --set "$NAME" popup.drawing="$1"
+}
 </file>
 
 <file path="sketchybarrc">
@@ -480,8 +774,8 @@ sketchybar --bar position=top \
     height=30 \
     blur_radius=25 \
     color="$DEFAULT_BAR_COLOR" \
-    padding_left=6 \
-    padding_right=6
+    padding_left=10 \
+    padding_right=10
 
 # Set default properties for all items
 default=(
@@ -491,7 +785,7 @@ default=(
     label.font="$LABEL_FONT"
     icon.color="$DEFAULT_ICON_COLOR"
     label.color="$DEFAULT_LABEL_COLOR"
-    label.y_offset=2
+    label.y_offset=1
     icon.y_offset=1
 
     background.height=22
@@ -514,10 +808,13 @@ default=(
 sketchybar --default "${default[@]}"
 
 ##### Adding Left Items #####
-source "$ITEM_DIR/left/aerospace_scratchpad.sh"
+source "$ITEM_DIR/left/apple.sh"
+source "$ITEM_DIR/left/aerospace_workspaces.sh"
 
 ##### Adding Right Items #####
 source "$ITEM_DIR/right/clock.sh"
+source "$ITEM_DIR/right/battery.sh"
+source "$ITEM_DIR/right/ram.sh"
 
 # Add other items here as needed...
 
