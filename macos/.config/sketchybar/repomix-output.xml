@@ -1,0 +1,528 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+items/
+  left/
+    aerospace_scratchpad.sh
+  right/
+    clock.sh
+plugins/
+  left/
+    aerospace_scratchpad.sh
+  right/
+    battery.sh
+    cpu.sh
+    ram.sh
+    volume.sh
+  clock.sh
+  front_app.sh
+  space.sh
+colors.sh
+icons.sh
+settings.sh
+sketchybarrc
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="items/left/aerospace_scratchpad.sh">
+#!/usr/bin/env bash
+
+scratchpad=(
+    "${left_items_common[@]}"
+    background.padding_right=2
+    icon="󰖲"  # floating window icon
+    icon.y_offset=2.5
+    label=0
+    update_freq=0
+    icon.color=0xff6272a4
+    label.color=0xffbd93f9
+    script="$PLUGIN_DIR/left/aerospace_scratchpad.sh"
+    click_script="aerospace workspace NSP"
+)
+
+sketchybar --add event scratchpad_update \
+    --add item scratchpad left \
+    --set scratchpad "${scratchpad[@]}" \
+    --subscribe scratchpad mouse.entered mouse.exited mouse.exited.global mouse.clicked scratchpad_update
+</file>
+
+<file path="items/right/clock.sh">
+#!/usr/bin/env bash
+
+clock=(
+    update_freq=10
+    icon="??"
+    icon.color="$CLOCK_ICON_COLOR"
+    label.color="$CLOCK_LABEL_COLOR"
+    script="$PLUGIN_DIR/clock.sh"
+    click_script="open -a Clock"
+)
+
+sketchybar --add item clock center \
+    --set clock "${clock[@]}"
+</file>
+
+<file path="plugins/left/aerospace_scratchpad.sh">
+#!/usr/bin/env bash
+
+source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/settings.sh"
+
+function load_scratchpad_info() {
+    SCRATCHPAD_APPS=$(aerospace list-windows --workspace "NSP" 2>/dev/null)
+    SCRATCHPAD_COUNT=$(echo "$SCRATCHPAD_APPS" | grep -v '^$' | wc -l | awk '{print $1}')
+}
+
+function refresh() {
+    load_scratchpad_info
+
+    if [ -z "$SCRATCHPAD_APPS" ]; then
+        return
+    fi
+
+    args=(--remove '/scratchpad.popup\.*/' )
+
+    local counter=0
+    while IFS='|' read -r id label rest; do
+        # trim leading/trailing spaces
+        label="${label#"${label%%[![:space:]]*}"}"
+        label="${label%"${label##*[![:space:]]}"}"
+
+        # Get icon for the application
+        icon=$(get_app_icon "$label")
+
+        args+=(
+            --add item "$NAME".popup."$counter" popup."$NAME"
+            --set "$NAME".popup."$counter" \
+            label="$label" \
+            icon="$icon" \
+            icon.padding_right=6 \
+            label.color=0xff82aaff \
+            background.padding_right=10 \
+            background.padding_left=10 \
+            background.drawing=off
+        )
+        counter=$((counter + 1))
+
+    done <<< "$SCRATCHPAD_APPS"
+
+    sketchybar -m "${args[@]}" >/dev/null
+}
+
+function get_app_icon() {
+    case "$1" in
+        "kitty") echo "🐱" ;;
+        "Terminal") echo "💻" ;;
+        "Google Chrome" | "Brave Browser") echo "🌐" ;;
+        "Discord") echo "💬" ;;
+        "Slack") echo "💼" ;;
+        "Code" | "Visual Studio Code") echo "📝" ;;
+        *) echo "📱" ;;
+    esac
+}
+
+function popup() {
+    sketchybar --set "$NAME" popup.drawing="$1"
+}
+
+case "$SENDER" in
+    "mouse.entered")
+        popup on
+        exit 0
+        ;;
+    "mouse.exited" | "mouse.exited.global" | "mouse.clicked")
+        popup off
+        exit 0
+        ;;
+    *)
+        refresh
+        ;;
+esac
+
+if [ -z "$SCRATCHPAD_COUNT" ]; then
+    load_scratchpad_info
+fi
+
+sketchybar --set "$NAME" label="$SCRATCHPAD_COUNT"
+</file>
+
+<file path="plugins/right/battery.sh">
+#!/bin/sh
+
+PERCENTAGE="$(pmset -g batt | grep -Eo "\d+%" | cut -d% -f1)"
+CHARGING="$(pmset -g batt | grep 'AC Power')"
+
+if [ "$PERCENTAGE" = "" ]; then
+  exit 0
+fi
+
+case "${PERCENTAGE}" in
+  9[0-9]|100) ICON=""
+  ;;
+  [6-8][0-9]) ICON=""
+  ;;
+  [3-5][0-9]) ICON=""
+  ;;
+  [1-2][0-9]) ICON=""
+  ;;
+  *) ICON=""
+esac
+
+if [[ "$CHARGING" != "" ]]; then
+  ICON=""
+fi
+
+# The item invoking this script (name $NAME) will get its icon and label
+# updated with the current battery status
+sketchybar --set "$NAME" icon="$ICON" label="${PERCENTAGE}%"
+</file>
+
+<file path="plugins/right/cpu.sh">
+#!/usr/bin/env bash
+
+if [[ "$SENDER" == "mouse."* ]]; then
+    case "$SENDER" in
+        "mouse.clicked")
+            # echo "sender: $SENDER, button: $BUTTON, modifier: $MODIFIER, scroll_delta: $SCROLL_DELTA" > /tmp/logs.txt
+            case "$BUTTON" in
+                "left")
+                    "$CONFIG_DIR"/scripts/run_external_bash.sh '/opt/homebrew/bin/btop && exit'
+                    ;;
+                "right")
+                    open -a "Activity Monitor"
+                    ;;
+            esac
+            ;;
+    esac
+fi
+
+# Get CPU usage percentage
+CPU_USAGE=$(top -l 1 -n 0 | grep "CPU usage" | awk '{print $3}' | sed 's/%//')
+
+# Handle empty CPU usage
+if [[ -z "$CPU_USAGE" ]]; then
+    CPU_USAGE=0
+fi
+
+# Remove decimal point for comparison
+CPU_INT=${CPU_USAGE%.*}
+
+## Set icon and color based on CPU usage
+# source "$CONFIG_DIR/colors.sh"
+# if [[ $CPU_INT -le 25 ]]; then
+#     COLOR=$ACCENT_SECONDARY  # Green
+# elif [[ $CPU_INT -le 50 ]]; then
+#     COLOR=$ACCENT_PRIMARY  # Blue
+# elif [[ $CPU_INT -le 75 ]]; then
+#     COLOR=$ACCENT_TERTIARY  # Orange
+# else
+#     COLOR=$RED  # Red
+# fi
+CPU_INT_FORMATTED=$(printf "%02d" "$CPU_INT")
+sketchybar --set "$NAME" label="$CPU_INT_FORMATTED%"
+</file>
+
+<file path="plugins/right/ram.sh">
+#!/usr/bin/env bash
+
+LABEL=$(memory_pressure | grep "System-wide memory free percentage:" | awk '{print 100-$5"%"}')
+sketchybar --set "$NAME" label="$LABEL"
+</file>
+
+<file path="plugins/right/volume.sh">
+#!/bin/sh
+
+# The volume_change event supplies a $INFO variable in which the current volume
+# percentage is passed to the script.
+
+if [ "$SENDER" = "volume_change" ]; then
+  VOLUME="$INFO"
+
+  case "$VOLUME" in
+    [6-9][0-9]|100) ICON="󰕾"
+    ;;
+    [3-5][0-9]) ICON="󰖀"
+    ;;
+    [1-9]|[1-2][0-9]) ICON="󰕿"
+    ;;
+    *) ICON="󰖁"
+  esac
+
+  sketchybar --set "$NAME" icon="$ICON" label="$VOLUME%"
+fi
+</file>
+
+<file path="plugins/clock.sh">
+#!/bin/sh
+
+# The $NAME variable is passed from sketchybar and holds the name of
+# the item invoking this script:
+# https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
+
+sketchybar --set "$NAME" label="$(date '+%d/%m %H:%M')"
+</file>
+
+<file path="plugins/front_app.sh">
+#!/bin/sh
+
+# Some events send additional information specific to the event in the $INFO
+# variable. E.g. the front_app_switched event sends the name of the newly
+# focused application in the $INFO variable:
+# https://felixkratz.github.io/SketchyBar/config/events#events-and-scripting
+
+if [ "$SENDER" = "front_app_switched" ]; then
+  sketchybar --set "$NAME" label="$INFO"
+fi
+</file>
+
+<file path="plugins/space.sh">
+#!/bin/sh
+
+# The $SELECTED variable is available for space components and indicates if
+# the space invoking this script (with name: $NAME) is currently selected:
+# https://felixkratz.github.io/SketchyBar/config/components#space----associate-mission-control-spaces-with-an-item
+
+sketchybar --set "$NAME" background.drawing="$SELECTED"
+</file>
+
+<file path="colors.sh">
+#!/usr/bin/env bash
+
+############################################
+# Named Colors
+
+WHITE=0xFFCAD3F5
+RED=0xFFF38BA8
+BLACK=0xff212634
+# WHITE=0xfff8fdfa
+GREEN=0xffa6da95
+BLUE=0xff8aadf4
+YELLOW=0xffd6af7c
+ORANGE=0xfff5a97f
+MAGENTA=0xffc6a0f6
+GREY=0xff6c7086
+LIGHT_GREY=0xffc3c7d1
+DARK_GREY=0xff232634
+
+############################################
+# Accent Colors
+
+ACCENT_PRIMARY=0xff82aaff
+ACCENT_SECONDARY=0xffb9f27c
+ACCENT_TERTIARY=0xffff966c
+ACCENT_QUATERNARY=0xffc792ea
+ACCENT_PINK=0xffff79c6
+
+############################################
+# Default Colors
+
+DEFAULT_LABEL_COLOR=0xff6272a4
+DEFAULT_ICON_COLOR=0xff94928F
+DEFAULT_BACKGROUND_COLOR=0xff2e3440
+DEFAULT_BAR_COLOR=0x40232634 # 0xff1e1e2e  0xff242933  0xff1e1e2e  0xff232634  0x40232634
+
+############################################
+# Items Colors
+
+WIFI_ICON_COLOR=0xff4db5bd
+
+BLUETOOTH_OFF_ICON_COLOR=0xFF9399B2
+BLUETOOTH_ON_ICON_COLOR="$ACCENT_PRIMARY"
+
+BREW_ICON_COLOR=0xff8aadf4
+
+PLAYER_LABLE_COLOR=0xff5699af
+PLAYER_PLAY_ICON_COLOR=0xffc678dd
+PLAYER_PAUSE_ICON_COLOR=0xff98be65
+PLAYER_STOP_ICON_COLOR=0xffFC9867
+
+MIC_ICON_COLOR=0xff5699af
+VOLUME_ICON_COLOR=0xffca9ee6
+
+RAM_ICON_COLOR=0xffa6e3a1
+DISK_ICON_COLOR=0xffe5c890
+CPU_ICON_COLOR=0xff8caaee
+BATTERY_ICON_COLOR=0xffa6e3a1
+
+INPUT_LABEL_COLOR=0xffbc99ed
+
+CLOCK_ICON_COLOR=0xffbd93f9
+CLOCK_LABEL_COLOR=0xff8caaee
+
+DATE_ICON_COLOR=0xff7c8377
+DATE_LABEL_COLOR=0xff6272a4
+
+SCRATCHPAD_ICON_COLOR=0xff6272a4
+SCRATCHPAD_LABEL_COLOR=0xffbd93f9
+
+FRONT_APP_LABEL_COLOR=0xff928374
+FRONT_APP_ICON_COLOR=0xff81A1C1 # "0xff5699af"
+
+############################################
+# Runners Colors
+
+RUNNER_SETTINGS_ICON_COLOR=0xff3071db
+RUNNER_KITTY_ICON_COLOR=0xff89dceb
+RUNNER_GHOSTTY_ICON_COLOR=0xffc3c7d1
+RUNNER_WEZTERM_ICON_COLOR=0xff4E49EE
+RUNNER_BRAVE_BROWSER_ICON_COLOR=0xfff38ba8
+RUNNER_IDEA_ICON_COLOR=0xff8caaee
+
+############################################
+# Workspace Colors
+
+WS_DEFAULT_BG_COLOR=0x44ffffff
+WS_DEFAULT_COLOR=0xff51576d
+WS_ACTIVE_ICON_COLOR=0xffa6d189
+WS_ACTIVE_LABEL_COLOR=0xffa6d189
+WS_ACTIVE_BG_COLOR=0xff44475a
+WS_ACTIVE_ANOTHER_DISPLAY_ICON_COLOR="$WS_DEFAULT_COLOR"     # 0xffbd93f9
+WS_ACTIVE_ANOTHER_DISPLAY_LABEL_COLOR="$WS_DEFAULT_COLOR"    # 0xffbd93f9
+WS_ACTIVE_ANOTHER_DISPLAY_BG_COLOR=0xff83a598                # 0xffb8bb26
+WS_WIHT_CLIENTS_ICON_COLOR="$WS_DEFAULT_COLOR"               # 0xff83a598
+WS_WIHT_CLIENTS_LABEL_COLOR="$WS_DEFAULT_COLOR"
+WS_WIHT_CLIENTS_BG_COLOR="$WS_DEFAULT_COLOR"
+
+############################################
+# Popup Colors
+
+POPUP_BORDER_COLOR=0xff82aaff
+POPUP_BACKGROUND_COLOR=0x603C3E4F
+</file>
+
+<file path="icons.sh">
+#!/usr/bin/env bash
+
+# Basic icons - add more as needed
+CLOCK="??"
+CALENDAR="??"
+</file>
+
+<file path="settings.sh">
+#!/usr/bin/env bash
+
+# Font settings
+ICON_FONT="SF Pro:Bold:16.0"
+LABEL_FONT="SF Pro:Medium:14.0"
+
+# Common item configurations
+left_items_common=(
+    icon.padding_left=6
+    icon.padding_right=5
+    label.padding_left=0
+    label.padding_right=6
+    background.padding_left=2
+)
+
+# Popup events for mouse interactions
+popup_events=(
+    mouse.entered
+    mouse.exited
+    mouse.exited.global
+)
+</file>
+
+<file path="sketchybarrc">
+#!/usr/bin/env bash
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
+SCRIPTS_DIR="$CONFIG_DIR/scripts"
+
+# Source configuration files
+source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/icons.sh"
+source "$CONFIG_DIR/settings.sh"
+
+# Configure the bar
+sketchybar --bar position=top \
+    height=30 \
+    blur_radius=25 \
+    color="$DEFAULT_BAR_COLOR" \
+    padding_left=6 \
+    padding_right=6
+
+# Set default properties for all items
+default=(
+    padding_left=5
+    padding_right=5
+    icon.font="$ICON_FONT"
+    label.font="$LABEL_FONT"
+    icon.color="$DEFAULT_ICON_COLOR"
+    label.color="$DEFAULT_LABEL_COLOR"
+    label.y_offset=2
+    icon.y_offset=1
+
+    background.height=22
+    background.corner_radius=2
+    background.color="$DEFAULT_BACKGROUND_COLOR"
+    background.y_offset=1
+    background.padding_left=0
+    background.padding_right=0
+    background.border_width=0
+
+    popup.background.border_width=2
+    popup.background.corner_radius=9
+    popup.background.border_color="$POPUP_BORDER_COLOR"
+    popup.background.color="$POPUP_BACKGROUND_COLOR"
+    popup.blur_radius=20
+    popup.background.shadow.drawing=on
+
+    scroll_texts=on
+)
+sketchybar --default "${default[@]}"
+
+##### Adding Left Items #####
+source "$ITEM_DIR/left/aerospace_scratchpad.sh"
+
+##### Adding Right Items #####
+source "$ITEM_DIR/right/clock.sh"
+
+# Add other items here as needed...
+
+sketchybar --hotload on
+sketchybar --update
+</file>
+
+</files>
