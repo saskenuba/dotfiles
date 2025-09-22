@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+
+PLUGIN_DIR="$CONFIG_DIR/plugins"
+ITEM_DIR="$CONFIG_DIR/items"
+SCRIPTS_DIR="$CONFIG_DIR/scripts"
+
+# Source configuration files
+source "$CONFIG_DIR/colors.sh"
+source "$CONFIG_DIR/icons.sh"
+source "$CONFIG_DIR/settings.sh"
+
+# Configure the bar
+sketchybar --bar position=top \
+    height=30 \
+    blur_radius=25 \
+    color="$DEFAULT_BAR_COLOR" \
+    padding_left=10 \
+    padding_right=10
+
+# Set default properties for all items
+default=(
+    padding_left=5
+    padding_right=5
+    icon.font="$ICON_FONT"
+    label.font="$LABEL_FONT"
+    icon.color="$DEFAULT_ICON_COLOR"
+    label.color="$DEFAULT_LABEL_COLOR"
+    label.y_offset=1
+    icon.y_offset=1
+
+    background.height=22
+    background.corner_radius=2
+    background.color="$DEFAULT_BACKGROUND_COLOR"
+    background.y_offset=1
+    background.padding_left=0
+    background.padding_right=0
+    background.border_width=0
+
+    popup.background.border_width=2
+    popup.background.corner_radius=9
+    popup.background.border_color="$POPUP_BORDER_COLOR"
+    popup.background.color="$POPUP_BACKGROUND_COLOR"
+    popup.blur_radius=20
+    popup.background.shadow.drawing=on
+
+    scroll_texts=on
+)
+sketchybar --default "${default[@]}"
+
+##### Adding Left Items #####
+source "$ITEM_DIR/left/apple.sh"
+source "$ITEM_DIR/left/aerospace_scratchpad.sh"
+
+##### Adding Right Items #####
+source "$ITEM_DIR/right/clock.sh"
+source "$ITEM_DIR/right/battery.sh"
+source "$ITEM_DIR/right/ram.sh"
+
+# Add other items here as needed...
+
+sketchybar --hotload on
+sketchybar --update
