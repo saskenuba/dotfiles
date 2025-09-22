@@ -49,7 +49,7 @@ sketchybar --default "${default[@]}"
 
 ##### Adding Left Items #####
 source "$ITEM_DIR/left/apple.sh"
-source "$ITEM_DIR/left/aerospace_scratchpad.sh"
+source "$ITEM_DIR/left/aerospace_workspaces.sh"
 
 ##### Adding Right Items #####
 source "$ITEM_DIR/right/clock.sh"
