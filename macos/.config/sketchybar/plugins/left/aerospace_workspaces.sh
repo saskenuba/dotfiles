@@ -1,39 +1,61 @@
 #!/usr/bin/env bash
 
-source "$CONFIG_DIR/colors.sh"
+# Arguments from sketchybar
+WORKSPACE_ID="${1:-1}"
+COLOR_CONFIG="${2:-}"
 
-# Get current focused workspace
+# Default colors if not provided
+LABEL_ACTIVE_COLOR="#ffffff"
+LABEL_INACTIVE_COLOR="#888888"
+BG_ACTIVE_COLOR="#4c7899"
+BG_INACTIVE_COLOR="#333333"
+
+# Parse color configuration
+if [ -n "$COLOR_CONFIG" ]; then
+    # Parse format: "key1:value1,key2:value2,..."
+    IFS=',' read -ra PAIRS <<< "$COLOR_CONFIG"
+    for pair in "${PAIRS[@]}"; do
+        IFS=':' read -r key value <<< "$pair"
+        case "$key" in
+            label_active) LABEL_ACTIVE_COLOR="$value" ;;
+            label_inactive) LABEL_INACTIVE_COLOR="$value" ;;
+            bg_active) BG_ACTIVE_COLOR="$value" ;;
+            bg_inactive) BG_INACTIVE_COLOR="$value" ;;
+        esac
+    done
+fi
+
+# Get the current focused workspace
 FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
 
-# Check all workspaces 1-9 and update them
-for WORKSPACE_ID in {1..9}; do
-    # Count windows in this workspace
-    WINDOW_COUNT=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null | wc -l | awk '{print $1}')
-    
-    # Format label as "workspace:count"
-    LABEL="$WORKSPACE_ID:$WINDOW_COUNT"
-    
-    # Only show workspaces that have windows
-    if [ "$WINDOW_COUNT" -gt 0 ]; then
-        # Workspace has windows - show it
-        if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
-            # This is the active workspace with windows
-            sketchybar --set workspace.$WORKSPACE_ID \
-                label="$LABEL" \
-                background.drawing=on \
-                drawing=on
-        else
-            # Inactive workspace with windows
-            sketchybar --set workspace.$WORKSPACE_ID \
-                label="$LABEL" \
-                label.color="$WS_ACTIVE_LABEL_COLOR" \
-                background.color="$WS_WIHT_CLIENTS_BG_COLOR" \
-                background.drawing=on \
-                drawing=on
-        fi
+# Get window count for this workspace
+WINDOW_COUNT=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null | wc -l | tr -d ' ')
+
+# Format the label
+LABEL="$WORKSPACE_ID:$WINDOW_COUNT"
+
+# Update based on state
+if [ "$WINDOW_COUNT" -gt 0 ]; then
+    # Workspace has windows - show it
+    if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
+        # This is the active workspace
+        sketchybar --set workspace."$WORKSPACE_ID" \
+            label="$LABEL" \
+            label.color="$LABEL_ACTIVE_COLOR" \
+            background.color="$BG_ACTIVE_COLOR" \
+            background.drawing=on \
+            drawing=on
     else
-        # No windows - hide the workspace
-        sketchybar --set workspace.$WORKSPACE_ID \
-            drawing=off
+        # Inactive workspace with windows
+        sketchybar --set workspace."$WORKSPACE_ID" \
+            label="$LABEL" \
+            label.color="$LABEL_INACTIVE_COLOR" \
+            background.color="$BG_INACTIVE_COLOR" \
+            background.drawing=on \
+            drawing=on
     fi
-done
+else
+    # No windows - hide the workspace
+    sketchybar --set workspace."$WORKSPACE_ID" \
+        drawing=off
+fi
