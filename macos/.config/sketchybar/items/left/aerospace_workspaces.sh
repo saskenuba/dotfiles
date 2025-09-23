@@ -62,7 +62,6 @@ workspace_aesthetics=(
 
 # Functional configuration for workspace items  
 workspace_functionality=(
-    update_freq=$UPDATE_FREQUENCY
     drawing=$INITIAL_DRAWING
 )
 
@@ -72,11 +71,12 @@ COLOR_CONFIG=$(create_color_config)
 # Create workspace items for 1-9
 for i in {1..9}; do
     sketchybar --add item workspace.$i left \
+	--add event aerospace_workspace_change \
         --set workspace.$i \
         "${workspace_aesthetics[@]}" \
         "${workspace_functionality[@]}" \
         label="$i:0" \
         script="$PLUGIN_DIR/left/aerospace_workspaces.sh $i '$COLOR_CONFIG'" \
         click_script="$PLUGIN_DIR/left/workspace_click.sh $i" \
-        --subscribe workspace.$i workspace_change
+        --subscribe workspace.$i aerospace_workspace_change
 done
