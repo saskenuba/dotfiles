@@ -32,8 +32,7 @@ vmap <leader>ws <c-w>s
 vmap <leader>wc <c-w>c
 vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
-nmap <leader>jj :action emacsIDEAs.AceJump<CR>
-
+nmap <leader>jj :action AceAction<CR>
 
 function! OpenSplitAndRestorePosition()
     execute "vsplit"
@@ -103,5 +102,6 @@ nmap <leader>el :action :cursive.repl.actions/run-last-sexp<CR>
 nmap <leader>sa :action :cursive.repl.actions/jump-to-repl<CR>
 nmap <leader>ek :action :cursive.repl.actions/run-top-sexp<CR>
 nmap <leader>en :action :cursive.repl.actions/switch-namespace<CR>
+nmap <leader>ee :action :cursive.repl.actions/execute<CR>
 nmap <leader>=e :action Tool_External Tools_std-clj-format<CR>
 nmap <leader>== :action ReformatCode<CR>
