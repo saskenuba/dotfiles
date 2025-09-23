@@ -35,27 +35,24 @@ WINDOW_COUNT=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null | 
 LABEL="$WORKSPACE_ID:$WINDOW_COUNT"
 
 # Update based on state
-if [ "$WINDOW_COUNT" -gt 0 ]; then
-    # Workspace has windows - show it
-    if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
-        # This is the active workspace
-        sketchybar --set workspace."$WORKSPACE_ID" \
-            label="$LABEL" \
-            label.color="$LABEL_ACTIVE_COLOR" \
-            background.color="$BG_ACTIVE_COLOR" \
-            background.drawing=on \
-            drawing=on
-    else
-        # Inactive workspace with windows
-        sketchybar --set workspace."$WORKSPACE_ID" \
-            label="$LABEL" \
-            label.color="$LABEL_INACTIVE_COLOR" \
-            background.color="$BG_INACTIVE_COLOR" \
-            background.drawing=on \
-            drawing=on
-    fi
+if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
+    # This is the focused workspace - always show it
+    sketchybar --set workspace."$WORKSPACE_ID" \
+        label="$LABEL" \
+        label.color="$LABEL_ACTIVE_COLOR" \
+        background.color="$BG_ACTIVE_COLOR" \
+        background.drawing=on \
+        drawing=on
+elif [ "$WINDOW_COUNT" -gt 0 ]; then
+    # Inactive workspace with windows
+    sketchybar --set workspace."$WORKSPACE_ID" \
+        label="$LABEL" \
+        label.color="$LABEL_INACTIVE_COLOR" \
+        background.color="$BG_INACTIVE_COLOR" \
+        background.drawing=on \
+        drawing=on
 else
-    # No windows - hide the workspace
+    # Inactive workspace with no windows - hide it
     sketchybar --set workspace."$WORKSPACE_ID" \
         drawing=off
 fi
