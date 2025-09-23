@@ -55,6 +55,7 @@ source "$ITEM_DIR/left/aerospace_workspaces.sh"
 source "$ITEM_DIR/right/clock.sh"
 source "$ITEM_DIR/right/battery.sh"
 source "$ITEM_DIR/right/ram.sh"
+source "$ITEM_DIR/right/wifi.sh"
 
 # Add other items here as needed...
 

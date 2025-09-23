@@ -3,7 +3,7 @@ start-at-login = true
 # after-startup-command = 'exec-and-forget sketchybar'
 exec-on-workspace-change = [
     '/bin/bash', '-c',
-    'sketchybar --trigger aerospace_workspace_change FOCUSED_WORKSPACE=$AEROSPACE_FOCUSED_WORKSPACE'
+    'sketchybar --trigger aerospace_workspace_change FOCUSED=$AEROSPACE_FOCUSED_WORKSPACE PREVIOUS=$AEROSPACE_PREV_WORKSPACE'
 ]
 
 # Normalizations. See: https://nikitabobko.github.io/AeroSpace/guide#normalization
