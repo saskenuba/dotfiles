@@ -78,7 +78,7 @@ PACKAGES_SYNC_OK="? " # "?? "
 FRONT_APP_SEPARATOR="?"
 
 # WiFi
-WIFI_CONNECTED="?? " # "?? " "?? "
+WIFI_CONNECTED="" # "?? " "?? "
 WIFI_DISCONNECTED="?? " #"?? " "?? "
 ETHERNET_CONNECTED="??"
 
