@@ -63,6 +63,134 @@ current buffer's point."
           (kill-new result)
           (message "Copied: %s" result))))))
 
+(defun copy-project-tree-to-clipboard (&optional max-depth exclude-patterns)
+  "Run tree command at project root and copy output to clipboard.
+Optional MAX-DEPTH limits directory depth (default: no limit).
+Optional EXCLUDE-PATTERNS is a list of patterns to exclude."
+  (interactive)
+  (let ((proj (project-current)))
+    (unless proj
+      (user-error "Not in a project"))
+    (let* ((root (project-root proj))
+           (default-directory root)
+           (depth-args (when max-depth (list "-L" (number-to-string max-depth))))
+           (exclude-args (when exclude-patterns
+                          (mapcan (lambda (pattern) (list "-I" pattern)) exclude-patterns)))
+           ;; Build arguments without "tree" prefix since call-process takes command separately
+           (tree-args (append depth-args exclude-args '(".")))
+           (tree-output (with-temp-buffer
+                         (let ((exit-code (apply #'call-process "tree" nil t nil tree-args)))
+                           (unless (zerop exit-code)
+                             (user-error "tree command failed with exit code %d. Make sure 'tree' is installed" exit-code))
+                           (buffer-string)))))
+      (kill-new tree-output)
+      (message "Project tree copied to clipboard (%d lines)"
+               (length (split-string tree-output "\n"))))))
+
+(defun copy-project-tree-with-includes (include-patterns &optional max-depth)
+  "Copy project tree showing only specified paths and their full contents.
+For directories in INCLUDE-PATTERNS, shows complete tree structure within them."
+  (interactive)
+  (let ((proj (project-current)))
+    (unless proj
+      (user-error "Not in a project"))
+    (let* ((root (project-root proj))
+           (default-directory root)
+           ;; Filter patterns to only those that exist
+           (existing-paths (seq-filter
+                           (lambda (pattern)
+                             (or (file-exists-p pattern)
+                                 ;; Check if pattern matches any file/dir using glob
+                                 (not (null (file-expand-wildcards pattern t)))))
+                           include-patterns))
+           ;; Build tree command with specific paths
+           (depth-args (when max-depth (list "-L" (number-to-string max-depth))))
+           ;; If no paths exist, show empty result
+           (tree-output (if (null existing-paths)
+                           "No matching files or directories found."
+                         (with-temp-buffer
+                           ;; Run tree with all the paths that should be included
+                           (let ((exit-code (apply #'call-process "tree" nil t nil
+                                                  (append depth-args existing-paths))))
+                             (unless (zerop exit-code)
+                               (user-error "tree command failed with exit code %d" exit-code))
+                             (buffer-string))))))
+      (kill-new tree-output)
+      (message "Project tree (filtered) copied to clipboard (%d lines)"
+               (length (split-string tree-output "\n"))))))
+
+(defun copy-project-tree-filtered ()
+  "Copy project tree with exclusions based on detected Projectile project type."
+  (interactive)
+  (unless (fboundp 'projectile-project-type)
+    (user-error "Projectile is not available. Make sure it's installed and loaded"))
+
+  (let* ((project-type (ignore-errors (projectile-project-type)))
+         (common-excludes '(".git" ".DS_Store" "*.elc"))
+         (config (cond
+                  ;; Clojure projects - show important files only
+                  ((memq project-type '(lein-test lein-midje boot-clj clojure-cli))
+                   (list :mode 'include
+                         :patterns '("deps.edn" "project.clj" "build.boot" "shadow-cljs.edn"
+                                   "src" "test" "resources" "dev" "README.md" "CHANGELOG.md")))
+
+                  ;; JavaScript/Node projects
+                  ((memq project-type '(npm yarn))
+                   (list :mode 'exclude
+                         :patterns (append common-excludes
+                                         '("node_modules" "dist" "build" ".next" ".nuxt" "coverage"))))
+
+                  ;; Python projects
+                  ((memq project-type '(python-pip python-pkg python-tox))
+                   (list :mode 'exclude
+                         :patterns (append common-excludes
+                                         '("__pycache__" "*.pyc" "venv" ".venv" "env" ".env"
+                                           "build" "dist" "*.egg-info" ".pytest_cache"))))
+
+                  ;; Rust projects
+                  ((eq project-type 'rust-cargo)
+                   (list :mode 'exclude
+                         :patterns (append common-excludes '("target" "Cargo.lock"))))
+
+                  ;; Java/Maven projects
+                  ((eq project-type 'maven)
+                   (list :mode 'exclude
+                         :patterns (append common-excludes '("target" ".mvn"))))
+
+                  ;; Java/Gradle projects
+                  ((eq project-type 'gradle)
+                   (list :mode 'exclude
+                         :patterns (append common-excludes '("build" ".gradle"))))
+
+                  ;; Go projects
+                  ((eq project-type 'go)
+                   (list :mode 'exclude
+                         :patterns (append common-excludes '("vendor"))))
+
+                  ;; Default fallback
+                  (t (list :mode 'exclude
+                          :patterns (append common-excludes
+                                          '("target" "build" "dist" "node_modules"))))))
+
+         (mode (plist-get config :mode))
+         (patterns (plist-get config :patterns)))
+
+    (if (eq mode 'include)
+        ;; For include mode, use the special include function
+        (copy-project-tree-with-includes patterns)
+      ;; For exclude mode, use the standard function with exclude patterns
+      (copy-project-tree-to-clipboard nil patterns))
+
+    (message "Copied %s project tree (%s: %s)"
+             (if project-type (symbol-name project-type) "unknown")
+             (if (eq mode 'include) "included" "excluded")
+             (mapconcat 'identity patterns ", "))))
+
+(defun copy-project-tree-shallow ()
+  "Copy project tree with depth limit of 3 levels."
+  (interactive)
+  (copy-project-tree-to-clipboard 3))
+
 (defun my-magit-prune-conceptual-upstream ()
   "Delete local branches configured according to the 'Conceptual Workflow'.
 
@@ -156,7 +284,7 @@ branches ('master', 'main', 'develop') and the current branch."
       )
 
     ;; --- Step 3: Delete branches if any were found ---
-        ;; --- Step 3: Delete branches if any were found ---
+    ;; --- Step 3: Delete branches if any were found ---
     (setq branches-to-prune (nreverse branches-to-prune))
 
     (if branches-to-prune
