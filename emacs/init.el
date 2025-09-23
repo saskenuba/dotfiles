@@ -816,17 +816,17 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :ensure t
   :config
   (exec-path-from-shell-copy-env "OPENROUTER_API_KEY")
-  (exec-path-from-shell-copy-env "GEMINI_API_KEY"))
+  (exec-path-from-shell-copy-env "GEMINI_API_KEY")
+  (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY"))
 
 (use-package aidermacs
   :bind (("C-c a" . aidermacs-transient-menu))
   :custom
-   ; See the Configuration section below
-  ;(aidermacs-default-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
-  ;(aidermacs-architect-model "openrouter/google/gemini-2.5-pro-exp-03-25:free")
   (aidermacs-default-model "gemini/gemini-2.5-pro-preview-05-06")
   (aidermacs-architect-model "gemini/gemini-2.5-pro-preview-05-06")
   (aidermacs-use-architect-mode t))
+
+(use-package eca)
 
 (use-package kaocha-runner
   :defer t)
