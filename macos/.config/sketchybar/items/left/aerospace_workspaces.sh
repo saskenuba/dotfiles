@@ -77,6 +77,6 @@ for i in {1..9}; do
         "${workspace_functionality[@]}" \
         label="$i:0" \
         script="$PLUGIN_DIR/left/aerospace_workspaces.sh $i '$COLOR_CONFIG'" \
-        click_script="$PLUGIN_DIR/left/workspace_click.sh $i" \
+        click_script="aerospace workspace $i" \
         --subscribe workspace.$i aerospace_workspace_change
 done
