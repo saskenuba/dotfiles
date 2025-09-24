@@ -48,6 +48,7 @@ inner.vertical =   7
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 cmd-k = 'focus right'
 cmd-h = 'focus up'
+cmd-enter = 'swap --wrap-around left'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
 ctrl-alt-shift-cmd-h = 'move left'
@@ -104,6 +105,7 @@ r = ['flatten-workspace-tree', 'mode main'] # reset layout
 #s = ['layout sticky tiling', 'mode main'] # sticky is not yet supported https://github.com/nikitabobko/AeroSpace/issues/2
 f = ['layout floating tiling', 'mode main'] # Toggle between floating and tiling layout
 backspace = ['close-all-windows-but-current', 'mode main']
+
 
 ctrl-alt-shift-cmd-h = ['join-with left', 'mode main']
 ctrl-alt-shift-cmd-j = ['join-with down', 'mode main']
