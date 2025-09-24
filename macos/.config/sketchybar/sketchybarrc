@@ -13,6 +13,8 @@ source "$CONFIG_DIR/settings.sh"
 sketchybar --bar position=top \
     height=30 \
     blur_radius=25 \
+    topmost=on \
+    sticky=on \
     color="$DEFAULT_BAR_COLOR" \
     padding_left=10 \
     padding_right=10
