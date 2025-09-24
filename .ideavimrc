@@ -53,6 +53,7 @@ nmap <leader>bb      :action Rust.Build<CR>
 nmap <leader>br      :action Run<CR>
 nmap <leader>bs      :action Stop<CR>
 nmap <leader>fs      :action SaveAll<CR>
+nmap <leader>mz      :action ToggleZenMode<CR>
 
 " Reload .ideavimrc
 nmap <leader>R :action IdeaVim.ReloadVimRc.reload<CR>
@@ -96,7 +97,7 @@ map <leader>c :action :cursive.actions.paredit/kill-sexp<CR>
 " Cycle collection
 map <leader>C :action :cursive.actions.paredit/cycle-collection-type<CR>
 
-" more cursive actions
+" Cursive actions
 nmap <leader>eb :action :cursive.repl.actions/load-file<CR>
 nmap <leader>el :action :cursive.repl.actions/run-last-sexp<CR>
 nmap <leader>sa :action :cursive.repl.actions/jump-to-repl<CR>
