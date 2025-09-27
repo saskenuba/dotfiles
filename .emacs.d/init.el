@@ -648,7 +648,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    :repo "drym-org/symex.el"
    :files ("symex-core/symex*.el")))
 
-; FIXME: take a look at symex-rigpa for normal mode -> symex mode
 (use-package symex
   :after (symex-core)
   :straight
@@ -672,8 +671,16 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (lithium-define-keys symex-editing-mode
     (("M-1" symex-cycle-quote)
      ("M-[" symex-create-curly)
-     ("M-]" symex-wrap-curly))))
+     ("M-]" symex-wrap-curly)))
 
+  (evil-define-key 'normal clojure-mode-map
+    (kbd "<escape>") (lambda ()
+                       (interactive)
+                       (rigpa-enter-mode "symex")))
+  (evil-define-key 'normal emacs-lisp-mode-map
+    (kbd "<escape>") (lambda ()
+                       (interactive)
+                       (rigpa-enter-mode "symex"))))
 
 (use-package symex-ide
   :after (symex)
@@ -694,6 +701,25 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    :files ("symex-evil/symex*.el"))
   :config
   (symex-evil-mode 1))
+
+(use-package rigpa
+  :straight
+  (rigpa
+   :type git
+   :host github
+   :repo "countvajhula/rigpa")
+  :config
+  (rigpa-mode 1))
+
+(use-package symex-rigpa
+  :after (symex rigpa symex-evil)
+  :straight
+  (symex-rigpa
+   :host github
+   :repo "drym-org/symex.el"
+   :files ("symex-rigpa/symex*.el"))
+  :config
+  (symex-rigpa-mode 1))
 
 (use-package avy
   :straight t)
