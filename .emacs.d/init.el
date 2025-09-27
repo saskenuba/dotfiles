@@ -5,15 +5,47 @@
 
 ;;; Set up the package manager
 
+;; Initialize package.el
 (require 'package)
-(package-initialize)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+(package-initialize)
 
+;; Bootstrap straight.el
+(defvar bootstrap-version)
+(let ((bootstrap-file
+       (expand-file-name
+        "straight/repos/straight.el/bootstrap.el"
+        (or (bound-and-true-p straight-base-dir)
+            user-emacs-directory)))
+      (bootstrap-version 7))
+  (unless (file-exists-p bootstrap-file)
+    (with-current-buffer
+        (url-retrieve-synchronously
+         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+         'silent 'inhibit-cookies)
+      (goto-char (point-max))
+      (eval-print-last-sexp)))
+  (load bootstrap-file nil 'nomessage))
+
+;; Configure straight.el to work with use-package
+(straight-use-package 'use-package)
+
+;; Configure use-package to use package.el by default
+(setq use-package-always-ensure t)  ; Use package.el by default
+
+;; When you want to use straight.el explicitly, use :straight t
+;; When you want to use package.el explicitly, use :ensure t (or rely on the default)
+
+;; Optional: Set straight.el to not automatically install packages
+;; unless explicitly requested with :straight
+(setq straight-use-package-by-default nil)
+
+;; Ensure use-package is installed (via package.el)
 (when (< emacs-major-version 29)
   (unless (package-installed-p 'use-package)
-    (unless package-archive-contents
-      (package-refresh-contents))
+    (package-refresh-contents)
     (package-install 'use-package)))
+;;; end of package managers
 
 (add-to-list 'display-buffer-alist
              '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
@@ -31,7 +63,6 @@
             debug-on-error t)
     (setq use-package-verbose nil
           use-package-expand-minimally t))
-
 
 ;; (defvar martmacs/default-font-size 95)
 (defvar martmacs/default-font-size 110)
@@ -610,34 +641,70 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ((emacs-lisp-mode . (lambda () (smartparens-strict-mode))))
   :config (require 'smartparens-config))
 
-(use-package symex
-  :after evil-cleverparens
-  :init
-  (setq symex--user-evil-keyspec
-	'(("j"		.	symex-go-up)
-	  ("k"		.	symex-go-down)
-	  ("C-j"	.	symex-climb-branch)
-	  ("C-k"	.	symex-descend-branch)
-	  ("M-j"	.	symex-goto-highest)
-	  ("M-k"	.	symex-goto-lowest)
-	  ("M-1"	.	symex-cycle-quote)
-	  ("M-["	.	symex-create-curly)
-	  ("M-]"	.	symex-wrap-curly)))
-  
-  :config
-  (symex-initialize)
-  (global-set-key (kbd "s-;") 'symex-mode-interface)  ; or whatever keybinding you like
-  :hook
-  ((clojure-mode . (lambda ()
-		     (setq-local symex-quote-prefix-list (list "#" "'" "@" "#_"))
-		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
-   (emacs-lisp-mode . (lambda ()
-			(setq symex-quote-prefix-list (list "'" "#'"))
-			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
+(use-package symex-core
+  :straight
+  (symex-core
+   :host github
+   :repo "drym-org/symex.el"
+   :files ("symex-core/symex*.el")))
 
-(use-package avy)
+(use-package symex
+  :after (symex-core)
+  :straight
+  (symex
+   :host github
+   :repo "drym-org/symex.el"
+   :files ("symex/symex*.el" "symex/doc/*.texi" "symex/doc/figures"))
+  :config
+  (symex-mode 1)
+  (global-set-key (kbd "s-;") #'symex-mode-interface))  ; or whatever keybinding you like
+  ;; and any other customizations you like
+
+(use-package symex-ide
+  :after (symex)
+  :straight
+  (symex-ide
+   :host github
+   :repo "drym-org/symex.el"
+   :files ("symex-ide/symex*.el"))
+  :config
+  (symex-ide-mode 1))
+
+(use-package symex-evil
+  :after (symex evil)
+  :straight
+  (symex-evil
+   :host github
+   :repo "drym-org/symex.el"
+   :files ("symex-evil/symex*.el"))
+  :config
+  (symex-evil-mode 1))
+
+;(use-package symex
+;  :after evil-cleverparens
+;  :init
+;  (setq symex--user-evil-keyspec
+;	'(("j"		.	symex-go-up)
+;	  ("k"		.	symex-go-down)
+;	  ("C-j"	.	symex-climb-branch)
+;	  ("C-k"	.	symex-descend-branch)
+;	  ("M-j"	.	symex-goto-highest)
+;	  ("M-k"	.	symex-goto-lowest)
+;	  ("M-1"	.	symex-cycle-quote)
+;	  ("M-["	.	symex-create-curly)
+;	  ("M-]"	.	symex-wrap-curly)))
+;  :hook
+;  ((clojure-mode . (lambda ()
+;		     (setq-local symex-quote-prefix-list (list "#" "'" "@" "#_"))
+;		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+;		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
+;   (emacs-lisp-mode . (lambda ()
+;			(setq symex-quote-prefix-list (list "'" "#'"))
+;			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+;			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
+
+(use-package avy
+  :straight t)
 
 (use-package markdown-mode
   :init (setq markdown-command "multimarkdown")
