@@ -648,6 +648,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    :repo "drym-org/symex.el"
    :files ("symex-core/symex*.el")))
 
+; FIXME: take a look at symex-rigpa for normal mode -> symex mode
 (use-package symex
   :after (symex-core)
   :straight
@@ -655,10 +656,24 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    :host github
    :repo "drym-org/symex.el"
    :files ("symex/symex*.el" "symex/doc/*.texi" "symex/doc/figures"))
+
+  :hook
+  ((clojure-mode . (lambda ()
+		     (setq-local symex-quote-prefix-list (list "#" "'" "@" "#_"))
+		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
+   (emacs-lisp-mode . (lambda ()
+			(setq symex-quote-prefix-list (list "'" "#'"))
+			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
+			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface))))
   :config
   (symex-mode 1)
-  (global-set-key (kbd "s-;") #'symex-mode-interface))  ; or whatever keybinding you like
-  ;; and any other customizations you like
+  (global-set-key (kbd "s-;") #'symex-mode-interface)
+  (lithium-define-keys symex-editing-mode
+    (("M-1" symex-cycle-quote)
+     ("M-[" symex-create-curly)
+     ("M-]" symex-wrap-curly))))
+
 
 (use-package symex-ide
   :after (symex)
@@ -679,29 +694,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    :files ("symex-evil/symex*.el"))
   :config
   (symex-evil-mode 1))
-
-;(use-package symex
-;  :after evil-cleverparens
-;  :init
-;  (setq symex--user-evil-keyspec
-;	'(("j"		.	symex-go-up)
-;	  ("k"		.	symex-go-down)
-;	  ("C-j"	.	symex-climb-branch)
-;	  ("C-k"	.	symex-descend-branch)
-;	  ("M-j"	.	symex-goto-highest)
-;	  ("M-k"	.	symex-goto-lowest)
-;	  ("M-1"	.	symex-cycle-quote)
-;	  ("M-["	.	symex-create-curly)
-;	  ("M-]"	.	symex-wrap-curly)))
-;  :hook
-;  ((clojure-mode . (lambda ()
-;		     (setq-local symex-quote-prefix-list (list "#" "'" "@" "#_"))
-;		     (evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-;		     (evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))
-;   (emacs-lisp-mode . (lambda ()
-;			(setq symex-quote-prefix-list (list "'" "#'"))
-;			(evil-define-key 'normal symex-mode-map (kbd "<escape>") 'symex-mode-interface)
-;			(evil-define-key 'insert symex-mode-map (kbd "<escape>") 'symex-mode-interface)))))
 
 (use-package avy
   :straight t)
