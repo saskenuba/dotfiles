@@ -32,10 +32,11 @@ on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
 [gaps]
 inner.horizontal = 7
 inner.vertical =   7
-# outer.left =       5
-# outer.bottom =     5
-# outer.top =        40
-# outer.right =      5
+
+# Added because of huge gigabyte M34 monitor
+outer.top = 30
+outer.left = 2
+outer.right = 2
 
 # See: https://nikitabobko.github.io/AeroSpace/guide#binding-modes
 [mode.main.binding]
