@@ -127,3 +127,19 @@ _export_aws_credentials() {
         return 1
     fi
 }
+
+splint-committed-check() {
+    git diff --name-only @{u}..HEAD | xargs splint
+}
+
+splint-index-and-committed-check() {
+    git diff --name-only --cached | xargs splint
+}
+
+splint-committed-fix() {
+    git diff --name-only @{u}..HEAD | xargs splint --autocorrect
+}
+
+splint-index-and-committed-fix() {
+    git diff --name-only --cached | xargs splint --autocorrect
+}
