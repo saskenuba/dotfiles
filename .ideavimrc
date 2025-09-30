@@ -3,6 +3,7 @@ set smartcase
 set ideajoin
 set surround
 set wrapsearch
+set clipboard+=unnamed
 
 let mapleader = " "
 " nnoremap <S-Enter> <C-W>w
@@ -20,8 +21,8 @@ nmap <leader>ws <c-w>s
 nmap <leader>wc <c-w>c
 nmap <leader>wm :action MoveEditorToOppositeTabGroup<CR>
 nmap <leader>wo :action OpenEditorInOppositeTabGroup<CR>
-" nmap <leader>wm :action HideAllWindows<CR>
 nmap <leader>wz :action ToggleDistractionFreeMode<CR>
+nmap <leader>wD :action CloseAllEditors<CR>
 
 vmap <leader>wh <c-w>h
 vmap <leader>wl <c-w>l
@@ -93,6 +94,7 @@ map <A-S-]> :action :cursive.actions.paredit/wrap-curly<CR>
 map <leader>x :action :cursive.actions.paredit/kill-sexp<CR>
 map <leader>d :action :cursive.actions.paredit/kill<CR>
 map <leader>c :action :cursive.actions.paredit/kill-sexp<CR>
+map <leader>y :action :cursive.actions.paredit/copy-as-kill<CR>
 
 " Cycle collection
 map <leader>C :action :cursive.actions.paredit/cycle-collection-type<CR>
