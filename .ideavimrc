@@ -14,11 +14,11 @@ let mapleader = " "
 " ============================================================================
 nmap <leader>wh <c-w>h
 nmap <leader>wl <c-w>l
-nmap <leader>wk <c-w>k
-nmap <leader>wj <c-w>j
+nmap <leader>wk :action NextTab<CR>
+nmap <leader>wj :action PreviousTab<CR>
 nmap <leader>wv <c-w>v
 nmap <leader>ws <c-w>s
-nmap <leader>wc <c-w>c
+nmap <leader>wd <c-w>c
 nmap <leader>wm :action MoveEditorToOppositeTabGroup<CR>
 nmap <leader>wo :action OpenEditorInOppositeTabGroup<CR>
 nmap <leader>wz :action ToggleDistractionFreeMode<CR>
@@ -30,7 +30,7 @@ vmap <leader>wk <c-w>k
 vmap <leader>wj <c-w>j
 vmap <leader>wv <c-w>v
 vmap <leader>ws <c-w>s
-vmap <leader>wc <c-w>c
+vmap <leader>wd <c-w>c
 vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
 nmap <leader>jj :action AceAction<CR>
@@ -60,7 +60,9 @@ nmap <leader>mz      :action ToggleZenMode<CR>
 nmap <leader>R :action IdeaVim.ReloadVimRc.reload<CR>
 vmap <leader>R :<Backspace><Backspace><Backspace><Backspace><Backspace>source ~/.ideavimrc<CR>
 
-" vmap ctrlR :action EditorScrollToCenter
+
+nmap <leader>cc :action com.anthropic.code.plugin.actions.OpenClaudeInTerminalAction<CR>
+nmap <leader>cs :action com.anthropic.code.plugin.actions.SendToClaudeAction<CR>
 
 " Cursive Related =================
 
