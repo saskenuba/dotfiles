@@ -18,7 +18,7 @@ nmap <leader>wk :action NextTab<CR>
 nmap <leader>wj :action PreviousTab<CR>
 nmap <leader>wv <c-w>v
 nmap <leader>ws <c-w>s
-nmap <leader>wd <c-w>c
+nmap <leader>wd :action CloseEditor<CR>
 nmap <leader>wm :action MoveEditorToOppositeTabGroup<CR>
 nmap <leader>wo :action OpenEditorInOppositeTabGroup<CR>
 nmap <leader>wz :action ToggleDistractionFreeMode<CR>
@@ -30,7 +30,7 @@ vmap <leader>wk <c-w>k
 vmap <leader>wj <c-w>j
 vmap <leader>wv <c-w>v
 vmap <leader>ws <c-w>s
-vmap <leader>wd <c-w>c
+vmap <leader>wd :action CloseEditor<CR>
 vmap <leader>wm :<Backspace><Backspace><Backspace><Backspace><Backspace>action HideAllWindows<CR>
 vmap <leader>wz :<Backspace><Backspace><Backspace><Backspace><Backspace>action ToggleDistractionFreeMode<CR>
 nmap <leader>jj :action AceAction<CR>
@@ -104,6 +104,10 @@ map <leader>C :action :cursive.actions.paredit/cycle-collection-type<CR>
 " Refactor actions
 nmap <leader>ri :action Inline<CR>
 nmap <leader>rv :action IntroduceVariable<CR>
+nmap <leader>rr :action RenameElement<CR>
+
+" Cursive test actions
+nmap <leader>tf :action Cursive.Repl.Command.Run focused tests<CR>
 
 " Cursive actions
 nmap <leader>eb :action :cursive.repl.actions/load-file<CR>

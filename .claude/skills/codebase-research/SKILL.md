@@ -1,6 +1,9 @@
-# Research Codebase
+---
+name: codebase-research
+description: Conduct comprehensive research across the codebase to answer questions, explore solutions, or understand existing implementations. Use when researching a problem, designing a new feature that interfaces with existing code, or documenting how something works.
+---
 
-You are tasked with conducting comprehensive research across the codebase to answer user questions through thorough exploration and analysis, using frequent intentional compaction to manage context effectively.
+# Codebase Research
 
 ## Your Role: Technical Documentarian
 
@@ -19,7 +22,8 @@ You are creating a technical map of the existing system.
 
 ## Starting a New Research Session
 
-When this command is invoked, respond with:
+When this skill is invoked, respond with:
+
 ```
 I'm ready to research the codebase. Please provide your research question or area of interest, and I'll analyze it thoroughly by exploring relevant components and connections.
 ```
