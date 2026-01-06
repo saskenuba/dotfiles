@@ -57,7 +57,7 @@ ZSH_THEME="random"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
-  git gitfast sudo docker yarn aws
+  git gitfast sudo docker aws
 )
 
 # url pasting
@@ -127,9 +127,6 @@ PERL_MM_OPT="INSTALL_BASE=/home/martin/perl5"; export PERL_MM_OPT;
 
 # Direnv hook
 eval "$(direnv hook zsh)"
-
-# Yarn correct usage
-export PATH="$PATH:`yarn global bin`"
 
 path+=('/home/martin/.cargo/bin')
 path+=('/home/martin/.local/bin')
