@@ -366,9 +366,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 (clojurescript-mode . evil-cleverparens-mode)
 	 (clojurec-mode . evil-cleverparens-mode)))
 
-(use-package ef-themes)
-
 (use-package modus-themes)
+
+(use-package ef-themes)
 
 (use-package moe-theme)
 
@@ -471,8 +471,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
    consult-theme :preview-key '(:debounce 0.2 any)
    consult-ripgrep consult-git-grep consult-grep
    consult-bookmark consult-recent-file consult-xref
-   consult--source-bookmark consult--source-file-register
-   consult--source-recent-file consult--source-project-recent-file
+   consult-source-bookmark consult-source-file-register
+   consult-source-recent-file consult-source-project-recent-file
    ;; :preview-key "M-."
    :preview-key '(:debounce 0.4 any))
 
@@ -613,6 +613,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
 
+  (with-eval-after-load 'magit-fetch
+    (transient-append-suffix 'magit-fetch "m"
+      '("O" "Prune orphaned local branches" magit-prune-orphaned-branches)))
+
   :general
   (global-definer
    "gs" #'magit-status-quick))
@@ -725,7 +729,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :straight t)
 
 (use-package markdown-mode
-  :init (setq markdown-command "multimarkdown")
+  :init (setq markdown-command "pandoc")
   :mode ("README\\.md'" . gfm-mode))
 
 (use-package yasnippet
@@ -1073,7 +1077,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   "f" '(find-file :which-key)
   "r" '(rename-file :which-key "Rename file")
   "s" '(save-buffer :which-key "Save buffer")
-  "S" '(evil-write-all :which-key "Save opened buffers"))
+  "S" '(evil-write-all :which-key "Save opened buffers")
+  "ya" '(copy-absolute-path :which-key "Copy absolute path")
+  "yA" '(copy-absolute-path-and-line :which-key "Copy absolute path:line")
+  "yc" '(copy-absolute-path-line-and-column :which-key "Copy absolute path:line:col")
+  "yr" '(copy-relative-path :which-key "Copy relative path")
+  "yR" '(copy-relative-path-and-line :which-key "Copy relative path:line")
+  "yC" '(copy-relative-path-line-and-column :which-key "Copy relative path:line:col"))
 
 (+general-global-menu! "Project" "p"
   "f" #'consult-projectile-find-file
