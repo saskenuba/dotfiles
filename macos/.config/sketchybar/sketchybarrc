@@ -56,14 +56,16 @@ sketchybar --default "${default[@]}"
 source "$ITEM_DIR/left/apple.sh"
 source "$ITEM_DIR/left/aerospace_workspaces.sh"
 
+##### Adding Center Items #####
+source "$ITEM_DIR/center/front_app.sh"
+
 ##### Adding Right Items #####
 source "$ITEM_DIR/right/clock.sh"
+source "$ITEM_DIR/right/volume.sh"
 source "$ITEM_DIR/right/battery.sh"
 source "$ITEM_DIR/right/ram.sh"
 source "$ITEM_DIR/right/cpu.sh"
 source "$ITEM_DIR/right/wifi.sh"
-
-# Add other items here as needed...
 
 sketchybar --hotload on
 sketchybar --update

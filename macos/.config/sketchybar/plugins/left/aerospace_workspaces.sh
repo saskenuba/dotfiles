@@ -1,58 +1,41 @@
 #!/usr/bin/env bash
 
-# Arguments from sketchybar
-WORKSPACE_ID="${1:-1}"
-COLOR_CONFIG="${2:-}"
+source "$CONFIG_DIR/colors.sh"
 
-# Default colors if not provided
-LABEL_ACTIVE_COLOR="#ffffff"
-LABEL_INACTIVE_COLOR="#888888"
-BG_ACTIVE_COLOR="#4c7899"
-BG_INACTIVE_COLOR="#333333"
+# Active workspace colors
+LABEL_ACTIVE="${WS_ACTIVE_LABEL_COLOR:-$GREEN}"
+LABEL_INACTIVE="${WS_INACTIVE_LABEL_COLOR:-$RED}"
+BG_ACTIVE="${WS_ACTIVE_BG_COLOR:-0xff44475a}"
+BG_INACTIVE="${WS_INACTIVE_BG_COLOR:-0xff333333}"
 
-# Parse color configuration
-if [ -n "$COLOR_CONFIG" ]; then
-    # Parse format: "key1:value1,key2:value2,..."
-    IFS=',' read -ra PAIRS <<< "$COLOR_CONFIG"
-    for pair in "${PAIRS[@]}"; do
-        IFS=':' read -r key value <<< "$pair"
-        case "$key" in
-            label_active) LABEL_ACTIVE_COLOR="$value" ;;
-            label_inactive) LABEL_INACTIVE_COLOR="$value" ;;
-            bg_active) BG_ACTIVE_COLOR="$value" ;;
-            bg_inactive) BG_INACTIVE_COLOR="$value" ;;
-        esac
-    done
-fi
+# Fetch state once for all workspaces (2 calls total, not 18/sec)
+FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null)
 
-# Get the current focused workspace
-FOCUSED_WORKSPACE=$(aerospace list-workspaces --focused)
+# Build a single batched sketchybar command for all 9 workspaces
+args=()
 
-# Get window count for this workspace
-WINDOW_COUNT=$(aerospace list-windows --workspace "$WORKSPACE_ID" 2>/dev/null | wc -l | tr -d ' ')
+for i in {1..9}; do
+    WINDOW_COUNT=$(aerospace list-windows --workspace "$i" 2>/dev/null | wc -l | tr -d ' ')
 
-# Format the label
-LABEL="$WORKSPACE_ID:$WINDOW_COUNT"
+    if [ "$i" = "$FOCUSED" ]; then
+        args+=(--set workspace."$i"
+            label="$i:$WINDOW_COUNT"
+            label.color="$LABEL_ACTIVE"
+            background.color="$BG_ACTIVE"
+            background.drawing=on
+            drawing=on)
+    elif [ "$WINDOW_COUNT" -gt 0 ]; then
+        args+=(--set workspace."$i"
+            label="$i:$WINDOW_COUNT"
+            label.color="$LABEL_INACTIVE"
+            background.color="$BG_INACTIVE"
+            background.drawing=on
+            drawing=on)
+    else
+        args+=(--set workspace."$i"
+            drawing=off)
+    fi
+done
 
-# Update based on state
-if [ "$WORKSPACE_ID" = "$FOCUSED_WORKSPACE" ]; then
-    # This is the focused workspace - always show it
-    sketchybar --set workspace."$WORKSPACE_ID" \
-        label="$LABEL" \
-        label.color="$LABEL_ACTIVE_COLOR" \
-        background.color="$BG_ACTIVE_COLOR" \
-        background.drawing=on \
-        drawing=on
-elif [ "$WINDOW_COUNT" -gt 0 ]; then
-    # Inactive workspace with windows
-    sketchybar --set workspace."$WORKSPACE_ID" \
-        label="$LABEL" \
-        label.color="$LABEL_INACTIVE_COLOR" \
-        background.color="$BG_INACTIVE_COLOR" \
-        background.drawing=on \
-        drawing=on
-else
-    # Inactive workspace with no windows - hide it
-    sketchybar --set workspace."$WORKSPACE_ID" \
-        drawing=off
-fi
+# Single IPC call to sketchybar instead of 9 separate ones
+sketchybar "${args[@]}"
