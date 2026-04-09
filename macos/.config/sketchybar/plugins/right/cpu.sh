@@ -16,27 +16,9 @@ if [[ "$SENDER" == "mouse."* ]]; then
     esac
 fi
 
-# Get CPU usage percentage
-CPU_USAGE=$(top -l 1 -n 0 | grep "CPU usage" | awk '{print $3}' | sed 's/%//')
+# Uses sysctl instead of top -l 1 (near-instant vs ~1s)
+CPU_LOAD=$(sysctl -n vm.loadavg | awk '{print $2}')
+NUM_CORES=$(sysctl -n hw.ncpu)
+CPU_PERCENT=$(echo "$CPU_LOAD $NUM_CORES" | awk '{printf "%02d", ($1 / $2) * 100}')
 
-# Handle empty CPU usage
-if [[ -z "$CPU_USAGE" ]]; then
-    CPU_USAGE=0
-fi
-
-# Remove decimal point for comparison
-CPU_INT=${CPU_USAGE%.*}
-
-## Set icon and color based on CPU usage
-# source "$CONFIG_DIR/colors.sh"
-# if [[ $CPU_INT -le 25 ]]; then
-#     COLOR=$ACCENT_SECONDARY  # Green
-# elif [[ $CPU_INT -le 50 ]]; then
-#     COLOR=$ACCENT_PRIMARY  # Blue
-# elif [[ $CPU_INT -le 75 ]]; then
-#     COLOR=$ACCENT_TERTIARY  # Orange
-# else
-#     COLOR=$RED  # Red
-# fi
-CPU_INT_FORMATTED=$(printf "%02d" "$CPU_INT")
-sketchybar --set "$NAME" label="$CPU_INT_FORMATTED%"
+sketchybar --set "$NAME" label="${CPU_PERCENT}%"
