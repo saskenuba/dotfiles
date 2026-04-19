@@ -36,6 +36,36 @@ buffer's dir-locals."
   (kill-new (buffer-string))
   (message "Buffer content yanked"))
 
+(defun martmacs/kill-or-bury-buffer ()
+  "Kill the current buffer, or bury it if Emacs refuses to kill it.
+Some built-in buffers such as *Messages* and *scratch* cannot be
+killed. In that case, bury the buffer so the current window moves on
+to the previous buffer instead of getting stuck."
+  (interactive)
+  (let ((buf (current-buffer)))
+    (condition-case nil
+        (kill-buffer buf)
+      (error nil))
+    (when (buffer-live-p buf)
+      ;; Kill was refused (protected buffer); bury instead.
+      (bury-buffer))))
+
+(defun martmacs/evil-delete-whole-buffer ()
+  "Delete the whole buffer using Evil, yanking text like a linewise delete.
+If the buffer is read-only (e.g. magit, help, compile), kill the buffer instead."
+  (interactive)
+  (if buffer-read-only
+      (kill-current-buffer)
+    (evil-delete (point-min) (point-max) 'line nil nil)))
+
+(defun martmacs/evil-change-whole-buffer ()
+  "Change the whole buffer using Evil, yanking text and entering insert state.
+If the buffer is read-only, kill the buffer instead."
+  (interactive)
+  (if buffer-read-only
+      (kill-current-buffer)
+    (evil-change (point-min) (point-max) 'line nil nil)))
+
 (defun copy-clipboard-to-whole-buffer ()
   "Copy clipboard and replace buffer."
   (interactive)

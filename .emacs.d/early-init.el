@@ -1,8 +1,6 @@
-(setenv "LSP_USE_PLISTS" "true")
+; (setenv "LSP_USE_PLISTS" "true")
 
-;; Don't disable package.el - we want to use both
-;; (setq package-enable-at-startup nil)  ; Remove or comment this line
-
-;; Instead, prevent package.el from loading packages automatically
-;; but still allow it to be initialized
-(setq package-enable-at-startup t)
+;; We manage packages exclusively with straight.el (see init.el).
+;; Keep package.el from auto-initializing at startup so we don't end up
+;; with two package managers loading the same packages into the session.
+(setq package-enable-at-startup nil)

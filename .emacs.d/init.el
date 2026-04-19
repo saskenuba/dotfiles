@@ -3,12 +3,7 @@
 (setq custom-file (locate-user-emacs-file "custom.el"))
 (load custom-file :no-error-if-file-is-missing)
 
-;;; Set up the package manager
-
-;; Initialize package.el
-(require 'package)
-(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
-(package-initialize)
+;;; Set up the package manager (straight.el only)
 
 ;; Bootstrap straight.el
 (defvar bootstrap-version)
@@ -27,34 +22,22 @@
       (eval-print-last-sexp)))
   (load bootstrap-file nil 'nomessage))
 
-;; Configure straight.el to work with use-package
+;; Have straight.el drive use-package. With this:
+;;   - A bare `(use-package foo)` installs `foo` via straight.el from
+;;     MELPA/GNU ELPA (using its recipe repositories).
+;;   - Existing `:ensure t` forms keep working because straight.el
+;;     overrides `use-package-ensure-function' and routes `:ensure`
+;;     through itself — equivalent to `:straight t'.
+;;   - Explicit `:straight t' / `:straight (..recipe..)' keeps working
+;;     as before, including your GitHub-sourced packages (rigpa, symex*).
 (straight-use-package 'use-package)
-
-;; Configure use-package to use package.el by default
-(setq use-package-always-ensure t)  ; Use package.el by default
-
-;; When you want to use straight.el explicitly, use :straight t
-;; When you want to use package.el explicitly, use :ensure t (or rely on the default)
-
-;; Optional: Set straight.el to not automatically install packages
-;; unless explicitly requested with :straight
-(setq straight-use-package-by-default nil)
-
-;; Ensure use-package is installed (via package.el)
-(when (< emacs-major-version 29)
-  (unless (package-installed-p 'use-package)
-    (package-refresh-contents)
-    (package-install 'use-package)))
-;;; end of package managers
+(setq straight-use-package-by-default t)
+;;; end of package manager setup
 
 (add-to-list 'display-buffer-alist
              '("\\`\\*\\(Warnings\\|Compile-Log\\)\\*\\'"
                (display-buffer-no-window)
                (allow-no-window . t)))
-
-; force download and installation of packages
-(setq use-package-always-ensure t)
-(package-refresh-contents :async)
 
 (if init-file-debug
       (setq use-package-verbose t
@@ -65,7 +48,7 @@
           use-package-expand-minimally t))
 
 ;; (defvar martmacs/default-font-size 95)
-(defvar martmacs/default-font-size 110)
+(defvar martmacs/default-font-size 130)
 
 ;; Cool fonts:
 ;; - CommitMono Nerd Font
@@ -621,14 +604,20 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (global-definer
    "gs" #'magit-status-quick))
 
+;; Download git-delta with package-manager
 (use-package magit-delta
   :hook ((magit-mode . magit-delta-mode)))
 
-(use-package magit-lfs
-  :after magit)
+;; (use-package magit-lfs
+;;   :after magit)
 
 (use-package forge
-  :after magit)
+  :after magit
+  :config
+  ;; GitLab.com is already in forge-alist by default.
+  ;; If you use a self-hosted GitLab, add it like this:
+  ;; (push '("gitlab.example.com" "gitlab.example.com/api/v4" "gitlab.example.com" forge-gitlab-repository) forge-alist)
+  )
 
 (use-package projectile)
 
@@ -757,7 +746,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
   :custom
   (lsp-completion-provider :none)
-  (lsp-clojure-server-store-path "/usr/bin/clojure-lsp")
+  (lsp-clojure-server-store-path "~/.local/bin/clojure-lsp")
   (lsp-enable-file-watchers t)
   (lsp-ui-sideline-show-diagnostics t)
   (lsp-log-io nil)
@@ -798,27 +787,26 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :after '(treemacs magit))
 
 (use-package org-roam
-  :config
-  (org-roam-db-autosync-mode)
-  :custom
-  (org-roam-directory "~/Dropbox/Pessoal/Notes")
-  (org-M-RET-may-split-line nil)
+ :config
+ (org-roam-db-autosync-mode)
+ :custom
+ (org-roam-directory "~/Documents/notes")
+ (org-M-RET-may-split-line nil)
 
-  :general
-  ("M-S-<return>" #'org-insert-item))
+ :general
+ ("M-S-<return>" #'org-insert-item))
 
 (use-package org-roam-ui
-  :after org-roam ;; or :after org
-  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
-  ;;         a hookable mode anymore, you're advised to pick something yourself
-  ;;         if you don't care about startup time, use
-  ;;  :hook (after-init . org-roam-ui-mode)
-  :config
-  (setq org-roam-ui-sync-theme t
+ :after org-roam ;; or :after org
+ ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+ ;;         a hookable mode anymore, you're advised to pick something yourself
+ ;;         if you don't care about startup time, use
+ ;;  :hook (after-init . org-roam-ui-mode)
+ :config
+ (setq org-roam-ui-sync-theme t
 	org-roam-ui-follow t
 	org-roam-ui-update-on-save t
 	org-roam-ui-open-on-start t))
-
 
 (use-package ox-hugo
   :after ox)
@@ -901,9 +889,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :config
   (setq cljr-add-ns-to-blank-clj-files nil))
 
+; (add-to-list 'exec-path (expand-file-name "~/.local/share/mise/shims"))
 (use-package exec-path-from-shell
   :ensure t
   :config
+  (exec-path-from-shell-initialize)
   (exec-path-from-shell-copy-env "OPENROUTER_API_KEY")
   (exec-path-from-shell-copy-env "GEMINI_API_KEY")
   (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY"))
@@ -926,9 +916,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :hook (after-init . global-emojify-mode))
 
 ;; load additional layers
-(load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
+; (load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
 (load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
 (load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
+(load (expand-file-name "mylayers/patches.el" user-emacs-directory))
 
 (defun my-clojure-mode-setup ()
   "Custom setup for clojure-mode."
@@ -1055,7 +1046,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (+general-global-menu! "Buffer" "b"
   "b" #'consult-buffer
-  "d" '(kill-current-buffer :which-key "Kill this buffer")
+  "d" '(martmacs/kill-or-bury-buffer :which-key "Kill buffer (bury if protected)")
+  "e" '(martmacs/evil-delete-whole-buffer :which-key "Erase buffer contents")
+  "c" '(martmacs/evil-change-whole-buffer :which-key "Change buffer contents")
   "P" '(copy-clipboard-to-whole-buffer :which-key "Paste clipboard to whole buffer")
   "Y" '(buffer-yank-all :which-key "Yank whole buffer"))
 
@@ -1162,6 +1155,28 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  )
+
+;; Refresh evil's per-buffer keymap alist in every live buffer once init
+;; is done.
+;;
+;; Why this is needed: `evil-mode-map-alist' is `defvar-local'. Emacs
+;; creates buffers like *Messages* very early in startup — before
+;; init.el runs — and those buffers snapshot a buffer-local copy of
+;; the alist at that moment. Later in init.el, general.el installs its
+;; leader bindings (e.g. SPC) via state-scoped entries appended to the
+;; *default* value of `evil-mode-map-alist'. Buffers created afterwards
+;; see the new entries, but early buffers keep their stale snapshot
+;; and the leader silently doesn't work in them — SPC falls through to
+;; `evil-motion-state-map' (evil-forward-char).
+;;
+;; `evil-normalize-keymaps' rebuilds the buffer-local alist from the
+;; current defaults, which is exactly what we want.
+(add-hook 'after-init-hook
+          (lambda ()
+            (dolist (buf (buffer-list))
+              (with-current-buffer buf
+                (when (bound-and-true-p evil-local-mode)
+                  (evil-normalize-keymaps))))))
 
 (provide 'init)
 
