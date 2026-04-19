@@ -1,0 +1,11 @@
+{
+  "lastChangelogVersion": "0.67.68",
+  "defaultProvider": "anthropic",
+  "defaultModel": "claude-opus-4-7",
+  "defaultThinkingLevel": "xhigh",
+  "compaction": {
+    "enabled": false
+  },
+  "hideThinkingBlock": false,
+  "theme": "dark"
+}

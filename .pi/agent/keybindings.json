@@ -1,0 +1,5 @@
+{
+  "app.clear": "ctrl+l",
+  "app.model.select": "alt+m",
+  "tui.editor.cursorLineStart": "home"
+}
