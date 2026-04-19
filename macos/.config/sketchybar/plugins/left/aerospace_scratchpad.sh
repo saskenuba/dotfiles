@@ -32,7 +32,7 @@ function refresh() {
             label="$label" \
             icon="$icon" \
             icon.padding_right=6 \
-            label.color=0xff82aaff \
+            label.color="$SCRATCHPAD_LABEL_COLOR" \
             background.padding_right=10 \
             background.padding_left=10 \
             background.drawing=off
