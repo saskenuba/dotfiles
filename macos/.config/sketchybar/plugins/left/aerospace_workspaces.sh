@@ -4,9 +4,10 @@ source "$CONFIG_DIR/colors.sh"
 
 # Active workspace colors
 LABEL_ACTIVE="${WS_ACTIVE_LABEL_COLOR:-$GREEN}"
-LABEL_INACTIVE="${WS_INACTIVE_LABEL_COLOR:-$RED}"
+LABEL_INACTIVE="${WS_WIHT_CLIENTS_LABEL_COLOR:-$GREY}"
+LABEL_EMPTY="${WS_EMPTY_LABEL_COLOR:-0xff504945}"
 BG_ACTIVE="${WS_ACTIVE_BG_COLOR:-0xff44475a}"
-BG_INACTIVE="${WS_INACTIVE_BG_COLOR:-0xff333333}"
+BG_INACTIVE="${WS_WIHT_CLIENTS_BG_COLOR:-$DARK_GREY}"
 
 # Fetch state once for all workspaces (2 calls total, not 18/sec)
 FOCUSED=$(aerospace list-workspaces --focused 2>/dev/null)
@@ -33,7 +34,10 @@ for i in {1..9}; do
             drawing=on)
     else
         args+=(--set workspace."$i"
-            drawing=off)
+            label="$i"
+            label.color="$LABEL_EMPTY"
+            background.drawing=off
+            drawing=on)
     fi
 done
 

@@ -7,8 +7,8 @@ scratchpad=(
     icon.y_offset=2.5
     label=0
     update_freq=0
-    icon.color=0xff6272a4
-    label.color=0xffbd93f9
+    icon.color="$SCRATCHPAD_ICON_COLOR"
+    label.color="$SCRATCHPAD_LABEL_COLOR"
     script="$PLUGIN_DIR/left/aerospace_scratchpad.sh"
     click_script="aerospace workspace NSP"
 )
