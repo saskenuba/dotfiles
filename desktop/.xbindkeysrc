@@ -45,5 +45,9 @@
     m:0x10 + c:122
     Mod2 + XF86AudioLowerVolume 
 
+#Screenshot
+"flameshot gui"
+    Print
+
 #
 # End of xbindkeys configuration

@@ -592,6 +592,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package transient)
 
+;; Evil Collection installs its own Forge bindings.  Keep Forge from
+;; also patching Magit's transient menus after Evil Collection has
+;; remapped them; otherwise Magit/Forge can warn while opening pull or
+;; branch transients.
+(setq forge-add-default-bindings nil)
+
 (use-package magit
   :config
   (add-hook 'after-save-hook 'magit-after-save-refresh-status t)
@@ -911,6 +917,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package json-navigator
   :hook ((hierarchy-tabulated-mode . tree-mode)))
+
+;; `emojify' still uses legacy `defadvice' for `text-scale-increase'.
+;; Load the real definition first so advice.el does not warn when it is
+;; autoloaded later.
+(require 'face-remap)
 
 (use-package emojify
   :hook (after-init . global-emojify-mode))
