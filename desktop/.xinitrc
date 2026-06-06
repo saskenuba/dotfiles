@@ -55,6 +55,13 @@ feh --bg-scale ~/Documentos/Images/Wallpaper/wallpaper8.jpg ~/Documentos/Images/
 wmname LG3D &
 xsettingsd &
 /home/martin/.start.sh &
+if command -v snixembed >/dev/null 2>&1; then
+    snixembed &
+    sleep 0.5
+fi
 parcellite &
-slstatus &
+/home/martin/Documentos/src/mydwm/slstatus/slstatus &
+if command -v dropbox >/dev/null 2>&1; then
+    dropbox start &
+fi
 exec dwm
