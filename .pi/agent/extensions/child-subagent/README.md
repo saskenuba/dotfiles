@@ -10,6 +10,8 @@ Owns the bundled agent prompts and subagent runtime behavior.
 - Uses the current working directory by default.
 - Forwards the currently active built-in tools to child runs.
 - Keeps managed `subagent` runs fire-and-forget.
+- Stops the parent turn by default after launch so delegated work is not duplicated.
+- Removes sibling non-subagent tool calls when the parent asks a default subagent run to wait.
 - Sends `subagent-result` follow-up messages when managed runs finish.
 
 ## Bundled agents
@@ -28,8 +30,10 @@ The runtime also chooses the thinking level automatically from the delegated tas
 ### `subagent`
 
 Use this for managed scout-style delegation.
-It starts a background run, emits live updates for the inspector, and later sends a
-`subagent-result` follow-up message.
+It starts a background run, emits live inspector updates, and later sends `subagent-result`.
+By default it terminates the parent turn after launch.
+If the same turn includes sibling non-subagent tool calls, the delegation guard removes them.
+Set `continueParent: true` only for explicitly independent, non-overlapping work.
 
 Supports single, parallel, and chain modes.
 Supports agent discovery (bundled, user, project agents) and ad-hoc roles.
