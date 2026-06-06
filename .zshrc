@@ -95,6 +95,9 @@ fi
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+# Personal aliases
+[[ -f ~/.zsh_aliases ]] && source ~/.zsh_aliases
+
 POWERLEVEL9K_PROMPT_ON_NEWLINE=true
 POWERLEVEL9K_RPROMPT_ON_NEWLINE=true
 DEFAULT_USER=`whoami`

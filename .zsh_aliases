@@ -1,0 +1,9 @@
+# Zsh aliases
+# Keep aliases here instead of ~/.zshrc so they are easy to scan and edit.
+
+# Clipboard
+alias paste-clipboard='xclip -out -selection clipboard'
+alias copy-clipboard='xclip -sel clipboard'
+
+# AI / coding agents
+alias pi='pnpx @earendil-works/pi-coding-agent'
