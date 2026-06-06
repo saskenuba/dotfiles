@@ -1,6 +1,3 @@
-alias paste-clipboard='xclip -out -selection clipboard'
-alias copy-clipboard='xclip -sel clipboard'
-
 VISUAL=emacs
 EDITOR=emacs
 RANGER_LOAD_DEFAULT_RC=false
