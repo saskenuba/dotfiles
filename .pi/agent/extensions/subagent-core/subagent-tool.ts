@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { StringEnum } from "@mariozechner/pi-ai";
+import { StringEnum, type Message } from "@mariozechner/pi-ai";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { discoverAgents } from "./agents.js";
@@ -59,6 +59,13 @@ const SubagentParams = Type.Object({
 			default: true,
 		}),
 	),
+	continueParent: Type.Optional(
+		Type.Boolean({
+			description:
+				"Default false. When false, starting a subagent ends the current parent turn so the parent waits for the subagent-result instead of duplicating delegated work. Set true only when remaining parent work is explicitly independent and non-overlapping.",
+			default: false,
+		}),
+	),
 	cwd: Type.Optional(Type.String({ description: "Single-mode working directory override" })),
 });
 
@@ -70,6 +77,7 @@ type SubagentToolParams = {
 	chain?: ChainTaskInput[];
 	agentScope?: AgentScope;
 	confirmProjectAgents?: boolean;
+	continueParent?: boolean;
 	cwd?: string;
 };
 
@@ -77,6 +85,9 @@ interface ActiveJob {
 	jobId: string;
 	mode: RunMode;
 	agent: string;
+	agentScope: AgentScope;
+	delegatedSummary: string;
+	continueParent: boolean;
 	abortController: AbortController;
 	killed: boolean;
 	promise: Promise<void>;
@@ -88,6 +99,8 @@ interface StartedDetails {
 	mode: RunMode;
 	agent: string;
 	agentScope: AgentScope;
+	delegatedSummary: string;
+	continueParent: boolean;
 }
 
 interface RegisterSubagentToolOptions {
@@ -217,6 +230,83 @@ function describePrimary(params: SubagentToolParams, mode: RunMode): string {
 	return `chain (${params.chain?.length ?? 0})`;
 }
 
+function compactText(text: string, maxLength = 220): string {
+	const compacted = text.replace(/\s+/g, " ").trim();
+	if (compacted.length <= maxLength) return compacted;
+	return `${compacted.slice(0, Math.max(0, maxLength - 1))}…`;
+}
+
+function describeTask(input: SingleTaskInput): string {
+	const label = input.agent?.trim() || input.role?.trim() || "ad-hoc";
+	return `${label}: ${compactText(input.task)}`;
+}
+
+function describeDelegatedScope(params: SubagentToolParams, mode: RunMode): string {
+	if (mode === "single") return describeTask(normalizeSingleInput(params));
+	const inputs = mode === "parallel" ? normalizeParallelInputs(params.tasks ?? []) : normalizeParallelInputs(params.chain ?? []);
+	const items = inputs.slice(0, 4).map((input, index) => `${index + 1}. ${describeTask(input)}`);
+	const remaining = Math.max(0, inputs.length - items.length);
+	return `${mode} (${inputs.length}) ${items.join(" | ")}${remaining ? ` | … +${remaining} more` : ""}`;
+}
+
+function buildPendingDelegationMessage(jobs: ActiveJob[]): Message {
+	const lines = jobs.map((job) => `- ${job.jobId} (${job.mode}, ${job.agent}): ${job.delegatedSummary}`);
+	return {
+		role: "user",
+		timestamp: Date.now(),
+		content: [
+			{
+				type: "text",
+				text: [
+					"[subagent pending delegation guard]",
+					"Subagent jobs are still running for delegated work:",
+					...lines,
+					"",
+					"Do not perform the delegated search, analysis, file reads, shell commands, or edits yourself.",
+					"Only continue with work that is explicitly independent and non-overlapping.",
+					`If the next action overlaps, wait for the "${SUBAGENT_RESULT_MESSAGE_TYPE}" follow-up.`,
+				].join("\n"),
+			},
+		],
+	} as Message;
+}
+
+type ToolCallPartLike = {
+	type: "toolCall";
+	name: string;
+	arguments?: unknown;
+};
+
+function isToolCallPartLike(part: unknown): part is ToolCallPartLike {
+	const candidate = part as Partial<ToolCallPartLike> | undefined;
+	return candidate?.type === "toolCall" && typeof candidate.name === "string";
+}
+
+function hasContinueParent(toolCall: ToolCallPartLike): boolean {
+	const args = toolCall.arguments;
+	return typeof args === "object" && args !== null && (args as SubagentToolParams).continueParent === true;
+}
+
+function removeSiblingToolCallsForExclusiveSubagent(message: Message): Message | undefined {
+	if (message.role !== "assistant" || !Array.isArray(message.content)) return undefined;
+	const toolCalls = message.content.filter(isToolCallPartLike);
+	const hasExclusiveSubagent = toolCalls.some((toolCall) => toolCall.name === "subagent" && !hasContinueParent(toolCall));
+	if (!hasExclusiveSubagent) return undefined;
+
+	const siblingToolNames = toolCalls.filter((toolCall) => toolCall.name !== "subagent").map((toolCall) => toolCall.name);
+	if (siblingToolNames.length === 0) return undefined;
+
+	const siblingSet = new Set(siblingToolNames);
+	const content = message.content.filter((part) => !isToolCallPartLike(part) || part.name === "subagent");
+	content.push({
+		type: "text",
+		text:
+			`Subagent delegation guard: removed sibling tool call(s) ${[...siblingSet].join(", ")} because ` +
+			"`subagent` was called with `continueParent` omitted or false. The parent will wait for the subagent result.",
+	});
+	return { ...message, content } as Message;
+}
+
 export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagentToolOptions): void {
 	const activeJobs = new Map<string, ActiveJob>();
 
@@ -280,7 +370,15 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 		params: SubagentToolParams,
 		ctx: ExtensionContext,
 	): Promise<
-		| { ok: true; jobId: string; mode: RunMode; agent: string; agentScope: AgentScope }
+		| {
+				ok: true;
+				jobId: string;
+				mode: RunMode;
+				agent: string;
+				agentScope: AgentScope;
+				delegatedSummary: string;
+				continueParent: boolean;
+			}
 		| { ok: false; reason: string }
 	> => {
 		const mode = detectMode(params);
@@ -310,6 +408,8 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 
 		const jobId = `job-${randomUUID().slice(0, 8)}`;
 		const primaryAgent = describePrimary(params, mode);
+		const delegatedSummary = describeDelegatedScope(params, mode);
+		const continueParent = params.continueParent === true;
 		const jobAbort = new AbortController();
 		const currentDepth = parseInt(process.env[SUBAGENT_DEPTH_ENV] || "0", 10);
 		if (currentDepth >= MAX_SUBAGENT_DEPTH) {
@@ -319,7 +419,17 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			};
 		}
 
-		const job: ActiveJob = { jobId, mode, agent: primaryAgent, abortController: jobAbort, killed: false, promise: Promise.resolve() };
+		const job: ActiveJob = {
+			jobId,
+			mode,
+			agent: primaryAgent,
+			agentScope,
+			delegatedSummary,
+			continueParent,
+			abortController: jobAbort,
+			killed: false,
+			promise: Promise.resolve(),
+		};
 		activeJobs.set(jobId, job);
 
 		const runnerContext: RunnerContext = {
@@ -349,10 +459,12 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 
 		job.promise = runPromise
 			.then((run) => {
+				activeJobs.delete(jobId);
 				if (job.killed) return;
 				deliverResultNudge(jobId, run, primaryAgent);
 			})
 			.catch((err) => {
+				activeJobs.delete(jobId);
 				if (job.killed) return;
 				const errorMessage = err instanceof Error ? err.message : String(err);
 				deliverErrorNudge(jobId, mode, primaryAgent, errorMessage);
@@ -361,18 +473,33 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 				activeJobs.delete(jobId);
 			});
 
-		return { ok: true, jobId, mode, agent: primaryAgent, agentScope };
+		return { ok: true, jobId, mode, agent: primaryAgent, agentScope, delegatedSummary, continueParent };
 	};
+
+	pi.on("message_end", async (event) => {
+		const replacement = removeSiblingToolCallsForExclusiveSubagent(event.message as Message);
+		if (!replacement) return;
+		return { message: replacement };
+	});
+
+	pi.on("context", async (event) => {
+		const pendingJobs = [...activeJobs.values()].filter((job) => !job.killed);
+		if (pendingJobs.length === 0) return;
+		return { messages: [...event.messages, buildPendingDelegationMessage(pendingJobs)] };
+	});
 
 	pi.registerTool({
 		name: "subagent",
 		label: "Subagent",
 		description:
-			`Delegate work to isolated subagents (single, parallel, or chain). FIRE-AND-FORGET: returns immediately with a job handle; the actual result arrives later as a follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" message. Default bundled scout: ${DEFAULT_SCOUT_AGENT}. When no named agent fits, omit agent and provide role for an ad-hoc expert.`,
+			`Delegate work to isolated subagents (single, parallel, or chain). FIRE-AND-FORGET: returns immediately with a job handle and, by default, ends the current parent turn so delegated work is not duplicated. The actual result arrives later as a follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" message. Default bundled scout: ${DEFAULT_SCOUT_AGENT}. When no named agent fits, omit agent and provide role for an ad-hoc expert.`,
 		promptSnippet:
-			`Delegate work to the default scout (${BUNDLED_AGENT_NAMES.map((name) => `\`${name}\``).join(", ")}), discovered agents, or ad-hoc experts via role in single, parallel, or chain mode. Fire-and-forget: returns a job handle immediately; the result arrives as a follow-up message.`,
+			`Delegate work to the default scout (${BUNDLED_AGENT_NAMES.map((name) => `\`${name}\``).join(", ")}), discovered agents, or ad-hoc experts via role in single, parallel, or chain mode. Fire-and-forget: returns a job handle immediately, stops the parent turn by default, and later sends a follow-up message.`,
 		promptGuidelines: [
-			"`subagent` is fire-and-forget: it returns immediately with a job handle. Do NOT call it again to wait for previous calls. Continue with other useful work in the meantime.",
+			"`subagent` is fire-and-forget: it returns immediately with a job handle. Do NOT call it again to wait for previous calls.",
+			"After calling `subagent`, treat the delegated task as owned by that subagent. Do not perform the same search, analysis, file reads, shell commands, or edits yourself.",
+			"Call `subagent` as the only tool in an assistant turn unless every other tool call is explicitly independent and non-overlapping.",
+			"`subagent` stops the parent turn by default (`continueParent` omitted or false). Set `continueParent: true` only when there is clearly independent, non-overlapping work to do while the job runs.",
 			`When a subagent completes, you receive a follow-up message with \`customType: ${SUBAGENT_RESULT_MESSAGE_TYPE}\` containing its full output. Act on it then.`,
 			`If a \`${SUBAGENT_RESULT_MESSAGE_TYPE}\` nudge fires while you are idle, its content may arrive alongside the next user message. The nudge content is always prefixed with \`[${SUBAGENT_RESULT_MESSAGE_TYPE} jobId=... agent=... status=...]\`\\n before the subagent's output — inspect each turn's input for that marker and react to it even when it appears merged with user text.`,
 			`Use \`${DEFAULT_SCOUT_AGENT}\` for fast reconnaissance, file location, and scoped codebase discovery.`,
@@ -383,27 +510,40 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 		parameters: SubagentParams,
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
 			const result = await launchJob(params as SubagentToolParams, ctx);
-			if (!result.ok) {
+			if (result.ok === false) {
 				const reason = result.reason;
 				return {
 					content: [{ type: "text", text: reason }],
 					isError: true,
 				};
 			}
-			const { jobId, mode, agent, agentScope } = result;
-			const startedDetails: StartedDetails = { kind: "started", jobId, mode, agent, agentScope };
-			return {
+			const { jobId, mode, agent, agentScope, delegatedSummary, continueParent } = result;
+			const startedDetails: StartedDetails = {
+				kind: "started",
+				jobId,
+				mode,
+				agent,
+				agentScope,
+				delegatedSummary,
+				continueParent,
+			};
+			const waitInstruction = continueParent
+				? "continueParent=true; continue only with explicitly independent, non-overlapping work. Do not perform the delegated work yourself."
+				: `Parent turn will stop now and wait for the follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" message. Do not perform the delegated work yourself.`;
+			const response = {
 				content: [
 					{
-						type: "text",
+						type: "text" as const,
 						text:
 							`Subagent job ${jobId} started in background (mode: ${mode}, agent: ${agent}). ` +
-							`Continue with other work — the result will arrive as a follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" ` +
-							"message when the job completes. Do not poll; do not call `subagent` again to wait for this job.",
+							`Delegated scope: ${delegatedSummary}. ` +
+							`${waitInstruction} Do not poll; do not call \`subagent\` again to wait for this job.`,
 					},
 				],
 				details: startedDetails,
 			};
+			if (!continueParent) return { ...response, terminate: true };
+			return response;
 		},
 		renderCall(args, theme) {
 			const params = args as SubagentToolParams;
