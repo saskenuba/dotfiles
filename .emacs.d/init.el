@@ -303,7 +303,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   )
 
 (use-package writeroom-mode
-  :hook '((writeroom-mode . (lambda () (display-line-numbers-mode)))))
+  :hook ((writeroom-mode . (lambda () (display-line-numbers-mode)))))
 
 (use-package evil
   :init
@@ -376,20 +376,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package auctex
   :defer t
-  :hook (('LaTeX-mode-hook . 'latex/auto-fill-mode)
-	 ('LaTeX-mode-hook . 'TeX-source-correlate-mode)
-	 ('doc-view-mode-hook . 'auto-revert-mode))
-
-  :config
-  ; set zathura as default viewer
-  ; (add-to-list 'TeX-view-program-list '("Zathura" ("zathura" " %o")))
-  ; (setcdr (assq 'output-pdf TeX-view-program-selection) '("Zathura"))
+  :hook ((LaTeX-mode . turn-on-auto-fill)
+	 (LaTeX-mode . TeX-source-correlate-mode)
+	 (doc-view-mode . auto-revert-mode))
 
   :custom
   (TeX-parse-self t)
-  (TeX-auto-save t)
-  (TeX-engine #'latex-build-engine)
-  (TeX-command-default #'latex-build-command))
+  (TeX-auto-save t))
 
 (use-package marginalia
   :general
@@ -617,8 +610,22 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ;; (use-package magit-lfs
 ;;   :after magit)
 
+;; difftastic.el — structural diffs via the `difft' binary.
+;; Requires the difftastic CLI: `brew install difftastic'.
+;; Bindings added by `difftastic-bindings-mode':
+;;   M-d / M-c in magit-diff prefix, M-RET in magit-blame,
+;;   M-d in magit-file-dispatch, M-= in dired.
+(use-package difftastic-bindings
+  :straight difftastic
+  :config (difftastic-bindings-mode))
+
 (use-package forge
   :after magit
+  :init
+  ;; evil-collection installs its own forge bindings into magit-dispatch,
+  ;; so let it disable forge's defaults silently (avoids the
+  ;; "Cannot insert ... into magit-dispatch; o not found" warning).
+  (setq forge-add-default-bindings nil)
   :config
   ;; GitLab.com is already in forge-alist by default.
   ;; If you use a self-hosted GitLab, add it like this:
@@ -725,7 +732,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package markdown-mode
   :init (setq markdown-command "pandoc")
-  :mode ("README\\.md'" . gfm-mode))
+  :mode ("README\\.md\\'" . gfm-mode))
 
 (use-package yasnippet
   :init (yas-global-mode 1)
@@ -737,9 +744,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package lsp-mode
   :init (setq lsp-keymap-prefix "C-c l")
-  :hook '((clojure-mode . lsp)
-	  (rust-ts-mode . lsp)
-	  (lsp-mode . lsp-enable-which-key-integration))
+  :hook ((clojure-mode . lsp)
+	 (rust-ts-mode . lsp)
+	 (lsp-mode . lsp-enable-which-key-integration))
   :commands (lsp lsp-completion-provider)
 
   :config
@@ -772,7 +779,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ; (use-package treemacs)
 
 (use-package lsp-treemacs
-  :after '(lsp-mode treemacs)
+  :after (lsp-mode treemacs)
   :commands lsp-treemacs-errors-list
   :init (lsp-treemacs-sync-mode 1))
 
@@ -790,7 +797,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package treemacs-magit
   :defer t
-  :after '(treemacs magit))
+  :after (treemacs magit))
 
 (use-package org-roam
  :config
@@ -827,9 +834,9 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package cider
   :defer t
-  :hook '((clojure-mode . cider-mode)
-	  (cider-repl-mode . eldoc-mode)
-	  (cider-mode . eldoc-mode))
+  :hook ((clojure-mode . cider-mode)
+	 (cider-repl-mode . eldoc-mode)
+	 (cider-mode . eldoc-mode))
 
   :init
   (setq cider-stacktrace-default-filters '(tooling dup)
@@ -927,7 +934,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   :hook (after-init . global-emojify-mode))
 
 ;; load additional layers
-; (load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
+(load (expand-file-name "mylayers/flycheck-splint.el" user-emacs-directory))
 (load (expand-file-name "mylayers/elisp.el" user-emacs-directory))
 (load (expand-file-name "mylayers/clojure.el" user-emacs-directory))
 (load (expand-file-name "mylayers/patches.el" user-emacs-directory))
@@ -962,8 +969,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "mg" #'cider-send-go
     "mh" #'cider-send-halt
     "mr" #'cider-send-reset
-    "mR" #'cider-send-reload
-    "mt" #'cider-send-reload-tests
+    "mR" #'cider-send-restart
+    "mt" #'cider-send-reset-tests
 
     "tt" #'cider-test-run-focused-test
     "tn" #'cider-test-run-ns-tests
@@ -976,8 +983,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
     "gr" #'lsp-find-references
     "Gr" #'lsp-ui-peek-find-references
     "gs" #'consult-lsp-symbols
-    "gt" #'lsp-bridge-find-type-def
-    "gT" #'lsp-bridge-find-type-def-other-window
+    "gt" #'lsp-find-type-definition
     "gd" #'lsp-find-definition
     "gG" #'xref-find-definitions-other-window
 
@@ -986,9 +992,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (defun my-rust-mode-setup ()
   "Custom setup for rust-mode."
-  ; (lsp-bridge-mode 1) ; Activate lsp-bridge-mode
-  ; (corfu-mode -1) ; Deactivate corfu-mode
-  ; (acm-mode 1) ; Activate acm-mode
   (general-create-definer rust-definer
     :keymaps 'override
     :states '(emacs normal hybrid motion visual operator)
@@ -997,47 +1000,25 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (rust-definer
    "a" #'lsp-execute-code-action
    "r" #'lsp-rename
-   "e" #'lsp-bridge-diagnostic-list
+   "e" #'flycheck-list-errors
    "=" #'rust-format-buffer
 
    "bc" #'rust-run-clippy
    "bb" #'rust-compile
    "bt" #'rust-test
 
-   "hh" #'lsp-bridge-show-documentation
+   "hh" #'lsp-describe-thing-at-point
    "gi" #'lsp-find-implementation
-   "gI" #'lsp-bridge-find-impl-other-window
-   "gr" #'lsp-bridge-find-references
-   "Gr" #'lsp-bridge-peek
-   "gt" #'lsp-bridge-find-type-def
-   "gT" #'lsp-bridge-find-type-def-other-window
+   "gI" #'lsp-find-implementation-other-window
+   "gr" #'lsp-find-references
+   "Gr" #'lsp-ui-peek-find-references
+   "gt" #'lsp-find-type-definition
    "gd" #'lsp-find-definition
-   "gG" #'lsp-bridge-find-def-other-window))
+   "gG" #'xref-find-definitions-other-window))
 
 (add-hook 'rust-mode-hook 'my-rust-mode-setup)
 (add-hook 'clojure-mode-hook 'my-clojure-mode-setup)
 (add-hook 'clojure-mode-hook (lambda () (set-fill-column 100)))
-(add-hook 'lsp-bridge-peek-mode-hook 'evil-normalize-keymaps)
-(add-hook 'lsp-bridge-ref-mode-hook 'evil-normalize-keymaps)
-(nmap :keymaps 'lsp-bridge-peek-keymap
-  "j" 'lsp-bridge-peek-list-next-line
-  "k" 'lsp-bridge-peek-list-prev-line
-  "J" 'lsp-bridge-peek-tree-next-branch
-  "K" 'lsp-bridge-peek-tree-previous-branch
-  "RET" 'lsp-bridge-peek-jump
-
-  "q" 'lsp-bridge-peek-abort
-  "<escape>" 'lsp-bridge-peek-abort)
-
-(nmap :keymaps 'lsp-bridge-ref-mode-map
-  "j" 'lsp-bridge-ref-jump-next-keyword
-  "k" 'lsp-bridge-ref-jump-prev-keyword
-  "J" 'lsp-bridge-ref-jump-next-file
-  "K" 'lsp-bridge-ref-jump-prev-file
-  "RET" 'lsp-bridge-ref-open-file-and-stay
-
-  "q" 'lsp-bridge-ref-quit
-  "<escape>" 'lsp-bridge-ref-quit)
 
 ;; Spacemacs-like buffer menus
 (global-definer
@@ -1110,40 +1091,6 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (+general-global-menu! "Checkers" "!"
   "c" '(consult-flycheck :which-key "Consult flycheck"))
-
-;; LSP booster to make json parsing comms faster
-;; installation needed: https://github.com/blahgeek/emacs-lsp-booster
-(defun lsp-booster--advice-json-parse (old-fn &rest args)
-  "Try to parse bytecode instead of json."
-  (or
-   (when (equal (following-char) ?#)
-     (let ((bytecode (read (current-buffer))))
-       (when (byte-code-function-p bytecode)
-         (funcall bytecode))))
-   (apply old-fn args)))
-
-(advice-add (if (progn (require 'json)
-                       (fboundp 'json-parse-buffer))
-                'json-parse-buffer
-              'json-read)
-            :around
-            #'lsp-booster--advice-json-parse)
-
-(defun lsp-booster--advice-final-command (old-fn cmd &optional test?)
-  "Prepend emacs-lsp-booster command to lsp CMD."
-  (let ((orig-result (funcall old-fn cmd test?)))
-    (if (and (not test?)                             ;; for check lsp-server-present?
-             (not (file-remote-p default-directory)) ;; see lsp-resolve-final-command, it would add extra shell wrapper
-             lsp-use-plists
-             (not (functionp 'json-rpc-connection))  ;; native json-rpc
-             (executable-find "emacs-lsp-booster"))
-        (progn
-          (message "Using emacs-lsp-booster for %s!" orig-result)
-          (cons "emacs-lsp-booster" orig-result))
-      orig-result)))
-
-(advice-add 'lsp-resolve-final-command :around #'lsp-booster--advice-final-command)
-;; end of lsp booster
 
 ;; Add a hook to enable emacs-lisp-mode for .dir-locals.el files
 (defun enable-emacs-lisp-mode-for-dir-locals ()

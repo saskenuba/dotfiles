@@ -4,6 +4,7 @@ set ideajoin
 set surround
 set wrapsearch
 set clipboard+=unnamed
+set symex
 
 let mapleader = " "
 " nnoremap <S-Enter> <C-W>w
