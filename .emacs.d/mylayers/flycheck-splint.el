@@ -1,13 +1,12 @@
 ;;; flycheck-splint.el --- Add splint linter to flycheck
 
-;; Copyright (C) 2019 Martin Mariano <martin@hotmail.com.br>
+;; Copyright (C) 2025 Martin Mariano <martin@hotmail.com.br>
 ;; This code borrows heavily from flycheck-clj-kondo:
-;; https://github.com/candid82/flycheck-joker
+;; https://github.com/borkdude/flycheck-clj-kondo
 ;;
 ;; Author: Martin Mariano <martin@hotmail.com.br>
 ;; Created: 23 April 2025
 ;; Version: 0.0.1-snapshot
-;; Homepage: https://github.com/borkdude/flycheck-clj-kondo
 ;; Package-Requires: ((emacs "26.1") (flycheck "34"))
 
 ;;; Commentary:
@@ -18,7 +17,7 @@
 ;; (require 'flycheck-splint)
 
 ;; Make sure the splint binary is on your path.  For installation
-;; instructions, see https://github.com/borkdude/clj-kondo.
+;; instructions, see https://github.com/NoahTheDuke/splint.
 
 ;;; License:
 

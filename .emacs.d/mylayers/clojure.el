@@ -90,13 +90,6 @@ the focus."
   (interactive)
   (cider-eval-in-repl-no-focus (cider-ns-form)))
 
-(defun clojure-set-capf ()
-  (add-hook 'cider-mode-hook
-	    (lambda ()
-	      (setq completion-at-point-functions
-		    (list (cape-capf-super #'cider-complete-at-point
-					   #'lsp-completion-at-point
-					   #'dabbrev-capf))))))
 (defun cider-run-flowstorm ()
   (interactive)
   (cider-interactive-eval
