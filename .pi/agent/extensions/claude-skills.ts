@@ -11,12 +11,12 @@ async function exists(path: string) {
 	}
 }
 
-async function findClaudeSkillDirs(startDir: string) {
+async function findClaudeResourceDirs(startDir: string, resourceDir: "skills" | "commands") {
 	const dirs: string[] = [];
 	let current = resolve(startDir);
 
 	while (true) {
-		const candidate = join(current, ".claude", "skills");
+		const candidate = join(current, ".claude", resourceDir);
 		if (await exists(candidate)) dirs.push(candidate);
 
 		const parent = dirname(current);
@@ -29,7 +29,13 @@ async function findClaudeSkillDirs(startDir: string) {
 
 export default function (pi: ExtensionAPI) {
 	pi.on("resources_discover", async (event) => {
-		const skillPaths = await findClaudeSkillDirs(event.cwd);
-		return skillPaths.length > 0 ? { skillPaths } : undefined;
+		const [skillPaths, promptPaths] = await Promise.all([
+			findClaudeResourceDirs(event.cwd, "skills"),
+			findClaudeResourceDirs(event.cwd, "commands"),
+		]);
+
+		if (skillPaths.length === 0 && promptPaths.length === 0) return undefined;
+
+		return { skillPaths, promptPaths };
 	});
 }
