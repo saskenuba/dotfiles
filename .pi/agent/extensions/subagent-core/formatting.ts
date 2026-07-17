@@ -15,7 +15,11 @@ export function formatUsage(usage: UsageStats, model?: string): string {
 	if (usage.cacheRead > 0) parts.push(`R${formatTokens(usage.cacheRead)}`);
 	if (usage.cacheWrite > 0) parts.push(`W${formatTokens(usage.cacheWrite)}`);
 	if (usage.cost > 0) parts.push(`$${usage.cost.toFixed(4)}`);
-	if (usage.contextTokens > 0) parts.push(`ctx:${formatTokens(usage.contextTokens)}`);
+	if (usage.contextWindow > 0) {
+		parts.push(`ctx:${((usage.contextTokens / usage.contextWindow) * 100).toFixed(1)}%/${formatTokens(usage.contextWindow)}`);
+	} else if (usage.contextTokens > 0) {
+		parts.push(`ctx:${formatTokens(usage.contextTokens)}`);
+	}
 	if (model) parts.push(model);
 	return parts.join(" ");
 }

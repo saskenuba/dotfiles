@@ -5,7 +5,10 @@ import {
 	compareChildren,
 	compareRuns,
 	formatAge,
+	formatChildContextUsage,
+	formatContextWindowUsage,
 	getChildLabel,
+	getContextUsageColor,
 	getRunLabel,
 	getStatusColor,
 	getStatusIcon,
@@ -306,6 +309,8 @@ export class SubagentInspectorOverlay implements Component {
 			this.theme.fg(counts.completed > 0 ? "success" : "dim", `${counts.completed} done`),
 		];
 		if (counts.failed > 0) parts.push(this.theme.fg("error", `${counts.failed} failed`));
+		const contextText = formatContextWindowUsage(snapshot.contextUsage);
+		if (contextText) parts.push(this.theme.fg(getContextUsageColor(snapshot.contextUsage), contextText));
 		return truncateToWidth(parts.join("  "), width, "...", true);
 	}
 
@@ -392,6 +397,10 @@ export class SubagentInspectorOverlay implements Component {
 		}
 		if (child.model) {
 			lines.push(padRight(`  ${this.theme.fg("muted", "Model:")} ${child.model}`, safeWidth));
+		}
+		const contextUsage = formatChildContextUsage(child);
+		if (contextUsage) {
+			lines.push(padRight(`  ${this.theme.fg("muted", "Context:")} ${contextUsage}`, safeWidth));
 		}
 		const started = formatAge(child.startedAt ?? child.createdAt);
 		const elapsed = formatDuration(child.startedAt, child.endedAt);

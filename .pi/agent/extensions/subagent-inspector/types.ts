@@ -17,6 +17,13 @@ export { createEmptyUsage, isTerminalStatus } from "../subagent-core/types.js";
 
 import type { ChildRunRecord, RunRecord } from "../subagent-core/types.js";
 
+export interface ContextWindowUsage {
+	tokens: number | null;
+	contextWindow: number;
+	percent: number | null;
+	model?: string;
+}
+
 export interface DetailsSnapshot {
 	version: number;
 	runs: RunRecord[];

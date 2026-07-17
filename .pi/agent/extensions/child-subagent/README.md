@@ -5,7 +5,8 @@ Owns the bundled agent prompts and subagent runtime behavior.
 
 ## Behavior
 
-- Uses the current model by default.
+- Uses the current model by default, unless the selected agent explicitly pins a model.
+- Shows a five-second launch preview for every child run in the interactive TUI.
 - Chooses the child thinking level automatically from the delegated task.
 - Uses the current working directory by default.
 - Forwards the currently active built-in tools to child runs.
@@ -23,7 +24,15 @@ The default agent prompts live here.
 
 Agent prompts do not pin a model.
 The runtime passes the current parent session model unless the agent explicitly pins one.
-The runtime also chooses the thinking level automatically from the delegated task.
+Before each interactive child launch, a five-second preview shows that automatic choice.
+If untouched, the countdown launches with the existing automatic model and thinking behavior.
+Models follow Pi's automatically synchronized catalog order, with newer catalog entries first.
+Type to fuzzy-search authenticated models from the automatic model's provider.
+Use Up and Down to navigate the matching models.
+Press Tab for more thinking or Shift+Tab for less thinking.
+Press Enter to launch the selection.
+Press Escape to keep the automatic choices.
+Non-interactive modes preserve the automatic behavior without a popup.
 
 ## Tools
 
@@ -75,3 +84,4 @@ Typical defaults are these.
 - Research, inspect, trace, or summarize tasks → `medium`.
 - Planning, review, root-cause, or design tasks → `high`.
 - `xhigh` is only chosen for very explicit deep-reasoning requests.
+- `max` is only chosen for explicit maximum-thinking requests.

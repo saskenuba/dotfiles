@@ -1,5 +1,5 @@
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import type { ChildRunRecord, DetailsSnapshot, RunRecord } from "./types.js";
+import type { ChildRunRecord, ContextWindowUsage, DetailsSnapshot, RunRecord } from "./types.js";
 import {
 	SUBAGENT_INSPECTOR_SNAPSHOT_VERSION,
 	SUBAGENT_INSPECTOR_STATE_TYPE,
@@ -13,6 +13,12 @@ interface CustomEntryLike {
 }
 
 type Listener = () => void;
+
+type RuntimeSnapshot = DetailsSnapshot & { contextUsage?: ContextWindowUsage };
+
+function cloneContextUsage(usage: ContextWindowUsage): ContextWindowUsage {
+	return { ...usage };
+}
 
 function cloneChild(child: ChildRunRecord): ChildRunRecord {
 	return {
@@ -111,13 +117,16 @@ export class SubagentInspectorStore {
 	};
 
 	private readonly listeners = new Set<Listener>();
+	private contextUsage: ContextWindowUsage | undefined;
 	private persistTimer: ReturnType<typeof setTimeout> | undefined;
 	private lastPersistedSerialized = "";
 
 	constructor(private readonly pi: ExtensionAPI) {}
 
-	getSnapshot(): DetailsSnapshot {
-		return cloneSnapshot(this.snapshot);
+	getSnapshot(): RuntimeSnapshot {
+		const snapshot: RuntimeSnapshot = cloneSnapshot(this.snapshot);
+		if (this.contextUsage) snapshot.contextUsage = cloneContextUsage(this.contextUsage);
+		return snapshot;
 	}
 
 	subscribe(listener: Listener): () => void {
@@ -139,6 +148,31 @@ export class SubagentInspectorStore {
 		else this.lastPersistedSerialized = JSON.stringify(this.snapshot);
 		this.emit();
 		return this.getSnapshot();
+	}
+
+	updateContextUsage(ctx: ExtensionContext): void {
+		const ctxWithUsage = ctx as ExtensionContext & {
+			getContextUsage?: () => ContextWindowUsage | undefined;
+			model?: { provider?: string; id?: string; contextWindow?: number };
+		};
+		const usage = ctxWithUsage.getContextUsage?.();
+		const contextWindow = usage?.contextWindow ?? ctxWithUsage.model?.contextWindow;
+		const model = ctxWithUsage.model
+			? [ctxWithUsage.model.provider, ctxWithUsage.model.id].filter(Boolean).join("/")
+			: undefined;
+		const next =
+			typeof contextWindow === "number" && contextWindow > 0
+				? {
+						tokens: usage?.tokens ?? null,
+						contextWindow,
+						percent: usage?.percent ?? null,
+						model: model || undefined,
+					}
+				: undefined;
+
+		if (JSON.stringify(next) === JSON.stringify(this.contextUsage)) return;
+		this.contextUsage = next;
+		this.emit();
 	}
 
 	upsertRun(run: RunRecord): DetailsSnapshot {
@@ -189,7 +223,7 @@ export class SubagentInspectorStore {
 
 	private persistNow(): void {
 		this.clearPersistTimer();
-		const snapshot = this.getSnapshot();
+		const snapshot = cloneSnapshot(this.snapshot);
 		const serialized = JSON.stringify(snapshot);
 		if (serialized === this.lastPersistedSerialized) return;
 		this.lastPersistedSerialized = serialized;

@@ -5,6 +5,7 @@ import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { discoverAgents } from "./agents.js";
 import { MAX_SUBAGENT_DEPTH, SUBAGENT_DEPTH_ENV, SUBAGENT_RESULT_MESSAGE_TYPE, SUBAGENT_RUN_UPDATE_EVENT } from "./constants.js";
+import { chooseLaunchSelection } from "./launch-picker.js";
 import {
 	buildFinalOutput,
 	runChainTasks,
@@ -23,7 +24,7 @@ import type {
 	SubagentRunUpdateEvent,
 	UsageStats,
 } from "./types.js";
-import type { ThinkingLevel } from "./thinking.js";
+import { chooseDelegatedThinkingLevel, type ThinkingLevel } from "./thinking.js";
 
 const DEFAULT_AGENT_SCOPE: AgentScope = "user";
 const DEFAULT_SCOUT_AGENT = "subagent-scout";
@@ -148,6 +149,27 @@ function buildAgentCatalog(
 	};
 }
 
+async function previewLaunches(
+	inputs: SingleTaskInput[],
+	catalog: AgentConfig[],
+	ctx: ExtensionContext,
+	defaultModel: string | undefined,
+	parentThinkingLevel: ThinkingLevel,
+): Promise<SingleTaskInput[]> {
+	const selected: SingleTaskInput[] = [];
+	for (const input of inputs) {
+		const agent = catalog.find((candidate) => candidate.name === input.agent);
+		const automaticModel = agent?.model ?? defaultModel;
+		const automaticThinking = chooseDelegatedThinkingLevel(input.task, parentThinkingLevel, {
+			role: input.role,
+			agentName: input.agent,
+		});
+		const choice = await chooseLaunchSelection(ctx, automaticModel, automaticThinking);
+		selected.push(choice ? { ...input, model: choice.model, thinkingLevel: choice.thinkingLevel } : input);
+	}
+	return selected;
+}
+
 function renderAgentsText(scope: AgentScope, cwd: string, bundledAgentsDir: string): string {
 	const discovery = discoverAgents(cwd, scope, bundledAgentsDir);
 	if (discovery.agents.length === 0) return `No agents found for scope "${scope}".`;
@@ -207,6 +229,7 @@ function aggregateRunUsage(run: RunRecord): UsageStats {
 		cacheWrite: 0,
 		cost: 0,
 		contextTokens: 0,
+		contextWindow: 0,
 		turns: 0,
 	};
 	for (const child of run.children) {
@@ -216,6 +239,7 @@ function aggregateRunUsage(run: RunRecord): UsageStats {
 		total.cacheWrite += child.usage.cacheWrite;
 		total.cost += child.usage.cost;
 		total.contextTokens = Math.max(total.contextTokens, child.usage.contextTokens);
+		total.contextWindow = Math.max(total.contextWindow, child.usage.contextWindow);
 		total.turns += child.usage.turns;
 	}
 	return total;
@@ -406,6 +430,19 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			return { ok: false, reason: "Canceled: project-local agents were not approved." };
 		}
 
+		const normalizedInputs =
+			mode === "single"
+				? [{ ...normalizeSingleInput(params), cwd: params.cwd }]
+				: normalizeParallelInputs(mode === "parallel" ? params.tasks ?? [] : params.chain ?? []);
+		const parentThinkingLevel = options.getParentThinkingLevel();
+		const selectedInputs = await previewLaunches(
+			normalizedInputs,
+			catalog.agents,
+			ctx,
+			options.getDefaultModel(ctx),
+			parentThinkingLevel,
+		);
+
 		const jobId = `job-${randomUUID().slice(0, 8)}`;
 		const primaryAgent = describePrimary(params, mode);
 		const delegatedSummary = describeDelegatedScope(params, mode);
@@ -439,22 +476,20 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			projectAgentsDir: catalog.projectAgentsDir,
 			defaultModel: options.getDefaultModel(ctx),
 			defaultTools: options.getDefaultTools(),
-			parentThinkingLevel: options.getParentThinkingLevel(),
+			parentThinkingLevel,
+			getContextWindow: (model) => {
+				const separator = model.indexOf("/");
+				if (separator <= 0 || separator === model.length - 1) return undefined;
+				return ctx.modelRegistry.find(model.slice(0, separator), model.slice(separator + 1))?.contextWindow;
+			},
 			signal: jobAbort.signal,
 			onRunUpdate: emitRunUpdate,
 		};
 
 		const runPromise: Promise<RunRecord> = (async () => {
-			if (mode === "single") {
-				return runSingleTask(
-					{ ...normalizeSingleInput(params), cwd: params.cwd },
-					runnerContext,
-				);
-			}
-			if (mode === "parallel") {
-				return runParallelTasks(normalizeParallelInputs(params.tasks ?? []), runnerContext);
-			}
-			return runChainTasks(normalizeParallelInputs(params.chain ?? []), runnerContext);
+			if (mode === "single") return runSingleTask(selectedInputs[0]!, runnerContext);
+			if (mode === "parallel") return runParallelTasks(selectedInputs, runnerContext);
+			return runChainTasks(selectedInputs, runnerContext);
 		})();
 
 		job.promise = runPromise
