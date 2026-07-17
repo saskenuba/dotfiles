@@ -36,6 +36,7 @@ export interface UsageStats {
 	cacheWrite: number;
 	cost: number;
 	contextTokens: number;
+	contextWindow: number;
 	turns: number;
 }
 
@@ -124,6 +125,7 @@ export function createEmptyUsage(): UsageStats {
 		cacheWrite: 0,
 		cost: 0,
 		contextTokens: 0,
+		contextWindow: 0,
 		turns: 0,
 	};
 }

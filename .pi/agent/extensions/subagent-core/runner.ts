@@ -21,6 +21,8 @@ export interface SingleTaskInput {
 	task: string;
 	cwd?: string;
 	role?: string;
+	model?: string;
+	thinkingLevel?: ThinkingLevel;
 }
 
 export interface ChainTaskInput extends SingleTaskInput {}
@@ -33,6 +35,7 @@ export interface RunnerContext {
 	defaultModel?: string;
 	defaultTools?: string[];
 	parentThinkingLevel: ThinkingLevel;
+	getContextWindow?: (model: string) => number | undefined;
 	signal?: AbortSignal;
 	onRunUpdate?: RunUpdateHandler;
 }
@@ -323,7 +326,7 @@ async function runSingleChild(
 	step?: number,
 ): Promise<ChildRunRecord> {
 	const cwd = path.resolve(input.cwd ?? run.cwd);
-	const thinkingLevel = chooseDelegatedThinkingLevel(input.task, ctx.parentThinkingLevel, {
+	const thinkingLevel = input.thinkingLevel ?? chooseDelegatedThinkingLevel(input.task, ctx.parentThinkingLevel, {
 		role: input.role,
 		agentName: input.agent,
 	});
@@ -352,7 +355,8 @@ async function runSingleChild(
 
 	if (!isAdHoc) child.agentSource = agent.source;
 	child.status = "starting";
-	child.model = agent.model ?? ctx.defaultModel;
+	child.model = input.model ?? agent.model ?? ctx.defaultModel;
+	child.usage.contextWindow = child.model ? ctx.getContextWindow?.(child.model) ?? 0 : 0;
 	emitRunUpdate(run, ctx.onRunUpdate);
 
 	const args: string[] = ["--mode", "json", "-p", "--no-session"];

@@ -1,16 +1,19 @@
 import type { Theme } from "@mariozechner/pi-coding-agent";
 import type { Component, OverlayHandle, OverlayOptions, TUI } from "@mariozechner/pi-tui";
 import { truncateToWidth, visibleWidth } from "@mariozechner/pi-tui";
-import type {
-	ChildRunRecord as SubagentChildRecord,
-	RunRecord as SubagentRunRecord,
-	RunStatus as SubagentStatus,
-} from "../subagent-core/types.js";
+import { formatTokens } from "../subagent-core/formatting.js";
+import type { ChildRunRecord, RunRecord, RunStatus } from "../subagent-core/types.js";
+import type { ContextWindowUsage } from "./types.js";
+
+export type SubagentChildRecord = ChildRunRecord;
+export type SubagentRunRecord = RunRecord;
+export type SubagentStatus = RunStatus;
 
 export interface SubagentInspectorSnapshot {
 	runs: readonly SubagentRunRecord[];
 	children: readonly SubagentChildRecord[];
 	updatedAt?: number;
+	contextUsage?: ContextWindowUsage;
 }
 
 export interface SubagentInspectorStore {
@@ -224,8 +227,33 @@ function renderMetric(theme: Theme, label: string, value: number, color: "accent
 	return theme.fg(color, `${label} ${value}`);
 }
 
+export function formatContextWindowUsage(usage: ContextWindowUsage | undefined): string {
+	if (!usage || usage.contextWindow <= 0) return "";
+	const used = usage.tokens === null ? "?" : formatTokens(usage.tokens);
+	const max = formatTokens(usage.contextWindow);
+	const percent = usage.percent === null ? "" : ` ${usage.percent.toFixed(1)}%`;
+	return `ctx ${used}/${max}${percent}`;
+}
+
+export function getContextUsageColor(usage: ContextWindowUsage | undefined): "dim" | "warning" | "error" {
+	const percent = usage?.percent ?? 0;
+	if (percent > 90) return "error";
+	if (percent > 70) return "warning";
+	return "dim";
+}
+
+export function formatChildContextUsage(child: SubagentChildRecord): string {
+	const contextWindow = child.usage.contextWindow;
+	if (contextWindow <= 0) return "";
+	const percent = (child.usage.contextTokens / contextWindow) * 100;
+	return `${percent.toFixed(1)}%/${formatTokens(contextWindow)}`;
+}
+
 function getTopItems(snapshot: SubagentInspectorSnapshot, maxItems: number): readonly SubagentChildRecord[] {
-	return [...snapshot.children].sort(compareChildren).slice(0, Math.max(0, maxItems));
+	const children = [...snapshot.children].sort(compareChildren);
+	const active = children.filter((child) => isActiveStatus(child.status));
+	const inactive = children.filter((child) => !isActiveStatus(child.status));
+	return [...active, ...inactive.slice(0, Math.max(0, maxItems - active.length))];
 }
 
 export class SubagentDock implements Component {
@@ -317,10 +345,15 @@ export function renderDockLines(
 	const showIdle = options.showIdleWhenEmpty ?? true;
 	const lines: string[] = [];
 
+	const contextText = formatContextWindowUsage(snapshot.contextUsage);
+	const contextColor = getContextUsageColor(snapshot.contextUsage);
+
 	if (metrics.totalRuns === 0 && metrics.totalChildren === 0) {
 		if (!showIdle) return [];
 		const idle = `${theme.fg("muted", label)} ${theme.fg("dim", "idle")}`;
-		return [padRight(truncateToWidth(idle, safeWidth, "...", true), safeWidth)];
+		const idleLines = [padRight(truncateToWidth(idle, safeWidth, "...", true), safeWidth)];
+		if (contextText) idleLines.push(padRight(theme.fg(contextColor, contextText), safeWidth));
+		return idleLines;
 	}
 
 	if (safeWidth <= compactThreshold) {
@@ -329,7 +362,15 @@ export function renderDockLines(
 			theme.fg("accent", String(metrics.activeChildren || metrics.activeRuns || metrics.totalChildren)),
 			metrics.failed > 0 ? theme.fg("error", `!${metrics.failed}`) : theme.fg("dim", `${metrics.ended}`),
 		];
-		return [padRight(truncateToWidth(compact.join(" "), safeWidth, "...", true), safeWidth)];
+		const compactLines = [padRight(truncateToWidth(compact.join(" "), safeWidth, "...", true), safeWidth)];
+		for (const child of [...snapshot.children].sort(compareChildren).filter((entry) => isActiveStatus(entry.status))) {
+			const context = formatChildContextUsage(child);
+			const line = context
+				? `${theme.fg(getStatusColor(child.status), getStatusIcon(child.status))} ${theme.fg("dim", context)}`
+				: theme.fg(getStatusColor(child.status), getStatusIcon(child.status));
+			compactLines.push(padRight(truncateToWidth(line, safeWidth, "...", true), safeWidth));
+		}
+		return compactLines;
 	}
 
 	const summary: string[] = [
@@ -340,6 +381,7 @@ export function renderDockLines(
 	if (metrics.failed > 0) summary.push(renderMetric(theme, "bad", metrics.failed, "error"));
 	else if (metrics.ended > 0) summary.push(renderMetric(theme, "done", metrics.ended, "muted"));
 	lines.push(joinSegments(summary, safeWidth));
+	if (contextText) lines.push(padRight(theme.fg(contextColor, contextText), safeWidth));
 
 	const detail: string[] = [];
 	if (metrics.running > 0) detail.push(renderMetric(theme, "run", metrics.running, "accent"));
@@ -349,16 +391,20 @@ export function renderDockLines(
 
 	const topItems = getTopItems(snapshot, options.maxItems ?? 2);
 	for (const child of topItems) {
-		const status = theme.fg(getStatusColor(child.status), `${getStatusIcon(child.status)} ${getChildLabel(child)}`);
 		const age = formatAge(child.startedAt ?? child.createdAt ?? child.endedAt);
 		const runPrefix = options.showRunLabel ? `${getRunName(snapshot, child.runId)} · ` : "";
-		const line = age
-			? `${status} ${theme.fg("dim", `${runPrefix}${age}`)}`
-			: `${status} ${theme.fg("dim", runPrefix.trim())}`;
-		lines.push(padRight(truncateToWidth(line.trimEnd(), safeWidth, "...", true), safeWidth));
+		const context = formatChildContextUsage(child);
+		const suffix = [context, age].filter(Boolean).join(" ");
+		const prefix = `${getStatusIcon(child.status)} `;
+		const metadata = `${runPrefix}${suffix}`.trim();
+		const labelWidth = Math.max(1, safeWidth - visibleWidth(prefix) - (metadata ? visibleWidth(metadata) + 1 : 0));
+		const line = `${theme.fg(getStatusColor(child.status), `${prefix}${truncateToWidth(getChildLabel(child), labelWidth, "...", true)}`)}${
+			metadata ? ` ${theme.fg("dim", metadata)}` : ""
+		}`;
+		lines.push(padRight(line, safeWidth));
 	}
 
-	return lines.slice(0, 4);
+	return lines;
 }
 
 function getRunName(snapshot: SubagentInspectorSnapshot, runId: string): string {

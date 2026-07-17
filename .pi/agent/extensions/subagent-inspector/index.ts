@@ -36,8 +36,13 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 		);
 	};
 
+	const refreshContextUsage = (ctx: ExtensionContext) => {
+		runtimeStore.updateContextUsage(ctx);
+	};
+
 	const restoreState = (ctx: ExtensionContext) => {
 		runtimeStore.restore(ctx);
+		refreshContextUsage(ctx);
 		applyDockWidget(ctx);
 	};
 
@@ -122,6 +127,26 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 
 	pi.on("session_tree", async (_event, ctx) => {
 		restoreState(ctx);
+	});
+
+	pi.on("model_select", async (_event, ctx) => {
+		refreshContextUsage(ctx);
+	});
+
+	pi.on("context", async (_event, ctx) => {
+		refreshContextUsage(ctx);
+	});
+
+	pi.on("message_end", async (_event, ctx) => {
+		refreshContextUsage(ctx);
+	});
+
+	pi.on("turn_end", async (_event, ctx) => {
+		refreshContextUsage(ctx);
+	});
+
+	pi.on("session_compact", async (_event, ctx) => {
+		refreshContextUsage(ctx);
 	});
 
 	pi.on("session_shutdown", async (_event, ctx) => {

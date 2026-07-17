@@ -1,4 +1,4 @@
-export const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh"] as const;
+export const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
 
 export type ThinkingLevel = (typeof THINKING_LEVELS)[number];
 
@@ -47,7 +47,8 @@ export function chooseDelegatedThinkingLevel(
 	const lower = text.toLowerCase();
 	const personaText = [context?.role, context?.agentName].filter((value): value is string => Boolean(value?.trim())).join(" ").toLowerCase();
 
-	if (/\b(xhigh|ultra ?think|ultra-?think|maximum thinking|deepest reasoning)\b/.test(lower)) return "xhigh";
+	if (/\b(max thinking|maximum thinking|deepest reasoning)\b/.test(lower)) return "max";
+	if (/\b(xhigh|ultra ?think|ultra-?think)\b/.test(lower)) return "xhigh";
 	if (/\b(no thinking|thinking off)\b/.test(lower)) return "off";
 	if (/\b(minimal thinking)\b/.test(lower)) return "minimal";
 	if (/\b(low thinking|quick scout|fast scout)\b/.test(lower)) return "low";
