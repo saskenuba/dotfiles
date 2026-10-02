@@ -28,9 +28,9 @@ Choose the form that fits the OS.
 
 Use when the task involves pi APIs or behavior.
 
-- Main docs: `/opt/homebrew/Cellar/pi-coding-agent/0.67.3/libexec/lib/node_modules/@mariozechner/pi-coding-agent/README.md`
-- Docs dir: `/opt/homebrew/Cellar/pi-coding-agent/0.67.3/libexec/lib/node_modules/@mariozechner/pi-coding-agent/docs`
-- Examples dir: `/opt/homebrew/Cellar/pi-coding-agent/0.67.3/libexec/lib/node_modules/@mariozechner/pi-coding-agent/examples`
+- Main docs: `/opt/homebrew/Cellar/pi-coding-agent/0.99.2/libexec/lib/node_modules/@earendil-works/pi-coding-agent/README.md`
+- Docs dir: `/opt/homebrew/Cellar/pi-coding-agent/0.99.2/libexec/lib/node_modules/@earendil-works/pi-coding-agent/docs`
+- Examples dir: `/opt/homebrew/Cellar/pi-coding-agent/0.99.2/libexec/lib/node_modules/@earendil-works/pi-coding-agent/examples`
 
 ## Procedure
 
@@ -41,17 +41,18 @@ Use when the task involves pi APIs or behavior.
 
 ## Targeted Commands
 
+Use bash for directory listings and scoped searches.
+Use the `read` tool to examine file contents, including settings and keybindings, instead of `cat` or
+`sed`.
+
 ```bash
 find ~/.pi/agent/extensions -maxdepth 2 -type f 2>/dev/null
 find ~/.pi/agent/agents -maxdepth 2 -type f 2>/dev/null
 find ~/.pi/agent/skills -maxdepth 2 -type f 2>/dev/null
 find ~/.pi/agent/themes -maxdepth 2 -type f 2>/dev/null
-cat ~/.pi/agent/settings.json 2>/dev/null
-cat ~/.pi/agent/keybindings.json 2>/dev/null
 ```
 
 ## Fallback
 
-```bash
-find ~/.pi -type f | head -120
-```
+Choose the relevant resource directory above and expand only that scoped search.
+Avoid blanket scans of `~/.pi`, which include sessions and credentials.

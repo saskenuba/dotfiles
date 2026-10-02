@@ -1,11 +1,14 @@
 {
-  "lastChangelogVersion": "0.80.6",
+  "lastChangelogVersion": "0.99.2",
   "defaultProvider": "openai-codex",
-  "defaultModel": "gpt-5.6-terra",
+  "defaultModel": "gpt-6.1-sol",
   "defaultThinkingLevel": "medium",
   "compaction": {
     "enabled": false
   },
   "hideThinkingBlock": false,
-  "theme": "dark"
+  "theme": "dark",
+  "images": {
+    "autoResize": false
+  }
 }
