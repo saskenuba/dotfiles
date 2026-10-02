@@ -1,0 +1,8 @@
+{
+  "name": "pi-provider-status-local",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test status.test.ts"
+  }
+}
