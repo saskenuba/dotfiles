@@ -1,2 +1,7 @@
 .pi/agent/auth.json
 .pi/agent/sessions/
+.pi/agent/agent-team/
+.pi/agent/models-store.json
+.pi/agent/trust.json
+.pi/backups/
+macos/.config/karabiner/automatic_backups/
