@@ -282,8 +282,8 @@ export class SubagentInspectorOverlay implements Component {
 		lines.push(border(`╰${"─".repeat(innerWidth)}╯`));
 
 		this.cacheWidth = width;
-		this.cacheLines = lines;
-		return lines;
+		this.cacheLines = lines.map((line) => truncateToWidth(line, Math.max(0, width)));
+		return this.cacheLines;
 	}
 
 	invalidate(): void {

@@ -15,7 +15,7 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 	let overlayMode: "hidden" | "overlay" | "modal" = "hidden";
 
 	const applyDockWidget = (ctx: ExtensionContext) => {
-		if (!ctx.hasUI) return;
+		if (ctx.mode !== "tui") return;
 		if (overlayMode !== "overlay") {
 			ctx.ui.setWidget(DOCK_WIDGET_ID, undefined);
 			return;
@@ -75,8 +75,8 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 	);
 
 	const openInspectorCommand = async (ctx: ExtensionContext) => {
-		if (!ctx.hasUI) {
-			console.log("Subagent inspector overlay requires interactive UI mode.");
+		if (ctx.mode !== "tui") {
+			ctx.ui.notify("Subagent inspector overlay requires interactive TUI mode.", "info");
 			return;
 		}
 		await openInspector(ctx.ui, runtimeStore, { title: "Subagent inspector" });
@@ -99,7 +99,7 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 	pi.registerShortcut(SUBAGENT_INSPECTOR_SHORTCUT.toggleOverlay.key, {
 		description: SUBAGENT_INSPECTOR_SHORTCUT.toggleOverlay.description,
 		handler: async (ctx) => {
-			if (!ctx.hasUI) return;
+			if (ctx.mode !== "tui") return;
 			if (overlayMode === "hidden") {
 				overlayMode = "overlay";
 				applyDockWidget(ctx);
@@ -123,6 +123,10 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 
 	pi.on("session_start", async (_event, ctx) => {
 		restoreState(ctx);
+	});
+
+	pi.on("session_before_tree", async () => {
+		runtimeStore.flush();
 	});
 
 	pi.on("session_tree", async (_event, ctx) => {
@@ -151,6 +155,6 @@ export default function subagentInspectorExtension(pi: ExtensionAPI) {
 
 	pi.on("session_shutdown", async (_event, ctx) => {
 		runtimeStore.flush();
-		if (ctx.hasUI) ctx.ui.setWidget(DOCK_WIDGET_ID, undefined);
+		if (ctx.mode === "tui") ctx.ui.setWidget(DOCK_WIDGET_ID, undefined);
 	});
 }

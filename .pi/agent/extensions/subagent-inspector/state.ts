@@ -70,7 +70,7 @@ function markInterrupted(snapshot: DetailsSnapshot): DetailsSnapshot {
 		if (!isTerminalStatus(next.status)) {
 			next.status = "interrupted";
 			next.endedAt ??= now;
-			next.error ??= "Interrupted during previous session";
+			if (!next.error) next.error = "Interrupted during previous session";
 		}
 		return next;
 	});
@@ -80,8 +80,8 @@ function markInterrupted(snapshot: DetailsSnapshot): DetailsSnapshot {
 		if (!isTerminalStatus(next.status)) {
 			next.status = "interrupted";
 			next.endedAt ??= now;
-			next.error ??= "Interrupted during previous session";
-			next.summary ??= next.output || next.error;
+			if (!next.error) next.error = "Interrupted during previous session";
+			if (!next.summary) next.summary = next.output || next.error;
 		}
 		return next;
 	});
@@ -104,7 +104,7 @@ function markInterrupted(snapshot: DetailsSnapshot): DetailsSnapshot {
 		version: SUBAGENT_INSPECTOR_SNAPSHOT_VERSION,
 		runs,
 		children,
-		updatedAt: now,
+		updatedAt: snapshot.updatedAt,
 	};
 }
 
@@ -136,6 +136,8 @@ export class SubagentInspectorStore {
 
 	restore(ctx: ExtensionContext): DetailsSnapshot {
 		this.clearPersistTimer();
+		this.lastPersistedSerialized = "";
+		this.contextUsage = undefined;
 		const branch = ctx.sessionManager.getBranch() as CustomEntryLike[];
 		const latest = branch
 			.filter((entry) => entry.type === "custom" && entry.customType === SUBAGENT_INSPECTOR_STATE_TYPE)
@@ -226,8 +228,8 @@ export class SubagentInspectorStore {
 		const snapshot = cloneSnapshot(this.snapshot);
 		const serialized = JSON.stringify(snapshot);
 		if (serialized === this.lastPersistedSerialized) return;
-		this.lastPersistedSerialized = serialized;
 		this.pi.appendEntry(SUBAGENT_INSPECTOR_STATE_TYPE, snapshot);
+		this.lastPersistedSerialized = serialized;
 	}
 
 	private emit(): void {

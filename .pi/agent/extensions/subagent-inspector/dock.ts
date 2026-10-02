@@ -295,35 +295,29 @@ export class SubagentDock implements Component {
 
 class FramedDockOverlay implements Component {
 	private inner: SubagentDock;
-	private cacheWidth?: number;
-	private cacheLines?: string[];
 
 	constructor(
-		private readonly tui: TUI,
+		tui: TUI,
 		private readonly theme: Theme,
-		private readonly store: SubagentInspectorStore,
-		private readonly options: DockComponentOptions = {},
+		store: SubagentInspectorStore,
+		options: DockComponentOptions = {},
 	) {
 		this.inner = new SubagentDock(tui, theme, store, options);
 	}
 
 	render(width: number): string[] {
-		if (this.cacheLines && this.cacheWidth === width) return this.cacheLines;
-		const innerWidth = Math.max(8, width - 2);
+		// The inner component invalidates on store updates; do not cache over it.
+		const innerWidth = Math.max(0, width - 2);
 		const body = this.inner.render(innerWidth);
 		const border = this.theme.fg("border", "│");
 		const lines: string[] = [];
 		lines.push(this.theme.fg("border", `╭${"─".repeat(innerWidth)}╮`));
 		for (const line of body) lines.push(border + padRight(line, innerWidth) + border);
 		lines.push(this.theme.fg("border", `╰${"─".repeat(innerWidth)}╯`));
-		this.cacheWidth = width;
-		this.cacheLines = lines;
-		return lines;
+		return lines.map((line) => truncateToWidth(line, Math.max(0, width)));
 	}
 
 	invalidate(): void {
-		this.cacheWidth = undefined;
-		this.cacheLines = undefined;
 		this.inner.invalidate();
 	}
 
@@ -338,7 +332,7 @@ export function renderDockLines(
 	width: number,
 	options: DockComponentOptions = {},
 ): string[] {
-	const safeWidth = Math.max(8, width);
+	const safeWidth = Math.max(0, width);
 	const metrics = buildDockMetrics(snapshot);
 	const label = options.label ?? "subagents";
 	const compactThreshold = options.compactThreshold ?? 26;
@@ -435,7 +429,10 @@ class PersistentDockController implements Component {
 		return [];
 	}
 
-	invalidate(): void {}
+	invalidate(): void {
+		// Recreate the overlay so theme/resize invalidation reaches its component.
+		this.hideOverlay();
+	}
 
 	dispose(): void {
 		this.unsubscribe();
@@ -478,7 +475,8 @@ export function createDockHost(store: SubagentInspectorStore, options: DockOverl
 		headerFactory: createHeaderComponent,
 		createHeaderComponent,
 		showOverlay(tui: TUI, theme: Theme, overrideOptions?: OverlayOptions): OverlayHandle {
-			return tui.showOverlay(new FramedDockOverlay(tui, theme, store, componentOptions), {
+			const component = new FramedDockOverlay(tui, theme, store, componentOptions);
+			const handle = tui.showOverlay(component, {
 				nonCapturing: true,
 				anchor: "top-right",
 				width: 34,
@@ -487,6 +485,16 @@ export function createDockHost(store: SubagentInspectorStore, options: DockOverl
 				...overlayOptions,
 				...overrideOptions,
 			});
+			let disposed = false;
+			return {
+				...handle,
+				hide() {
+					if (disposed) return;
+					disposed = true;
+					handle.hide();
+					component.dispose();
+				},
+			};
 		},
 	};
 }

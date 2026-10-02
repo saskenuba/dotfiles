@@ -1,9 +1,9 @@
 import type { KeybindingsManager } from "@mariozechner/pi-coding-agent";
-import { matchesKey } from "@mariozechner/pi-tui";
+import { matchesKey, type Keybinding, type KeyId } from "@mariozechner/pi-tui";
 
 export interface InspectorActionBinding {
-	ids?: string[];
-	keys?: string[];
+	ids?: readonly Keybinding[];
+	keys?: readonly (KeyId | "G")[];
 }
 
 export const SUBAGENT_INSPECTOR_SHORTCUT = {
@@ -56,5 +56,5 @@ export function matchesInspectorBinding(
 	binding: InspectorActionBinding,
 ): boolean {
 	if (binding.ids?.some((id) => keybindings.matches(data, id))) return true;
-	return binding.keys?.some((key) => matchesKey(data, key) || data === key) ?? false;
+	return binding.keys?.some((key) => data === key || (key !== "G" && matchesKey(data, key))) ?? false;
 }
