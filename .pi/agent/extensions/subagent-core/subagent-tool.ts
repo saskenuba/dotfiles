@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import type { ExtensionAPI, ExtensionContext } from "@mariozechner/pi-coding-agent";
-import { StringEnum, type Message } from "@mariozechner/pi-ai";
+import { StringEnum, type Message, type ToolCall } from "@mariozechner/pi-ai";
 import { Text } from "@mariozechner/pi-tui";
 import { Type } from "@sinclair/typebox";
 import { discoverAgents } from "./agents.js";
@@ -41,7 +41,7 @@ const SubagentParams = Type.Object({
 	agent: Type.Optional(Type.String({ description: `Single-mode agent name. Defaults to ${DEFAULT_SCOUT_AGENT}.` })),
 	task: Type.Optional(Type.String({ description: "Single-mode delegated task" })),
 	role: Type.Optional(Type.String({ description: "Expert role for ad-hoc single-mode (e.g., 'Senior UX Designer', 'Staff Engineer'). Used when no named agent fits the task." })),
-	tasks: Type.Optional(Type.Array(TaskItem, { minItems: 1, description: "Parallel-mode child tasks" })),
+	tasks: Type.Optional(Type.Array(TaskItem, { minItems: 1, maxItems: 8, description: "Parallel-mode child tasks" })),
 	chain: Type.Optional(
 		Type.Array(TaskItem, {
 			minItems: 1,
@@ -301,7 +301,7 @@ type ToolCallPartLike = {
 	arguments?: unknown;
 };
 
-function isToolCallPartLike(part: unknown): part is ToolCallPartLike {
+function isToolCallPartLike(part: unknown): part is ToolCall {
 	const candidate = part as Partial<ToolCallPartLike> | undefined;
 	return candidate?.type === "toolCall" && typeof candidate.name === "string";
 }
@@ -393,6 +393,7 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 	const launchJob = async (
 		params: SubagentToolParams,
 		ctx: ExtensionContext,
+		launchSignal?: AbortSignal,
 	): Promise<
 		| {
 				ok: true;
@@ -402,6 +403,7 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 				agentScope: AgentScope;
 				delegatedSummary: string;
 				continueParent: boolean;
+				completion: Promise<RunRecord>;
 			}
 		| { ok: false; reason: string }
 	> => {
@@ -424,6 +426,10 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			return { ok: false, reason: "Every chain subagent step needs a non-empty task string." };
 		}
 
+		if (mode === "parallel" && (params.tasks?.length ?? 0) > 8) {
+			return { ok: false, reason: "Too many parallel tasks. Max is 8." };
+		}
+		if ((launchSignal ?? ctx.signal)?.aborted) return { ok: false, reason: "Subagent launch aborted." };
 		const agentScope = params.agentScope ?? DEFAULT_AGENT_SCOPE;
 		const catalog = buildAgentCatalog(agentScope, ctx.cwd, options.bundledAgentsDir);
 		if (!(await confirmProjectAgentsIfNeeded(ctx, params, catalog.agents, catalog.projectAgentsDir, agentScope))) {
@@ -443,6 +449,7 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			parentThinkingLevel,
 		);
 
+		if ((launchSignal ?? ctx.signal)?.aborted) return { ok: false, reason: "Subagent launch aborted." };
 		const jobId = `job-${randomUUID().slice(0, 8)}`;
 		const primaryAgent = describePrimary(params, mode);
 		const delegatedSummary = describeDelegatedScope(params, mode);
@@ -495,12 +502,12 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 		job.promise = runPromise
 			.then((run) => {
 				activeJobs.delete(jobId);
-				if (job.killed) return;
+				if (job.killed || ctx.mode !== "tui") return;
 				deliverResultNudge(jobId, run, primaryAgent);
 			})
 			.catch((err) => {
 				activeJobs.delete(jobId);
-				if (job.killed) return;
+				if (job.killed || ctx.mode !== "tui") return;
 				const errorMessage = err instanceof Error ? err.message : String(err);
 				deliverErrorNudge(jobId, mode, primaryAgent, errorMessage);
 			})
@@ -508,7 +515,7 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 				activeJobs.delete(jobId);
 			});
 
-		return { ok: true, jobId, mode, agent: primaryAgent, agentScope, delegatedSummary, continueParent };
+		return { ok: true, jobId, mode, agent: primaryAgent, agentScope, delegatedSummary, continueParent, completion: runPromise };
 	};
 
 	pi.on("message_end", async (event) => {
@@ -525,17 +532,19 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 
 	pi.registerTool({
 		name: "subagent",
+		exposure: "model-only",
+		executionMode: "sequential",
 		label: "Subagent",
 		description:
-			`Delegate work to isolated subagents (single, parallel, or chain). FIRE-AND-FORGET: returns immediately with a job handle and, by default, ends the current parent turn so delegated work is not duplicated. The actual result arrives later as a follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" message. Default bundled scout: ${DEFAULT_SCOUT_AGENT}. When no named agent fits, omit agent and provide role for an ad-hoc expert.`,
+			`Delegate work to isolated subagents (single, parallel, or chain). In interactive TUI mode, FIRE-AND-FORGET: returns immediately with a job handle and, by default, ends the current parent turn so delegated work is not duplicated. The actual result arrives later as a follow-up "${SUBAGENT_RESULT_MESSAGE_TYPE}" message. In print, JSON, and RPC modes it waits and returns the completed result. Default bundled scout: ${DEFAULT_SCOUT_AGENT}. When no named agent fits, omit agent and provide role for an ad-hoc expert.`,
 		promptSnippet:
-			`Delegate work to the default scout (${BUNDLED_AGENT_NAMES.map((name) => `\`${name}\``).join(", ")}), discovered agents, or ad-hoc experts via role in single, parallel, or chain mode. Fire-and-forget: returns a job handle immediately, stops the parent turn by default, and later sends a follow-up message.`,
+			`Delegate work to the default scout (${BUNDLED_AGENT_NAMES.map((name) => `\`${name}\``).join(", ")}), discovered agents, or ad-hoc experts via role in single, parallel, or chain mode. In TUI mode it returns a background job handle and stops the parent turn by default; other modes wait and return the completed output.`,
 		promptGuidelines: [
-			"`subagent` is fire-and-forget: it returns immediately with a job handle. Do NOT call it again to wait for previous calls.",
-			"After calling `subagent`, treat the delegated task as owned by that subagent. Do not perform the same search, analysis, file reads, shell commands, or edits yourself.",
-			"Call `subagent` as the only tool in an assistant turn unless every other tool call is explicitly independent and non-overlapping.",
-			"`subagent` stops the parent turn by default (`continueParent` omitted or false). Set `continueParent: true` only when there is clearly independent, non-overlapping work to do while the job runs.",
-			`When a subagent completes, you receive a follow-up message with \`customType: ${SUBAGENT_RESULT_MESSAGE_TYPE}\` containing its full output. Act on it then.`,
+			"In TUI mode `subagent` is fire-and-forget: it returns a job handle. Do NOT call it again to wait. In print, JSON, and RPC modes it waits and returns the completed result directly.",
+			"While a subagent is running, treat its task as owned by that subagent. Do not duplicate its search, analysis, file reads, shell commands, or edits. Once the result arrives, resume work based on that result.",
+			"Call `subagent` as the only tool in an assistant turn. To retain independent, non-overlapping sibling calls, explicitly set `continueParent: true`; otherwise the delegation guard removes them.",
+			"In TUI mode `subagent` stops the parent turn by default (`continueParent` omitted or false). Set `continueParent: true` only for independent, non-overlapping work. Other modes return the completed result without terminating the parent turn.",
+			`In TUI mode a completed subagent sends a follow-up message with \`customType: ${SUBAGENT_RESULT_MESSAGE_TYPE}\`. In other modes act on the completed tool result.`,
 			`If a \`${SUBAGENT_RESULT_MESSAGE_TYPE}\` nudge fires while you are idle, its content may arrive alongside the next user message. The nudge content is always prefixed with \`[${SUBAGENT_RESULT_MESSAGE_TYPE} jobId=... agent=... status=...]\`\\n before the subagent's output — inspect each turn's input for that marker and react to it even when it appears merged with user text.`,
 			`Use \`${DEFAULT_SCOUT_AGENT}\` for fast reconnaissance, file location, and scoped codebase discovery.`,
 			"When no discovered agent fits the task, omit `agent` and provide `role` with a senior expert title (e.g., 'Senior UX Designer', 'Staff Engineer', 'Principal Architect'). The subagent will adopt that expert persona. Always delegate to the highest appropriate seniority level.",
@@ -544,15 +553,37 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 		],
 		parameters: SubagentParams,
 		async execute(_toolCallId, params, _signal, _onUpdate, ctx) {
-			const result = await launchJob(params as SubagentToolParams, ctx);
+			const result = await launchJob(params as SubagentToolParams, ctx, _signal);
 			if (result.ok === false) {
 				const reason = result.reason;
 				return {
 					content: [{ type: "text", text: reason }],
 					isError: true,
+					details: undefined,
 				};
 			}
 			const { jobId, mode, agent, agentScope, delegatedSummary, continueParent } = result;
+			if (ctx.mode !== "tui") {
+				const abort = () => activeJobs.get(jobId)?.abortController.abort();
+				_signal?.addEventListener("abort", abort, { once: true });
+				if (_signal?.aborted) abort();
+				try {
+					const run = await result.completion;
+					const usage = aggregateRunUsage(run);
+					return {
+						content: [{ type: "text" as const, text: buildFinalOutput(run) }],
+						details: run,
+						isError: run.status !== "succeeded",
+						usage: {
+							input: usage.input, output: usage.output, cacheRead: usage.cacheRead, cacheWrite: usage.cacheWrite,
+							totalTokens: usage.input + usage.output + usage.cacheRead + usage.cacheWrite,
+							cost: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, total: usage.cost },
+						},
+					};
+				} finally {
+					_signal?.removeEventListener("abort", abort);
+				}
+			}
 			const startedDetails: StartedDetails = {
 				kind: "started",
 				jobId,
@@ -642,6 +673,16 @@ export function registerSubagentTool(pi: ExtensionAPI, options: RegisterSubagent
 			}
 			console.log(text);
 		},
+	});
+
+	// Background results belong to the launching branch, never a new tree branch.
+	pi.on("session_before_tree", async () => {
+		for (const job of activeJobs.values()) {
+			job.killed = true;
+			job.abortController.abort();
+		}
+		await Promise.allSettled([...activeJobs.values()].map((job) => job.promise));
+		activeJobs.clear();
 	});
 
 	pi.on("session_shutdown", async () => {

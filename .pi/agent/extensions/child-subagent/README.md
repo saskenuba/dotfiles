@@ -1,19 +1,21 @@
 # child-subagent
 
-Adds the `subagent` tool for managed background subagent runs.
+Adds the `subagent` tool for managed delegation.
+Runs in the background in TUI mode and waits for completion in print, JSON, and RPC modes.
 Owns the bundled agent prompts and subagent runtime behavior.
 
 ## Behavior
 
 - Uses the current model by default, unless the selected agent explicitly pins a model.
-- Shows a five-second launch preview for every child run in the interactive TUI.
+- Shows a five-second TUI launch preview when an automatic provider/model is available.
 - Chooses the child thinking level automatically from the delegated task.
 - Uses the current working directory by default.
-- Forwards the currently active built-in tools to child runs.
-- Keeps managed `subagent` runs fire-and-forget.
-- Stops the parent turn by default after launch so delegated work is not duplicated.
-- Removes sibling non-subagent tool calls when the parent asks a default subagent run to wait.
-- Sends `subagent-result` follow-up messages when managed runs finish.
+- Uses the agent's tool list when specified; otherwise forwards the active parent built-in tools.
+- In TUI mode, returns a background job handle after launch preparation.
+- In TUI mode, stops the parent turn by default and sends a `subagent-result` follow-up when done.
+- In print, JSON, and RPC modes, waits and returns output, run details, error state, and usage.
+- In those waiting modes, does not terminate the parent turn or send a duplicate result follow-up.
+- In every mode, removes sibling non-subagent tool calls unless `continueParent: true` is explicit.
 
 ## Bundled agents
 
@@ -24,7 +26,7 @@ The default agent prompts live here.
 
 Agent prompts do not pin a model.
 The runtime passes the current parent session model unless the agent explicitly pins one.
-Before each interactive child launch, a five-second preview shows that automatic choice.
+When an automatic provider/model is available, a five-second TUI preview shows that choice.
 If untouched, the countdown launches with the existing automatic model and thinking behavior.
 Models follow Pi's automatically synchronized catalog order, with newer catalog entries first.
 Type to fuzzy-search authenticated models from the automatic model's provider.
@@ -38,19 +40,48 @@ Non-interactive modes preserve the automatic behavior without a popup.
 
 ### `subagent`
 
-Use this for managed scout-style delegation.
-It starts a background run, emits live inspector updates, and later sends `subagent-result`.
-By default it terminates the parent turn after launch.
-If the same turn includes sibling non-subagent tool calls, the delegation guard removes them.
-Set `continueParent: true` only for explicitly independent, non-overlapping work.
+Use this for scoped delegation to named agents or ad-hoc experts.
+It emits runtime updates in every mode; the companion inspector renders them in the TUI.
+In TUI mode, it starts a background run and later sends `subagent-result` to resume the parent.
+By default, it stops the current parent turn after launch.
+In print, JSON, and RPC modes, the tool call waits for the completed result instead.
+The delegation guard removes sibling non-subagent tool calls in every mode unless
+`continueParent: true` is explicit.
+Set that option only for independent, non-overlapping parent work.
+Do not poll by calling `subagent` again; resume delegated work from the returned result.
+The tool is model-only and cannot be called through codemode or nested `ctx.executeTool()` calls.
 
 Supports single, parallel, and chain modes.
 Supports agent discovery (bundled, user, project agents) and ad-hoc roles.
+The scout defaults to file-location reconnaissance; explicit delegated analysis is allowed.
+The analyzer defaults to explaining implementation; explicit review or bug finding is allowed.
+Recommendations require an explicit request in either role.
+
+## Cancellation and branches
+
+Before tree navigation, the runtime cancels active jobs and suppresses their background follow-ups.
+This prevents results from the launching branch from arriving on a different branch.
+Session shutdown also cancels active jobs and suppresses follow-ups.
+In print, JSON, and RPC modes, tool-call cancellation is forwarded while the call waits.
+Child cancellation sends SIGTERM, then SIGKILL after one second if the Pi child has not closed.
+This targets the Pi child, not a process group, and does not guarantee cleanup of descendants.
+
+## Child isolation limits
+
+Named and ad-hoc children start separate Pi processes with `--no-extensions` and `--no-session`.
+Disabling extensions prevents inheritance of parent extension prompt injections and runtime hooks.
+It also disables extension-defined providers and tools, including built-in extensions.
+Those capabilities are not transparently inherited from the parent.
+Agent tool lists still take precedence over the forwarded built-in tool defaults.
+Context files and skills are not disabled and may still influence child prompts.
+Children inherit the process environment and operating-system permissions.
+This is extension isolation, not a security sandbox.
+The working directory is not an access boundary.
 
 ## Companion inspector
 
 The tracing UI lives in `subagent-inspector`.
-That extension only renders dock, overlay, history, and result messages.
+That extension renders dock, overlay, history, and result messages and persists inspector snapshots.
 It does not own agent definitions or runtime execution.
 
 ## Install

@@ -230,6 +230,12 @@ class LaunchPicker {
 	invalidate(): void {
 		this.searchInput.invalidate();
 	}
+
+	dispose(): void {
+		if (this.timer) clearInterval(this.timer);
+		this.timer = undefined;
+		this.finished = true;
+	}
 }
 
 export async function chooseLaunchSelection(
@@ -239,7 +245,7 @@ export async function chooseLaunchSelection(
 ): Promise<LaunchSelection | undefined> {
 	if (ctx.mode !== "tui") return undefined;
 	const [provider] = autoModel?.split("/", 1) ?? [];
-	if (!provider) return undefined;
+	if (!provider || !autoModel) return undefined;
 
 	const toOption = (model: {
 		provider: string;
@@ -260,7 +266,7 @@ export async function chooseLaunchSelection(
 		.filter((model) => model.provider === provider)
 		.map(toOption)
 		.reverse();
-	const [, modelId] = autoModel.split("/", 2);
+	const modelId = autoModel.slice(provider.length + 1);
 	const configuredDefault = modelId ? ctx.modelRegistry.find(provider, modelId) : undefined;
 	if (configuredDefault && !models.some((model) => modelKey(model) === autoModel)) models.push(toOption(configuredDefault));
 

@@ -4,6 +4,7 @@ import * as fs from "node:fs/promises";
 import * as os from "node:os";
 import * as path from "node:path";
 import type { Message } from "@mariozechner/pi-ai";
+import { getPackageDir } from "@mariozechner/pi-coding-agent";
 import { SUBAGENT_DEPTH_ENV } from "./constants.js";
 import { formatTokens, formatUsage } from "./formatting.js";
 import { chooseDelegatedThinkingLevel, type ThinkingLevel } from "./thinking.js";
@@ -176,13 +177,12 @@ export function formatToolCall(toolName: string, args: Record<string, unknown>):
 }
 
 export function getPiInvocation(args: string[]): { command: string; args: string[] } {
-	const currentScript = process.argv[1];
-	if (currentScript && fsSync.existsSync(currentScript)) {
-		return { command: process.execPath, args: [currentScript, ...args] };
-	}
 	const execName = path.basename(process.execPath).toLowerCase();
 	const isGenericRuntime = /^(node|bun)(\.exe)?$/.test(execName);
 	if (!isGenericRuntime) return { command: process.execPath, args };
+	// SDK hosts have their own argv[1]; never respawn that application as Pi.
+	const cli = path.join(getPackageDir(), "dist", "cli.js");
+	if (fsSync.existsSync(cli)) return { command: process.execPath, args: [cli, ...args] };
 	return { command: "pi", args };
 }
 
@@ -190,8 +190,13 @@ async function writePromptToTempFile(agentName: string, prompt: string): Promise
 	const dir = await fs.mkdtemp(path.join(os.tmpdir(), "pi-subagent-core-"));
 	const safeName = agentName.replace(/[^\w.-]+/g, "_");
 	const filePath = path.join(dir, `${safeName}.md`);
-	await fs.writeFile(filePath, prompt, { encoding: "utf8", mode: 0o600 });
-	return { dir, filePath };
+	try {
+		await fs.writeFile(filePath, prompt, { encoding: "utf8", mode: 0o600 });
+		return { dir, filePath };
+	} catch (error) {
+		await fs.rm(dir, { recursive: true, force: true }).catch(() => undefined);
+		throw error;
+	}
 }
 
 function pushDisplayItem(items: DisplayItem[], item: DisplayItem): void {
@@ -255,7 +260,7 @@ function finalizeChildStatus(child: ChildRunRecord, exitCode: number | undefined
 	if (aborted) return "aborted";
 	if (child.stopReason === "aborted") return "aborted";
 	if (child.stopReason === "error") return "failed";
-	if ((exitCode ?? 0) !== 0) return "failed";
+	if (exitCode !== 0 || child.usage.turns === 0) return "failed";
 	return "succeeded";
 }
 
@@ -295,7 +300,9 @@ function emitRunUpdate(run: RunRecord, onRunUpdate?: RunUpdateHandler): void {
 	run.activeChildId = [...run.children].reverse().find((child) => isActiveStatus(child.status))?.id;
 	run.summary = summarizeRun(run);
 	setRunStatusFromChildren(run);
-	if (!isActiveStatus(run.status)) run.endedAt = Date.now();
+	if (run.metadata?.dispatching && !isActiveStatus(run.status)) run.status = "running";
+	// A chain or parallel queue may still have tasks not yet materialized.
+	if (isActiveStatus(run.status)) run.endedAt = undefined;
 	onRunUpdate?.(cloneRun(run));
 }
 
@@ -325,7 +332,7 @@ async function runSingleChild(
 	ctx: RunnerContext,
 	step?: number,
 ): Promise<ChildRunRecord> {
-	const cwd = path.resolve(input.cwd ?? run.cwd);
+	const cwd = path.resolve(run.cwd, input.cwd ?? ".");
 	const thinkingLevel = input.thinkingLevel ?? chooseDelegatedThinkingLevel(input.task, ctx.parentThinkingLevel, {
 		role: input.role,
 		agentName: input.agent,
@@ -359,12 +366,15 @@ async function runSingleChild(
 	child.usage.contextWindow = child.model ? ctx.getContextWindow?.(child.model) ?? 0 : 0;
 	emitRunUpdate(run, ctx.onRunUpdate);
 
-	const args: string[] = ["--mode", "json", "-p", "--no-session"];
-	if (isAdHoc) args.push("--no-extensions");
+	// Keep child personas independent of parent extension prompt injections.
+	const args: string[] = ["--mode", "json", "-p", "--no-session", "--no-extensions"];
 	if (child.model) args.push("--model", child.model);
 	args.push("--thinking", thinkingLevel);
-	const tools = agent.tools && agent.tools.length > 0 ? agent.tools : ctx.defaultTools;
-	if (tools && tools.length > 0) args.push("--tools", tools.join(","));
+	const tools = agent.tools ?? ctx.defaultTools;
+	if (tools) {
+		if (tools.length > 0) args.push("--tools", tools.join(","));
+		else args.push("--no-tools");
+	}
 
 	let tmpDir: string | undefined;
 	let tmpPromptPath: string | undefined;
@@ -378,13 +388,15 @@ async function runSingleChild(
 	};
 
 	try {
+		ctx.signal?.throwIfAborted();
 		if (agent.systemPrompt.trim()) {
 			const tmp = await writePromptToTempFile(agent.name, agent.systemPrompt);
 			tmpDir = tmp.dir;
 			tmpPromptPath = tmp.filePath;
 			args.push("--append-system-prompt", tmpPromptPath);
 		}
-		args.push(input.task);
+		ctx.signal?.throwIfAborted();
+		args.push("--", input.task);
 
 		child.status = "running";
 		emitRunUpdate(run, ctx.onRunUpdate);
@@ -401,6 +413,10 @@ async function runSingleChild(
 			});
 
 			let stdoutBuffer = "";
+			let closed = false;
+			let killTimer: ReturnType<typeof setTimeout> | undefined;
+			proc.stdout.setEncoding("utf8");
+			proc.stderr.setEncoding("utf8");
 			const processLine = (line: string) => {
 				if (!line.trim()) return;
 				let event: any;
@@ -454,16 +470,19 @@ async function runSingleChild(
 			const abortHandler = () => {
 				aborted = true;
 				proc.kill("SIGTERM");
-				const killTimer = setTimeout(() => {
-					if (!proc.killed) proc.kill("SIGKILL");
+				killTimer = setTimeout(() => {
+					if (!closed) proc.kill("SIGKILL");
 				}, 1000);
 				(killTimer as { unref?: () => void }).unref?.();
 			};
 
-			proc.on("close", (code) => {
+			proc.on("close", (code, signal) => {
+				closed = true;
+				if (killTimer) clearTimeout(killTimer);
 				if (stdoutBuffer.trim()) processLine(stdoutBuffer);
+				if (signal && !aborted) child.error += `Child terminated by ${signal}.\n`;
 				ctx.signal?.removeEventListener("abort", abortHandler);
-				resolve(code ?? 0);
+				resolve(code ?? 1);
 			});
 
 			proc.on("error", (error) => {
@@ -479,8 +498,17 @@ async function runSingleChild(
 		flushAssistantBuffer();
 		child.exitCode = exitCode;
 		child.status = finalizeChildStatus(child, exitCode, aborted);
+		if (child.status === "failed" && !child.error) child.error = "Child exited without a successful assistant result.";
 		if (!child.output && child.error) child.output = child.error;
 		child.summary = child.output || child.error;
+		child.endedAt = Date.now();
+		emitRunUpdate(run, ctx.onRunUpdate);
+		return cloneChild(child);
+	} catch (error) {
+		child.status = ctx.signal?.aborted ? "aborted" : "failed";
+		child.exitCode = 1;
+		child.error = error instanceof Error ? error.message : String(error);
+		child.summary = child.error;
 		child.endedAt = Date.now();
 		emitRunUpdate(run, ctx.onRunUpdate);
 		return cloneChild(child);
@@ -506,7 +534,7 @@ function createRun(mode: RunMode, ctx: RunnerContext): RunRecord {
 		cwd: ctx.cwd,
 		projectAgentsDir: ctx.projectAgentsDir,
 		children: [],
-		metadata: {},
+		metadata: { dispatching: true },
 	};
 }
 
@@ -532,27 +560,33 @@ export async function runSingleTask(input: SingleTaskInput, ctx: RunnerContext):
 	run.label = input.agent;
 	run.title = input.agent;
 	await runSingleChild(run, ctx.agents, input, ctx);
+	run.metadata!.dispatching = false;
+	run.endedAt = Date.now();
 	emitRunUpdate(run, ctx.onRunUpdate);
 	return cloneRun(run);
 }
 
 export async function runChainTasks(inputs: readonly ChainTaskInput[], ctx: RunnerContext): Promise<RunRecord> {
+	if (inputs.length === 0) throw new Error("A chain requires at least one task.");
 	const run = createRun("chain", ctx);
 	run.prompt = inputs.map((input) => input.task).join("\n\n---\n\n");
 	run.label = "chain";
 	let previous = "";
 	for (let index = 0; index < inputs.length; index += 1) {
 		const input = inputs[index];
-		const task = input.task.replace(/\{previous\}/g, previous);
+		const task = input.task.replace(/\{previous\}/g, () => previous);
 		const child = await runSingleChild(run, ctx.agents, { ...input, task }, ctx, index + 1);
 		previous = child.output || "";
 		if (child.status !== "succeeded") break;
 	}
+	run.metadata!.dispatching = false;
+	run.endedAt = Date.now();
 	emitRunUpdate(run, ctx.onRunUpdate);
 	return cloneRun(run);
 }
 
 export async function runParallelTasks(inputs: readonly SingleTaskInput[], ctx: RunnerContext): Promise<RunRecord> {
+	if (inputs.length === 0) throw new Error("Parallel mode requires at least one task.");
 	if (inputs.length > MAX_PARALLEL_TASKS) {
 		throw new Error(`Too many parallel tasks (${inputs.length}). Max is ${MAX_PARALLEL_TASKS}.`);
 	}
@@ -562,6 +596,8 @@ export async function runParallelTasks(inputs: readonly SingleTaskInput[], ctx: 
 	await mapWithConcurrencyLimit(inputs, MAX_CONCURRENCY, async (input) => {
 		await runSingleChild(run, ctx.agents, input, ctx);
 	});
+	run.metadata!.dispatching = false;
+	run.endedAt = Date.now();
 	emitRunUpdate(run, ctx.onRunUpdate);
 	return cloneRun(run);
 }
