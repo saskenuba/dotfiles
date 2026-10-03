@@ -44,7 +44,8 @@ outer.right = 2
 # All possible commands: https://nikitabobko.github.io/AeroSpace/commands
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#exec-and-forget
-# You can uncomment the following lines to open up terminal with alt + enter shortcut (like in i3)
+# Open a terminal in the folder the focused window is in (Alacritty cwd / Finder folder).
+ctrl-shift-enter = 'exec-and-forget /Users/martinmariano/Documents/dotfiles/.myscripts/term-here.sh'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
 cmd-k = 'focus right'
