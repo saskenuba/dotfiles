@@ -627,10 +627,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   ;; "Cannot insert ... into magit-dispatch; o not found" warning).
   (setq forge-add-default-bindings nil)
   :config
-  ;; GitLab.com is already in forge-alist by default.
-  ;; If you use a self-hosted GitLab, add it like this:
-  ;; (push '("gitlab.example.com" "gitlab.example.com/api/v4" "gitlab.example.com" forge-gitlab-repository) forge-alist)
-  )
+  ;; Keep private host configuration outside version control.
+  (load (expand-file-name "private.el" user-emacs-directory) t t t))
 
 (use-package projectile)
 
