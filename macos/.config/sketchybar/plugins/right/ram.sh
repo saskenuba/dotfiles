@@ -1,17 +1,18 @@
 #!/usr/bin/env bash
 
-# Parse memory_pressure output more efficiently
-memory_output=$(memory_pressure)
+# Match Activity Monitor's "Memory Used":
+# app memory (anonymous - purgeable) + wired + compressed
+total_bytes=$(sysctl -n hw.memsize)
 
-# Get total memory in GB
-total_gb=$(sysctl -n hw.memsize | awk '{printf "%.1f", $1/1073741824}')
+LABEL=$(vm_stat | awk -v total="$total_bytes" '
+    /page size of/                 { page = $8 }
+    /^Anonymous pages/             { anon = $3 }
+    /^Pages purgeable/             { purgeable = $3 }
+    /^Pages wired down/            { wired = $4 }
+    /^Pages occupied by compressor/ { comp = $5 }
+    END {
+        used = (anon - purgeable + wired + comp) * page
+        printf "%.1fG / %.1fG", used / 1073741824, total / 1073741824
+    }')
 
-# Get free percentage and calculate used
-free_percent=$(echo "$memory_output" | grep "System-wide memory free percentage:" | awk '{print $5}' | sed 's/%//')
-used_percent=$((100 - free_percent))
-
-# Calculate used GB from percentage
-used_gb=$(echo "scale=1; $total_gb * $used_percent / 100" | bc)
-
-LABEL="${used_gb}G / ${total_gb}G"
 sketchybar --set "$NAME" label="$LABEL"
