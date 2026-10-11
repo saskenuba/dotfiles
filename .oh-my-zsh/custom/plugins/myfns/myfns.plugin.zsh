@@ -128,6 +128,37 @@ _export_aws_credentials() {
     fi
 }
 
+# Switch AWS profile/region and log in via SSO (no credential export)
+aws-prod-agent() {
+    export AWS_PROFILE=prod-agent
+    export AWS_REGION=us-east-1
+    aws sso login
+}
+
+aws-release-engineer() {
+    export AWS_PROFILE=release-engineer
+    export AWS_REGION=us-east-1
+    aws sso login
+}
+
+aws-development() {
+    export AWS_PROFILE=development
+    export AWS_REGION=us-east-2
+    aws sso login
+}
+
+aws-staging() {
+    export AWS_PROFILE=staging-agent
+    export AWS_REGION=us-east-1
+    aws sso login
+}
+
+aws-brazil-release() {
+    export AWS_PROFILE=brazil-release
+    export AWS_REGION=us-east-1
+    aws sso login
+}
+
 splint-committed-check() {
     git diff --name-only @{u}..HEAD | xargs splint
 }
