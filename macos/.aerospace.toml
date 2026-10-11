@@ -1,5 +1,15 @@
+# See: https://nikitabobko.github.io/AeroSpace/guide#config-version
+config-version = 2
+
 # Start AeroSpace at login
 start-at-login = true
+
+# Reload on save. After enabling, reload once manually to start the auto-reloading
+auto-reload-config = true
+
+# Keep 1-9 alive even when empty (sketchybar always shows them).
+# Version 1 inferred this from the bindings; version 2 needs it spelled out.
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 # after-startup-command = 'exec-and-forget sketchybar'
 exec-on-workspace-change = [
     '/bin/bash', '-c',
@@ -48,8 +58,9 @@ outer.right = 2
 ctrl-shift-enter = 'exec-and-forget /Users/martinmariano/Documents/dotfiles/.myscripts/term-here.sh'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#focus
-cmd-k = 'focus right'
-cmd-h = 'focus up'
+# Cycle next/prev window in tree order (left-to-right, top-to-bottom), any layout
+cmd-k = 'focus --wrap-around dfs-next'
+cmd-h = 'focus --wrap-around dfs-prev'
 cmd-enter = 'swap --wrap-around left'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move
@@ -74,17 +85,17 @@ cmd-8 = 'workspace 8'
 cmd-9 = 'workspace 9'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-node-to-workspace
-cmd-shift-1 = [ 'move-node-to-workspace 1', 'workspace 1' ]
-cmd-shift-2 = [ 'move-node-to-workspace 2', 'workspace 2' ]
-cmd-shift-3 = [ 'move-node-to-workspace 3', 'workspace 3' ]
-cmd-shift-4 = [ 'move-node-to-workspace 4', 'workspace 4' ]
-cmd-shift-5 = [ 'move-node-to-workspace 5', 'workspace 5' ]
-cmd-shift-6 = [ 'move-node-to-workspace 6', 'workspace 6' ]
-cmd-shift-7 = [ 'move-node-to-workspace 7', 'workspace 7' ]
-cmd-shift-8 = [ 'move-node-to-workspace 8', 'workspace 8' ]
-cmd-shift-9 = [ 'move-node-to-workspace 9', 'workspace 9' ]
-cmd-shift-a = [ 'move-node-to-workspace prev', 'workspace prev' ]
-cmd-shift-d = [ 'move-node-to-workspace next', 'workspace next' ]
+cmd-shift-1 = 'move-node-to-workspace --focus-follows-window 1'
+cmd-shift-2 = 'move-node-to-workspace --focus-follows-window 2'
+cmd-shift-3 = 'move-node-to-workspace --focus-follows-window 3'
+cmd-shift-4 = 'move-node-to-workspace --focus-follows-window 4'
+cmd-shift-5 = 'move-node-to-workspace --focus-follows-window 5'
+cmd-shift-6 = 'move-node-to-workspace --focus-follows-window 6'
+cmd-shift-7 = 'move-node-to-workspace --focus-follows-window 7'
+cmd-shift-8 = 'move-node-to-workspace --focus-follows-window 8'
+cmd-shift-9 = 'move-node-to-workspace --focus-follows-window 9'
+cmd-shift-a = 'move-node-to-workspace --focus-follows-window prev'
+cmd-shift-d = 'move-node-to-workspace --focus-follows-window next'
 
 # Kill current window
 cmd-shift-c = 'close --quit-if-last-window'
@@ -94,7 +105,7 @@ cmd-f = 'fullscreen'
 # See: https://nikitabobko.github.io/AeroSpace/commands#workspace-back-and-forth
 ctrl-alt-shift-tab = 'workspace-back-and-forth'
 # See: https://nikitabobko.github.io/AeroSpace/commands#move-workspace-to-monitor
-shift-cmd-period = 'move-node-to-monitor --wrap-around next'
+shift-cmd-period = 'move-node-to-monitor --focus-follows-window --wrap-around next'
 cmd-period = 'focus-monitor --wrap-around next'
 
 # See: https://nikitabobko.github.io/AeroSpace/commands#mode
