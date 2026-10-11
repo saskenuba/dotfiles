@@ -1,24 +1,14 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 source "$CONFIG_DIR/icons.sh"
+source "$CONFIG_DIR/colors.sh"
 
-# Uses ipconfig instead of system_profiler (~50x faster)
-# system_profiler SPAirPortDataType takes 2-5s; ipconfig is near-instant
-
+# Icon only. macOS 15 redacts the SSID ("<redacted>") for processes without
+# Location Services access, so connected/disconnected is all we can show.
 INTERFACE="en0"
-SUMMARY=$(ipconfig getsummary "$INTERFACE" 2>/dev/null)
 
-if [[ -z "$SUMMARY" ]]; then
-    sketchybar --set wifi icon="$WIFI_DISCONNECTED" label="Disconnected"
-    exit 0
+if [ -n "$(ipconfig getifaddr "$INTERFACE" 2>/dev/null)" ]; then
+    sketchybar --set "$NAME" icon="$WIFI_CONNECTED" icon.color="$WIFI_ICON_COLOR"
+else
+    sketchybar --set "$NAME" icon="$WIFI_DISCONNECTED" icon.color="$WIFI_DISCONNECTED_ICON_COLOR"
 fi
-
-SSID=$(echo "$SUMMARY" | awk -F': ' '/^[[:space:]]+SSID :/{print $2}')
-
-if [[ -z "$SSID" || "$SSID" == "NONE" ]]; then
-    sketchybar --set wifi icon="$WIFI_DISCONNECTED" label="Disconnected"
-    exit 0
-fi
-
-sketchybar --set wifi icon="$WIFI_CONNECTED" label="$SSID"
-

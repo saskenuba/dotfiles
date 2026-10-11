@@ -9,6 +9,7 @@ front_app=(
     script="$PLUGIN_DIR/front_app.sh"
 )
 
-sketchybar --add item front_app center \
+# 'q' = just left of the MacBook notch; 'center' would sit underneath it
+sketchybar --add item front_app q \
     --set front_app "${front_app[@]}" \
     --subscribe front_app front_app_switched

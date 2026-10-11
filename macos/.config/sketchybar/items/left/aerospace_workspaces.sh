@@ -1,12 +1,10 @@
 #!/usr/bin/env bash
 
-# Source base configuration
-source "$CONFIG_DIR/colors.sh"
-
 # ============================================
 # WORKSPACE VISUAL CONFIGURATION
 # ============================================
 LABEL_FONT="${LABEL_FONT:-SF Pro:Regular:14.0}"
+APP_ICON_FONT="sketchybar-app-font:Regular:14.0"
 LABEL_PADDING_LEFT=8
 LABEL_PADDING_RIGHT=8
 BG_CORNER_RADIUS=5
@@ -16,13 +14,18 @@ BG_PADDING_RIGHT=8
 ITEM_PADDING_LEFT=3
 ITEM_PADDING_RIGHT=3
 
-# Aesthetic configuration for workspace items (no script, no update_freq)
+# Aesthetic configuration for workspace items (no script, no update_freq).
+# icon = workspace number, label = icons of the apps in it (sketchybar-app-font)
 workspace_aesthetics=(
-    label.font="$LABEL_FONT"
+    icon.font="$LABEL_FONT"
+    icon.color="$WS_DEFAULT_COLOR"
+    icon.padding_left=$LABEL_PADDING_LEFT
+    icon.padding_right=$LABEL_PADDING_RIGHT
+    label.font="$APP_ICON_FONT"
     label.color="$WS_DEFAULT_COLOR"
-    label.padding_left=$LABEL_PADDING_LEFT
+    label.padding_left=0
     label.padding_right=$LABEL_PADDING_RIGHT
-    icon.drawing=off
+    label.drawing=off
     background.corner_radius=$BG_CORNER_RADIUS
     background.height=$BG_HEIGHT
     background.drawing=off
@@ -38,15 +41,18 @@ for i in {1..9}; do
     sketchybar --add item workspace.$i left \
         --set workspace.$i \
         "${workspace_aesthetics[@]}" \
-        label="$i:0" \
+        icon="$i" \
         click_script="aerospace workspace $i"
 done
 
-# Single controller item: drives all workspace updates via one script
+# Single controller item: drives all workspace updates via one script.
+# aerospace_workspace_change covers focus moves; space_windows_change and
+# front_app_switched cover windows opening/closing (AeroSpace keeps every
+# window on one macOS Space). update_freq is only a safety net.
 sketchybar --add event aerospace_workspace_change \
     --add item workspace_controller left \
     --set workspace_controller \
         drawing=off \
-        update_freq=3 \
+        update_freq=30 \
         script="$PLUGIN_DIR/left/aerospace_workspaces.sh" \
-    --subscribe workspace_controller aerospace_workspace_change
+    --subscribe workspace_controller aerospace_workspace_change space_windows_change front_app_switched

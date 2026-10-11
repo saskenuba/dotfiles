@@ -5,9 +5,10 @@ cpu=(
     icon.font.size=21
     update_freq=5
     script="$PLUGIN_DIR/right/cpu.sh"
-    click_script="$SCRIPTS_DIR/run_external_bash.sh '/opt/homebrew/bin/btop && exit'"
     display=1
 )
 
+# Clicks go through the script (mouse.clicked) so it can tell left from right
 sketchybar --add item cpu right \
-    --set cpu "${cpu[@]}"
+    --set cpu "${cpu[@]}" \
+    --subscribe cpu mouse.clicked

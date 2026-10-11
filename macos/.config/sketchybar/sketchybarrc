@@ -55,8 +55,9 @@ sketchybar --default "${default[@]}"
 ##### Adding Left Items #####
 source "$ITEM_DIR/left/apple.sh"
 source "$ITEM_DIR/left/aerospace_workspaces.sh"
+source "$ITEM_DIR/left/aerospace_mode.sh"
 
-##### Adding Center Items #####
+##### Adding Center Items (front_app sits left of the notch) #####
 source "$ITEM_DIR/center/front_app.sh"
 
 ##### Adding Right Items #####

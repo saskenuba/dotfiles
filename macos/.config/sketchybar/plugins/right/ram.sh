@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+if [ "$SENDER" = "mouse.clicked" ]; then
+    "$CONFIG_DIR/scripts/system_monitor.sh" "$BUTTON"
+    exit 0
+fi
+
 # Match Activity Monitor's "Memory Used":
 # app memory (anonymous - purgeable) + wired + compressed
 total_bytes=$(sysctl -n hw.memsize)

@@ -3,9 +3,9 @@
 # General Icons
 LOADING="?? "
 APPLE=""
-PREFERENCES="?? "
-ACTIVITY="?? "
-LOCK="?? "
+PREFERENCES=""
+ACTIVITY=""
+LOCK=""
 BELL="?? "
 BELL_DOT="?? "
 BLUETOOTH="? "
@@ -79,7 +79,7 @@ FRONT_APP_SEPARATOR="?"
 
 # WiFi
 WIFI_CONNECTED="" # "?? " "?? "
-WIFI_DISCONNECTED="?? " #"?? " "?? "
+WIFI_DISCONNECTED="󰖪" #"?? " "?? "
 ETHERNET_CONNECTED="??"
 
 # System Icons
@@ -90,22 +90,3 @@ SYSTEM_CPU="󰻠" # "? "
 # Runners Icons
 RUNNER_SETTINGS="? " # "?? "
 RUNNER_UPDATES="? "
-
-# Svim Icons
-MODE_NORMAL="?? "
-MODE_INSERT="?? "
-MODE_VISUAL="?? "
-MODE_CMD="?? "
-MODE_PENDING="?? "
-
-# Aerospace Workspace Icons
-declare -A WS_ICONS
-WS_ICONS["1"]="? "
-WS_ICONS["2"]="? "
-WS_ICONS["3"]="? "
-WS_ICONS["4"]="?? "
-WS_ICONS["5"]="? "
-WS_ICONS["6"]="?? "
-WS_ICONS["7"]="? "
-WS_ICONS["8"]="? "
-WS_ICONS["9"]="? "
