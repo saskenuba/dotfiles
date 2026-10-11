@@ -145,3 +145,10 @@ source ${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-autosuggestions/zsh-autosugge
 
 # Syntax highlighting; keep last so it wraps every widget defined above
 source ${HOMEBREW_PREFIX:-/opt/homebrew}/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Valid commands in the default color instead of green; unknown ones stay bold
+# red. arg0 covers commands, builtins, aliases and functions.
+ZSH_HIGHLIGHT_STYLES[arg0]=none
+ZSH_HIGHLIGHT_STYLES[precommand]=underline
+ZSH_HIGHLIGHT_STYLES[suffix-alias]=underline
+ZSH_HIGHLIGHT_STYLES[autodirectory]=underline

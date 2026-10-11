@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+# Switch Alacritty and SketchyBar to a matching color theme.
+#
+#   theme              list the themes, * marks the current one
+#   theme <name>       switch to <name>, e.g. `theme ef-dream`
+#   theme toggle       switch to the light/dark twin of the current theme
+#                      (ef-duo-light <-> ef-duo-dark, modus-operandi <->
+#                      modus-vivendi); themes without one flip to Modus
+#   theme generate     regenerate the Modus and Ef themes from Emacs
+#
+# A theme is a pair of files: alacritty/themes/<name>.toml and
+# sketchybar/themes/<name>.sh, whose first line reads
+# "# <name> (<light|dark>): <description>". The choice is kept in
+# $XDG_STATE_HOME/theme, outside the dotfiles repo, so switching never
+# dirties git.
+
+set -euo pipefail
+
+CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}"
+STATE="${XDG_STATE_HOME:-$HOME/.local/state}/theme"
+DEFAULT=gruvbox-material-dark # must match the fallback in sketchybar/colors.sh
+
+current() {
+    local name
+    read -r name 2>/dev/null < "$STATE/current" || name=$DEFAULT
+    echo "$name"
+}
+
+exists() {
+    [ -f "$CONFIG/alacritty/themes/$1.toml" ] && [ -f "$CONFIG/sketchybar/themes/$1.sh" ]
+}
+
+# Only themes present for both apps count
+available() {
+    local f name
+    for f in "$CONFIG"/alacritty/themes/*.toml; do
+        name=${f##*/}
+        name=${name%.toml}
+        if exists "$name"; then echo "$name"; fi
+    done
+}
+
+# Sets KIND and DESC from the theme's header line
+describe() {
+    local line=
+    read -r line 2>/dev/null < "$CONFIG/alacritty/themes/$1.toml" || true
+    KIND= DESC=
+    case $line in
+        "# $1 ("*"): "*)
+            line=${line#"# $1 ("}
+            KIND=${line%%)*}
+            DESC=${line#*): }
+            ;;
+    esac
+}
+
+# The light/dark twin of a theme, if its name has one
+counterpart() {
+    case $1 in
+        *-light) echo "${1%-light}-dark" ;;
+        *-dark) echo "${1%-dark}-light" ;;
+        modus-operandi*) echo "modus-vivendi${1#modus-operandi}" ;;
+        modus-vivendi*) echo "modus-operandi${1#modus-vivendi}" ;;
+    esac
+}
+
+# Write via a temp file + rename so Alacritty never reads a half-written file
+put() {
+    cp "$1" "$2.tmp" && mv "$2.tmp" "$2"
+}
+
+apply() {
+    local name=$1
+    if ! exists "$name"; then
+        echo "theme: unknown theme '$name'; run \`theme\` to list them" >&2
+        exit 1
+    fi
+
+    mkdir -p "$STATE"
+    put "$CONFIG/alacritty/themes/$name.toml" "$STATE/alacritty.toml"
+    echo "$name" > "$STATE/current.tmp" && mv "$STATE/current.tmp" "$STATE/current"
+
+    # Alacritty only watches imports that existed when it started, so touch
+    # the main config to make every running window reload the import.
+    touch "$CONFIG/alacritty/alacritty.toml"
+
+    # The bar color and static items are only set from sketchybarrc
+    if pgrep -xq sketchybar; then
+        sketchybar --reload
+    fi
+
+    echo "theme: $name"
+}
+
+toggle() {
+    local cur twin
+    cur=$(current)
+    twin=$(counterpart "$cur")
+    if [ -n "$twin" ] && exists "$twin"; then
+        apply "$twin"
+    else
+        describe "$cur"
+        if [ "$KIND" = light ]; then apply modus-vivendi; else apply modus-operandi; fi
+    fi
+}
+
+case "${1:-}" in
+    "")
+        cur=$(current)
+        available | while read -r name; do
+            describe "$name"
+            mark=' '
+            if [ "$name" = "$cur" ]; then mark='*'; fi
+            printf '%s %-28s %-5s  %s\n' "$mark" "$name" "$KIND" "$DESC"
+        done
+        ;;
+    toggle)
+        toggle
+        ;;
+    generate)
+        # LANG: Emacs warns about macOS-only locales like en_BR
+        LANG=en_US.UTF-8 emacs -Q --script "$(dirname "$(readlink -f "$0")")/theme-generate.el"
+        apply "$(current)"
+        ;;
+    --complete)
+        # For the zsh completion (_theme): "name:(kind) description"
+        available | while read -r name; do
+            describe "$name"
+            echo "$name:($KIND) $DESC"
+        done
+        ;;
+    -h | --help)
+        awk 'NR > 1 && /^#/ { sub(/^# ?/, ""); print; next } NR > 1 { exit }' "$0"
+        ;;
+    *)
+        apply "$1"
+        ;;
+esac

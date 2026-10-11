@@ -1,3 +1,7 @@
+[general]
+# Written by the `theme` script (macos/bin/theme); absent until its first run.
+import = ["~/.local/state/theme/alacritty.toml"]
+
 [[keyboard.bindings]]
 key = "Return"
 mods = "Shift"

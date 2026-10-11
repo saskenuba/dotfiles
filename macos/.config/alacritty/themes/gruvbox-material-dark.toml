@@ -1,0 +1,29 @@
+# gruvbox-material-dark (dark): Gruvbox Material, hard contrast.
+# Hand-written, from alacritty-theme's gruvbox_material_hard_dark.toml.
+
+[colors.primary]
+background = "#1d2021"
+foreground = "#d4be98"
+
+[colors.normal]
+black = "#32302f"
+red = "#ea6962"
+green = "#a9b665"
+yellow = "#d8a657"
+blue = "#7daea3"
+magenta = "#d3869b"
+cyan = "#89b482"
+white = "#d4be98"
+
+# Bright colors are the same as normal in Gruvbox Material, except black:
+# upstream's #32302f is invisible on the background, and zsh-autosuggestions
+# draws in it. #928374 is Gruvbox Material's grey (also the bar's FG_DIM).
+[colors.bright]
+black = "#928374"
+red = "#ea6962"
+green = "#a9b665"
+yellow = "#d8a657"
+blue = "#7daea3"
+magenta = "#d3869b"
+cyan = "#89b482"
+white = "#d4be98"

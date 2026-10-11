@@ -8,7 +8,7 @@ apple_logo=(
     "${left_items_common[@]}"
     "${popup_props[@]}"
     icon="$APPLE"
-    icon.color="$RED"
+    icon.color="$APPLE_ICON_COLOR"
     icon.font.size=18
     label.drawing=off
     icon.y_offset=2
@@ -31,22 +31,22 @@ sketchybar --add item apple.logo left \
     --set apple.prefs "${pupup_item[@]}" \
     icon="$PREFERENCES" \
     label="Preferences" \
-    icon.color="$WHITE" \
-    label.color="$WHITE" \
+    icon.color="$APPLE_POPUP_COLOR" \
+    label.color="$APPLE_POPUP_COLOR" \
     click_script="open -a 'System Settings' ; $POPUP_OFF" \
     \
     --add item apple.activity popup.apple.logo \
     --set apple.activity "${pupup_item[@]}" \
     icon="$ACTIVITY" \
     label="Activity" \
-    icon.color="$WHITE" \
-    label.color="$WHITE" \
+    icon.color="$APPLE_POPUP_COLOR" \
+    label.color="$APPLE_POPUP_COLOR" \
     click_script="open -a 'Activity Monitor' ; $POPUP_OFF" \
     \
     --add item apple.lock popup.apple.logo \
     --set apple.lock "${pupup_item[@]}" \
     icon="$LOCK" \
     label="Lock Screen" \
-    icon.color="$WHITE" \
-    label.color="$WHITE" \
+    icon.color="$APPLE_POPUP_COLOR" \
+    label.color="$APPLE_POPUP_COLOR" \
     click_script="$POPUP_OFF ; $SCRIPTS_DIR/lock_screen.sh"

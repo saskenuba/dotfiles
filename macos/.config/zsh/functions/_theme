@@ -1,0 +1,19 @@
+#compdef theme
+
+# Completion for `theme` (dotfiles/macos/bin/theme). Names and descriptions
+# come from `theme --complete`, so newly generated themes show up by themselves.
+
+local -a commands themes
+local ret=1
+
+(( CURRENT == 2 )) || return 1
+
+commands=(
+    'toggle:switch to the light/dark twin of the current theme'
+    'generate:regenerate the Modus and Ef themes from Emacs'
+)
+themes=(${(f)"$(theme --complete 2>/dev/null)"})
+
+_describe -t commands 'command' commands && ret=0
+_describe -t themes 'theme' themes && ret=0
+return ret
