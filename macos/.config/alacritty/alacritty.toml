@@ -1,0 +1,7 @@
+[[keyboard.bindings]]
+key = "Return"
+mods = "Shift"
+chars = "\b"
+
+[font]
+normal = { family = "Hack Nerd Font Mono", style = "Regular" }
