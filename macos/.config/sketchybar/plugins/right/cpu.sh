@@ -5,9 +5,8 @@ if [ "$SENDER" = "mouse.clicked" ]; then
     exit 0
 fi
 
-# Uses sysctl instead of top -l 1 (near-instant vs ~1s)
-CPU_LOAD=$(sysctl -n vm.loadavg | awk '{print $2}')
-NUM_CORES=$(sysctl -n hw.ncpu)
-CPU_PERCENT=$(echo "$CPU_LOAD $NUM_CORES" | awk '{printf "%02d", ($1 / $2) * 100}')
+# Real utilization (user + sys). top's first sample is the since-boot average,
+# so take the second one; the ~1s it costs is fine since scripts run async.
+CPU_PERCENT=$(top -l 2 -n 0 -s 1 | awk '/CPU usage/ {u=$3; s=$5} END {printf "%02d", u+s}')
 
 sketchybar --set "$NAME" label="${CPU_PERCENT}%"
