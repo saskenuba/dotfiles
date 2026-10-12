@@ -80,6 +80,7 @@ FRONT_APP_SEPARATOR="?"
 # WiFi
 WIFI_CONNECTED="" # "?? " "?? "
 WIFI_DISCONNECTED="󰖪" #"?? " "?? "
+ROUTER="󰑩"
 ETHERNET_CONNECTED="??"
 
 # System Icons
