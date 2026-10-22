@@ -36,12 +36,20 @@ workspace_aesthetics=(
     drawing=off
 )
 
+# Display names; AeroSpace workspaces stay numeric (cmd-N bindings unchanged).
+# Unnamed workspaces show their number.
+WS_NAMES=([1]=server [2]=roboto [3]=music [7]=social [9]=web)
+WS_NAME_FONT_SIZE=12.0
+
 # Create workspace items 1-9 (display-only, no scripts)
 for i in {1..9}; do
+    ICON_SIZE=${LABEL_FONT##*:}
+    [ -n "${WS_NAMES[i]}" ] && ICON_SIZE=$WS_NAME_FONT_SIZE
     sketchybar --add item workspace.$i left \
         --set workspace.$i \
         "${workspace_aesthetics[@]}" \
-        icon="$i" \
+        icon="${WS_NAMES[i]:-$i}" \
+        icon.font.size="$ICON_SIZE" \
         click_script="aerospace workspace $i"
 done
 
