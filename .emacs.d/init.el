@@ -236,7 +236,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package ws-butler
   :init (ws-butler-global-mode))
 
-(use-package sudo-edit)
+(use-package sudo-edit
+  :defer t)
 
 (use-package expand-region)
 
@@ -244,9 +245,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
 (use-package org
   :custom
-  (org-babel-clojure-backend 'cider))
+  (org-babel-clojure-backend 'cider)
+  ;; Org loads every module in `org-modules' with `ol'; the default
+  ;; list drags in gnus, rmail, eww, irc, docview etc. (~0.8s). Notes
+  ;; only use id: and https: links; keep a few cheap ones.
+  (org-modules '(ol-doi ol-bibtex ol-info)))
 
-(use-package helpful)
+(use-package helpful
+  :defer t)
 
 (use-package evil-iedit-state
   :after (iedit expand-region)
@@ -372,7 +378,10 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
      orderless-initialism
      orderless-regexp)))
 
-(use-package pdf-tools)
+;; Loaded on first use of a pdf-tools command. PDFs still open in
+;; doc-view: `pdf-tools-install' was never called (epdfinfo not built).
+(use-package pdf-tools
+  :commands pdf-view-mode)
 
 (use-package auctex
   :defer t
@@ -738,7 +747,7 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
   (yas-snippet-dirs (list "~/.emacs.d/mylayers/snippets")))
 
 (setq read-process-output-max (* 1024 1024))
-(setq gc-cons-threshold 100000000)
+;; `gc-cons-threshold' is set in early-init.el.
 
 (use-package lsp-mode
   :init (setq lsp-keymap-prefix "C-c l")
@@ -786,9 +795,13 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ;  :if treemacs-use-all-the-icons-theme
 ;  :hook ((treemacs-mode . (lambda () (treemacs-load-theme 'all-the-icons)))))
 
-(use-package consult-lsp)
+(use-package consult-lsp
+  :commands (consult-lsp-symbols
+	     consult-lsp-diagnostics
+	     consult-lsp-file-symbols))
 
-(use-package consult-flycheck)
+(use-package consult-flycheck
+  :commands consult-flycheck)
 
 (use-package treemacs-evil
   :hook (treemacs-mode . evil-treemacs-state))
@@ -827,8 +840,12 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 (use-package envrc
   :hook (after-init . envrc-global-mode))
 
-(use-package rustic
-  :ensure t)
+;; rust-mode on top of the built-in tree-sitter `rust-ts-mode':
+;; tree-sitter highlighting/indent plus rust-mode's cargo commands.
+;; Emacs 31 pins the grammar source itself; install it once with
+;; M-x treesit-install-language-grammar RET rust.
+(use-package rust-mode
+  :init (setq rust-mode-treesitter-derive t))
 
 (use-package cider
   :defer t
@@ -894,7 +911,11 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 	 (clojurescript-mode . evil-cleverparens-mode)
 	 (clojurec-mode . evil-cleverparens-mode)))
 
+;; A lambda in `:hook' does not defer by itself; `:defer t' keeps
+;; clj-refactor (and clojure-mode/cider with it) until the first
+;; Clojure buffer.
 (use-package clj-refactor
+  :defer t
   :hook ((clojure-mode . (lambda () (clj-refactor-mode 1))))
 
   :config
@@ -903,11 +924,14 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 ; (add-to-list 'exec-path (expand-file-name "~/.local/share/mise/shims"))
 (use-package exec-path-from-shell
   :ensure t
+  :custom
+  ;; Copy everything in one shell spawn; `exec-path-from-shell-initialize'
+  ;; also sets `exec-path' from PATH.
+  (exec-path-from-shell-variables
+   '("PATH" "MANPATH"
+     "OPENROUTER_API_KEY" "GEMINI_API_KEY" "ANTHROPIC_API_KEY"))
   :config
-  (exec-path-from-shell-initialize)
-  (exec-path-from-shell-copy-env "OPENROUTER_API_KEY")
-  (exec-path-from-shell-copy-env "GEMINI_API_KEY")
-  (exec-path-from-shell-copy-env "ANTHROPIC_API_KEY"))
+  (exec-path-from-shell-initialize))
 
 (use-package kaocha-runner
   :defer t)
@@ -1003,6 +1027,8 @@ Create prefix map: +general-global-NAME. Prefix bindings in BODY with INFIX-KEY.
 
    "bc" #'rust-run-clippy
    "bb" #'rust-compile
+   "bk" #'rust-check
+   "br" #'rust-run
    "bt" #'rust-test
 
    "hh" #'lsp-describe-thing-at-point
